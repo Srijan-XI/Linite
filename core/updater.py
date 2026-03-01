@@ -90,9 +90,9 @@ def update_selected(
             results[entry.id] = (1, "No spec found")
             continue
 
-        def _cb(line: str):
+        def _cb(line: str, _id=entry.id):
             if progress_cb:
-                progress_cb(entry.id, line)
+                progress_cb(_id, line)
 
         try:
             pm = get_package_manager(pm_name)

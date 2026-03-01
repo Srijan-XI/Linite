@@ -5,6 +5,7 @@ Features: parallel installs, search, installed-state, detail popup,
           uninstall, export/import profiles.
 """
 
+import logging
 import threading
 import tkinter as tk
 from tkinter import filedialog, messagebox
@@ -24,6 +25,8 @@ from gui.components.app_detail import AppDetailWindow
 from gui.components.category_panel import CategoryPanel
 from gui.components.progress_panel import ProgressPanel
 from gui.components.software_panel import SoftwarePanel
+
+logger = logging.getLogger(__name__)
 
 # Build per-category counts from catalog
 _CAT_COUNTS: dict[str, int] = {}
@@ -261,18 +264,21 @@ class LiniteApp(tk.Tk):
                 tag = "warn" if _LOCK_PREFIX in line else "muted"
                 self.after(0, lambda l=line, t=tag: self._prog_panel.log(l, tag=t))
 
-            results = install_apps(selected, self._distro, progress_cb=progress)
+            try:
+                results = install_apps(selected, self._distro, progress_cb=progress)
+                for result in results:
+                    success = result.status == InstallStatus.SUCCESS
+                    self.after(0, lambda r=result, s=success: self._prog_panel.app_done(r.app_name, s))
+                all_ok = all(r.status == InstallStatus.SUCCESS for r in results)
+                msg = "All apps installed successfully!" if all_ok else "Some apps failed to install. Check the log."
+            except Exception as exc:
+                logger.exception("Unexpected error during install")
+                msg = f"Installation failed unexpectedly:\n{exc}"
+            finally:
+                self.after(0, lambda: self._set_busy(False))
+                self.after(0, self._refresh_installed_state)
 
-            for result in results:
-                success = result.status == InstallStatus.SUCCESS
-                self.after(0, lambda r=result, s=success: self._prog_panel.app_done(r.app_name, s))
-
-            self.after(0, lambda: self._set_busy(False))
-            self.after(0, self._refresh_installed_state)
-
-            all_ok = all(r.status == InstallStatus.SUCCESS for r in results)
-            msg = "All apps installed successfully!" if all_ok else "Some apps failed to install. Check the log."
-            self.after(0, lambda: messagebox.showinfo("Installation complete", msg))
+            self.after(0, lambda m=msg: messagebox.showinfo("Installation complete", m))
 
         threading.Thread(target=worker, daemon=True).start()
 
@@ -299,19 +305,22 @@ class LiniteApp(tk.Tk):
             def progress(app_id: str, line: str):
                 self.after(0, lambda l=line: self._prog_panel.log(l, tag="muted"))
 
-            results = uninstall_apps(selected, self._distro, progress_cb=progress)
+            try:
+                results = uninstall_apps(selected, self._distro, progress_cb=progress)
+                for app_id, (rc, _) in results.items():
+                    entry = CATALOG_MAP.get(app_id)
+                    name = entry.name if entry else app_id
+                    self.after(0, lambda n=name, s=(rc == 0): self._prog_panel.app_done(n, s))
+                all_ok = all(rc == 0 for rc, _ in results.values())
+                msg = "Apps removed successfully!" if all_ok else "Some apps failed to uninstall. Check the log."
+            except Exception as exc:
+                logger.exception("Unexpected error during uninstall")
+                msg = f"Uninstall failed unexpectedly:\n{exc}"
+            finally:
+                self.after(0, lambda: self._set_busy(False))
+                self.after(0, self._refresh_installed_state)
 
-            for app_id, (rc, _) in results.items():
-                entry = CATALOG_MAP.get(app_id)
-                name = entry.name if entry else app_id
-                self.after(0, lambda n=name, s=(rc == 0): self._prog_panel.app_done(n, s))
-
-            self.after(0, lambda: self._set_busy(False))
-            self.after(0, self._refresh_installed_state)
-
-            all_ok = all(rc == 0 for rc, _ in results.values())
-            msg = "Apps removed successfully!" if all_ok else "Some apps failed to uninstall. Check the log."
-            self.after(0, lambda: messagebox.showinfo("Uninstall complete", msg))
+            self.after(0, lambda m=msg: messagebox.showinfo("Uninstall complete", m))
 
         threading.Thread(target=worker, daemon=True).start()
 
@@ -338,14 +347,22 @@ class LiniteApp(tk.Tk):
                 tag = "warn" if _LOCK_PREFIX in line else "muted"
                 self.after(0, lambda l=line, t=tag: self._prog_panel.log(l, tag=t))
 
-            results = update_system(self._distro, progress_cb=progress)
-            all_ok = all(rc == 0 for rc, _ in results.values())
-            self.after(0, lambda: self._prog_panel.set_indeterminate(False))
-            self.after(0, lambda: self._set_busy(False))
-            status_text = "Update complete ✓" if all_ok else "Update finished with errors"
-            self.after(0, lambda: self._prog_panel.set_status(status_text))
-            msg = "System updated successfully!" if all_ok else "Update finished with some errors. Check the log."
-            self.after(0, lambda: messagebox.showinfo("Update complete", msg))
+            try:
+                results = update_system(self._distro, progress_cb=progress)
+                all_ok = all(rc == 0 for rc, _ in results.values())
+                status_text = "Update complete ✓" if all_ok else "Update finished with errors"
+                msg = "System updated successfully!" if all_ok else "Update finished with some errors. Check the log."
+            except Exception as exc:
+                logger.exception("Unexpected error during system update")
+                all_ok = False
+                status_text = "Update failed"
+                msg = f"Update failed unexpectedly:\n{exc}"
+            finally:
+                self.after(0, lambda: self._prog_panel.set_indeterminate(False))
+                self.after(0, lambda: self._set_busy(False))
+
+            self.after(0, lambda s=status_text: self._prog_panel.set_status(s))
+            self.after(0, lambda m=msg: messagebox.showinfo("Update complete", m))
 
         threading.Thread(target=worker, daemon=True).start()
 
