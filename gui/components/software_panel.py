@@ -216,6 +216,7 @@ class SoftwarePanel(tk.Frame):
         sel_stripe.pack(side="left", fill="y")
         sel_stripe.pack_propagate(False)
         card._sel_stripe = sel_stripe  # type: ignore[attr-defined]
+        _bind_click(sel_stripe, var, self._toggle, entry, self._open_detail)
 
         var.trace_add("write", lambda *_a, eid=entry.id: self._on_card_checked(eid))
 
