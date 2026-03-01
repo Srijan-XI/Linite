@@ -278,7 +278,7 @@ class SoftwarePanel(tk.Frame):
 
         # Cache hover targets at build time for O(1) updates.
         hover_targets: List[tk.Widget] = [
-            card, left, text_frame, icon_label, name_lbl, desc_lbl, right, cb,
+            card, sel_stripe, left, text_frame, icon_label, name_lbl, desc_lbl, right, cb,
         ]
         self._card_hover_widgets[entry.id] = hover_targets
 
@@ -349,12 +349,13 @@ class SoftwarePanel(tk.Frame):
             return
         bg = st.CARD_SELECTED if checked else st.BG_MEDIUM
         card.config(bg=bg)
-        card._sel_stripe.config(bg=st.ACCENT if checked else bg)  # type: ignore[attr-defined]
         for w in self._card_hover_widgets.get(entry_id, []):
             try:
                 w.config(bg=bg)
             except tk.TclError:
                 pass
+        # Set stripe last so the loop above doesn't overwrite it
+        card._sel_stripe.config(bg=st.ACCENT if checked else bg)  # type: ignore[attr-defined]
         self._update_count_label()
 
     def _card_hover(self, entry_id: str, card: tk.Frame, enter: bool):
