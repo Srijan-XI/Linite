@@ -1,0 +1,12 @@
+# Linite Python dependencies
+# Tkinter is part of the standard library but may need a system package on some distros:
+#   sudo apt install python3-tk        (Debian/Ubuntu)
+#   sudo dnf install python3-tkinter   (Fedora)
+#   sudo pacman -S tk                  (Arch)
+
+# No additional third-party packages are required.
+# All functionality uses the Python standard library (tkinter, subprocess, platform, etc.)
+
+# Optional extras:
+# pillow          # for app icons as images (PNG) instead of emoji
+# requests        # if you want to fetch live catalog updates from a remote source
