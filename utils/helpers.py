@@ -50,8 +50,8 @@ def warn_if_not_root() -> bool:
 
 # ── Platform guard ─────────────────────────────────────────────────────────
 
-def assert_linux():
-    """Exit with a friendly message if not running on Linux."""
+def warn_if_not_linux():
+    """Print an info message if not running on Linux (does not exit)."""
     if sys.platform != "linux":
         print(
             f"[INFO] Linite is designed for Linux. "

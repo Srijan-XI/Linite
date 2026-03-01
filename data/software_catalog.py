@@ -628,7 +628,7 @@ CATALOG: List[SoftwareEntry] = [
                     "apt-get update",
                 ],
             ),
-            "rpm": PackageSpec(
+            "dnf": PackageSpec(
                 packages=["opera-stable"],
                 pre_commands=[
                     "rpm --import https://rpm.opera.com/rpmrepo.key",
@@ -765,7 +765,7 @@ CATALOG: List[SoftwareEntry] = [
         website="https://www.openoffice.org",
         install_specs={
             "apt": PackageSpec(
-                packages=["openoffice"],
+                packages=[],
                 pre_commands=[
                     "curl -fsSL https://sourceforge.net/projects/openofficeorg.mirror/files/latest/download -o /tmp/openoffice.tar.gz",
                     "tar -xzf /tmp/openoffice.tar.gz -C /tmp/",

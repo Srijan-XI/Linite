@@ -131,8 +131,7 @@ def install_app(
     line_cb = (lambda line: progress_cb(entry.id, line)) if progress_cb else None
 
     if pm_name == "snap" and spec.snap_classic:
-        pm_snap = get_package_manager("snap")
-        rc, out = pm_snap.install_classic(spec.packages, progress_cb=line_cb)  # type: ignore[attr-defined]
+        rc, out = pm.install_classic(spec.packages, progress_cb=line_cb)  # type: ignore[attr-defined]
     else:
         rc, out = pm.install(spec.packages, progress_cb=line_cb)
 

@@ -6,6 +6,7 @@ Provides a unified interface for apt, dnf, pacman, zypper, snap, and flatpak.
 import subprocess
 import shlex
 import logging
+import os
 from abc import ABC, abstractmethod
 from typing import List, Optional, Callable
 
@@ -23,14 +24,21 @@ class BasePackageManager(ABC):
         self,
         args: List[str],
         sudo: bool = True,
+        env: Optional[dict] = None,
         progress_cb: Optional[Callable[[str], None]] = None,
     ) -> tuple[int, str]:
         """
         Execute a package-manager command.
         Returns (returncode, combined_output).
         """
+        import os
         cmd = (["sudo"] if sudo else []) + args
         logger.debug("Running: %s", " ".join(cmd))
+
+        proc_env = None
+        if env:
+            proc_env = os.environ.copy()
+            proc_env.update(env)
 
         try:
             process = subprocess.Popen(
@@ -39,6 +47,7 @@ class BasePackageManager(ABC):
                 stderr=subprocess.STDOUT,
                 text=True,
                 bufsize=1,
+                env=proc_env,
             )
             output_lines: List[str] = []
             for line in process.stdout:  # type: ignore[union-attr]
@@ -85,9 +94,8 @@ class AptPackageManager(BasePackageManager):
 
     def install(self, packages, progress_cb=None):
         self._refresh(progress_cb)
-        env_prefix = ["DEBIAN_FRONTEND=noninteractive"]
         cmd = ["apt-get", "install", "-y", "--no-install-recommends"] + packages
-        return self.run(cmd, progress_cb=progress_cb)
+        return self.run(cmd, env={"DEBIAN_FRONTEND": "noninteractive"}, progress_cb=progress_cb)
 
     def update_all(self, progress_cb=None):
         self._refresh(progress_cb)
@@ -100,9 +108,6 @@ class AptPackageManager(BasePackageManager):
         return self.install(packages, progress_cb)
 
     def is_installed(self, package: str) -> bool:
-        rc, _ = self.run(
-            ["dpkg-query", "-W", "-f=${Status}", package], sudo=False
-        )
         _, out = self.run(
             ["dpkg-query", "-W", "-f=${Status}", package], sudo=False
         )

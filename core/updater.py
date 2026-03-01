@@ -78,12 +78,12 @@ def update_selected(
     Update a specific list of apps (best-effort; uses the native PM).
     Returns { app_id: (returncode, output) }.
     """
+    from core.installer import _pick_pm
+
     results = {}
     native_pm = distro.package_manager
 
     for entry in entries:
-        # Determine which PM owns this installation
-        from core.installer import _pick_pm
         pm_name = _pick_pm(entry, distro) or native_pm
         spec = entry.get_spec(pm_name)
         if spec is None:

@@ -4,7 +4,6 @@ Detects the current Linux distribution, version, and system architecture.
 """
 
 import platform
-import subprocess
 import os
 import sys
 from dataclasses import dataclass, field

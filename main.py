@@ -14,7 +14,7 @@ Usage:
 import argparse
 import sys
 
-from utils.helpers import assert_linux, setup_logging, warn_if_not_root
+from utils.helpers import warn_if_not_linux, setup_logging, warn_if_not_root
 
 
 def parse_args():
@@ -133,7 +133,7 @@ def cmd_gui():
 def main():
     args = parse_args()
     setup_logging(verbose=args.verbose)
-    assert_linux()
+    warn_if_not_linux()
 
     if args.list:
         cmd_list()
