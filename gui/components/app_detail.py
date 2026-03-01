@@ -21,7 +21,8 @@ class AppDetailWindow(tk.Toplevel):
         super().__init__(parent)
         self.title(f"{entry.name} — Details")
         self.configure(bg=st.BG_DARK)
-        self.resizable(False, False)
+        self.resizable(True, True)
+        self.minsize(520, 380)
         self.grab_set()           # modal
 
         self._entry = entry
