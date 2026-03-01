@@ -25,6 +25,7 @@ class PackageSpec:
     snap_classic: bool = False          # used when pm == "snap"
     flatpak_remote: str = "flathub"     # used when pm == "flatpak"
     script_url: str = ""                # used when pm == "script"
+    sha256: str = ""                    # expected SHA-256 of downloaded file (script / deb)
     pre_commands: List[str] = field(default_factory=list)   # run before install
     post_commands: List[str] = field(default_factory=list)  # run after install
 
