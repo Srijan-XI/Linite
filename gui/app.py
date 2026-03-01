@@ -44,6 +44,7 @@ class LiniteApp(tk.Tk):
         # Detect distro
         self._distro: DistroInfo = distro_mod.detect()
         self._busy = False
+        self._busy_dot = None   # created inside _build_ui; guard before it exists
 
         self._build_ui()
         self._update_distro_label()
@@ -212,8 +213,9 @@ class LiniteApp(tk.Tk):
                     self._update_btn, self._export_btn, self._import_btn):
             btn.config(state=state)
         # Busy dot in title bar: green when active
-        dot_color = st.SUCCESS if busy else st.BG_MEDIUM
-        self._busy_dot.config(fg=dot_color)
+        if self._busy_dot is not None:
+            dot_color = st.SUCCESS if busy else st.BG_MEDIUM
+            self._busy_dot.config(fg=dot_color)
         if busy:
             self._cancel_btn.pack(side="right", padx=(0, 4), pady=10)
         else:
