@@ -14,6 +14,7 @@ from core import distro as distro_mod
 from core.distro import DistroInfo
 from core.history import get_installed_ids
 from core.installer import install_apps, Status as InstallStatus
+from core.package_manager import clear_cancel, request_cancel
 from core.profiles import load_profile, save_profile
 from core.uninstaller import uninstall_apps
 from core.updater import update_system
@@ -101,6 +102,16 @@ class LiniteApp(tk.Tk):
         action_bar.pack(fill="x", side="bottom")
         action_bar.pack_propagate(False)
 
+        # Cancel (shown only while busy)
+        self._cancel_btn = tk.Button(
+            action_bar, text="⏹  Cancel",
+            bg="#5a1a1a", fg="#ff8888", font=st.FONT_MEDIUM,
+            relief="flat", bd=0, padx=st.BTN_PADX, pady=st.BTN_PADY,
+            cursor="hand2", activebackground="#6e2020",
+            command=self._on_cancel,
+        )
+        # Packed into the bar dynamically by _set_busy()
+
         # Install
         self._install_btn = tk.Button(
             action_bar, text="⬇  Install Selected",
@@ -187,6 +198,15 @@ class LiniteApp(tk.Tk):
         for btn in (self._install_btn, self._uninstall_btn,
                     self._update_btn, self._export_btn, self._import_btn):
             btn.config(state=state)
+        if busy:
+            self._cancel_btn.pack(side="right", padx=(0, 8), pady=10)
+        else:
+            self._cancel_btn.pack_forget()
+
+    def _on_cancel(self):
+        request_cancel()
+        self._prog_panel.log("⏹ Cancelling — waiting for current command to finish …", tag="warn")
+        self._cancel_btn.config(state="disabled")
 
     def _refresh_installed_state(self):
         """Load history-based installed IDs and push them to the panel."""
@@ -214,10 +234,14 @@ class LiniteApp(tk.Tk):
 
         self._prog_panel.reset(total_apps=len(selected))
         self._set_busy(True)
+        clear_cancel()
 
         def worker():
+            _LOCK_PREFIX = "dpkg lock"
+
             def progress(app_id: str, line: str):
-                self.after(0, lambda: self._prog_panel.log(line, tag="muted"))
+                tag = "warn" if _LOCK_PREFIX in line else "muted"
+                self.after(0, lambda l=line, t=tag: self._prog_panel.log(l, tag=t))
 
             results = install_apps(selected, self._distro, progress_cb=progress)
 
@@ -251,10 +275,11 @@ class LiniteApp(tk.Tk):
 
         self._prog_panel.reset(total_apps=len(selected))
         self._set_busy(True)
+        clear_cancel()
 
         def worker():
             def progress(app_id: str, line: str):
-                self.after(0, lambda: self._prog_panel.log(line, tag="muted"))
+                self.after(0, lambda l=line: self._prog_panel.log(l, tag="muted"))
 
             results = uninstall_apps(selected, self._distro, progress_cb=progress)
 
@@ -285,10 +310,14 @@ class LiniteApp(tk.Tk):
         self._prog_panel.reset()
         self._prog_panel.set_status("Updating …")
         self._set_busy(True)
+        clear_cancel()
 
         def worker():
+            _LOCK_PREFIX = "dpkg lock"
+
             def progress(app_id: str, line: str):
-                self.after(0, lambda: self._prog_panel.log(line, tag="muted"))
+                tag = "warn" if _LOCK_PREFIX in line else "muted"
+                self.after(0, lambda l=line, t=tag: self._prog_panel.log(l, tag=t))
 
             results = update_system(self._distro, progress_cb=progress)
             all_ok = all(rc == 0 for rc, _ in results.values())

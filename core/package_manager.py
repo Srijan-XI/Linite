@@ -8,10 +8,28 @@ import shlex
 import logging
 import os
 import time
+import threading
 from abc import ABC, abstractmethod
 from typing import List, Optional, Callable
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Global cancel event — call request_cancel() to abort any in-progress
+# lock-retry loop; call clear_cancel() before starting a new operation.
+# ---------------------------------------------------------------------------
+
+_CANCEL_EVENT = threading.Event()
+
+
+def request_cancel() -> None:
+    """Signal all apt lock-retry loops to abort immediately."""
+    _CANCEL_EVENT.set()
+
+
+def clear_cancel() -> None:
+    """Reset the cancel flag before starting a new operation."""
+    _CANCEL_EVENT.clear()
 
 
 # ---------------------------------------------------------------------------
@@ -110,6 +128,12 @@ class AptPackageManager(BasePackageManager):
             rc, out = self.run(args, sudo=sudo, env=env, progress_cb=progress_cb)
             if rc == 0 or self._LOCK_MSG not in out:
                 return rc, out
+            if _CANCEL_EVENT.is_set():
+                msg = "dpkg lock wait cancelled by user."
+                logger.warning(msg)
+                if progress_cb:
+                    progress_cb(msg)
+                return rc, out
             if elapsed >= self._LOCK_MAX_WAIT:
                 logger.error(
                     "Gave up waiting for dpkg lock after %ds – last error:\n%s",
@@ -124,7 +148,12 @@ class AptPackageManager(BasePackageManager):
             logger.warning(msg)
             if progress_cb:
                 progress_cb(msg)
-            time.sleep(self._LOCK_RETRY_WAIT)
+            # Sleep in small increments so the cancel flag is checked promptly.
+            deadline = time.monotonic() + self._LOCK_RETRY_WAIT
+            while time.monotonic() < deadline:
+                if _CANCEL_EVENT.is_set():
+                    break
+                time.sleep(0.25)
             elapsed += self._LOCK_RETRY_WAIT
 
     def _refresh(self, progress_cb=None):

@@ -122,9 +122,12 @@ class SoftwarePanel(tk.Frame):
         self._inner.bind("<Configure>", self._on_inner_configure)
         self._canvas.bind("<Configure>", self._on_canvas_configure)
 
-        # Mousewheel scoped to canvas — avoids stealing scroll from other widgets.
-        self._canvas.bind("<Enter>", self._bind_mousewheel)
-        self._canvas.bind("<Leave>", self._unbind_mousewheel)
+        # bind_all catches wheel events on child widgets (cards) too.
+        # _on_mousewheel guards against scrolling when the pointer is outside
+        # the canvas bounds, so it won't steal scroll from the log panel.
+        self.bind_all("<MouseWheel>", self._on_mousewheel)  # Windows / macOS
+        self.bind_all("<Button-4>",   self._on_mousewheel)  # Linux scroll up
+        self.bind_all("<Button-5>",   self._on_mousewheel)  # Linux scroll down
 
         # Pre-build every BooleanVar and every card widget once.
         for entry in self._all_entries:
@@ -341,18 +344,15 @@ class SoftwarePanel(tk.Frame):
     def _on_canvas_configure(self, event):
         self._canvas.itemconfig(self._inner_id, width=event.width)
 
-    def _bind_mousewheel(self, _event=None):
-        """Activate scroll only while the pointer is inside the canvas."""
-        self._canvas.bind("<MouseWheel>", self._on_mousewheel)   # Windows / macOS
-        self._canvas.bind("<Button-4>",   self._on_mousewheel)   # Linux scroll up
-        self._canvas.bind("<Button-5>",   self._on_mousewheel)   # Linux scroll down
-
-    def _unbind_mousewheel(self, _event=None):
-        self._canvas.unbind("<MouseWheel>")
-        self._canvas.unbind("<Button-4>")
-        self._canvas.unbind("<Button-5>")
-
     def _on_mousewheel(self, event):
+        """Scroll only when the pointer is within the canvas bounds."""
+        cx = self._canvas.winfo_rootx()
+        cy = self._canvas.winfo_rooty()
+        cw = self._canvas.winfo_width()
+        ch = self._canvas.winfo_height()
+        px, py = event.x_root, event.y_root
+        if not (cx <= px < cx + cw and cy <= py < cy + ch):
+            return
         if event.num == 4:
             self._canvas.yview_scroll(-3, "units")
         elif event.num == 5:
