@@ -12,7 +12,7 @@
 - 🔄 **One-click system update** — upgrade all packages across all package managers
 - 🎨 **Dark-mode Tkinter GUI** — categorised, searchable software catalog
 - ⌨️  **CLI mode** — headless installs for scripts and servers
-- 30+ curated apps across 8 categories
+- 69 curated apps across 12 categories
 
 ---
 
@@ -55,16 +55,20 @@ linite/
 
 ## Software Categories
 
-| Category | Example Apps |
-|----------|-------------|
-| Web Browsers | Firefox, Chromium, Brave, Chrome |
-| Development | VS Code, Git, Python 3, Node.js, Docker, Vim, Neovim, GitHub CLI |
-| Media | VLC, Spotify, mpv, OBS Studio |
-| Communication | Discord, Telegram, Slack, Zoom |
-| Utilities | htop, curl, wget, 7-Zip, Timeshift, Flatpak, Neofetch |
-| Office | LibreOffice, Okular, Thunderbird |
-| Gaming | Steam, Lutris |
-| Graphics | GIMP, Inkscape |
+| Category | Apps (count) | Notable Entries |
+|----------|--------------|-----------------|
+| Web Browsers | 7 | Firefox, Chromium, Brave, Chrome, Opera, Tor Browser, Vivaldi |
+| Development | 8 | VS Code, Git, Python 3, Node.js, Docker, Vim, Neovim, GitHub CLI |
+| Media | 6 | VLC, Spotify, mpv, OBS Studio, Audacity, HandBrake |
+| Communication | 5 | Discord, Telegram, Slack, Zoom, Dropbox |
+| Utilities | 10 | htop, curl, wget, 7-Zip, Timeshift, Flatpak, Neofetch, Flameshot, Wireshark, Notepad++ |
+| Office | 6 | LibreOffice, Thunderbird, Okular, Evince, OpenOffice, Foxit PDF Reader |
+| Gaming | 2 | Steam, Lutris |
+| Graphics | 3 | GIMP, Inkscape, Blender |
+| Torrents | 4 | qBittorrent, qBittorrent-nox, Deluge, Transmission |
+| Virtualization | 3 | VirtualBox, VMware Workstation Player, QEMU |
+| Java | 5 | OpenJDK, Eclipse Temurin, Amazon Corretto, Zulu JDK, Oracle JDK |
+| Security | 10 | Nmap, Metasploit, Burp Suite, SQLMap, Hydra, John the Ripper, Aircrack-ng, Hashcat |
 
 ---
 

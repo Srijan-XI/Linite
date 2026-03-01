@@ -75,23 +75,25 @@ class LiniteApp(tk.Tk):
         body = tk.Frame(self, bg=st.BG_DARK)
         body.pack(fill="both", expand=True)
 
-        # Sidebar
+        # Content area (software list + progress) — created first so the
+        # CategoryPanel callback can reference _sw_panel during its __init__.
+        content = tk.Frame(body, bg=st.BG_DARK)
+
+        self._sw_panel = SoftwarePanel(content, entries=CATALOG)
+        self._sw_panel.pack(fill="both", expand=True)
+
+        # Sidebar — its __init__ fires on_select("All") which needs _sw_panel.
         self._cat_panel = CategoryPanel(
             body,
             categories=CATEGORIES,
             on_select=self._on_category_select,
             width=st.SIDEBAR_W,
         )
+
+        # Pack in correct visual order: sidebar | divider | content
         self._cat_panel.pack(side="left", fill="y")
-
         tk.Frame(body, bg=st.BORDER, width=1).pack(side="left", fill="y")
-
-        # Content area (software list + progress)
-        content = tk.Frame(body, bg=st.BG_DARK)
         content.pack(side="left", fill="both", expand=True)
-
-        self._sw_panel = SoftwarePanel(content, entries=CATALOG)
-        self._sw_panel.pack(fill="both", expand=True)
 
         tk.Frame(content, bg=st.BORDER, height=1).pack(fill="x")
 
