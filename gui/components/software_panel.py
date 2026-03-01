@@ -52,18 +52,28 @@ class SoftwarePanel(tk.Frame):
         self._card_inst_labels:   Dict[str, tk.Label]        = {}
 
         # ── Search bar ───────────────────────────────────────────────────
-        search_bar = tk.Frame(self, bg=st.BG_DARK)
-        search_bar.pack(fill="x", padx=st.PADDING, pady=(st.PADDING, 2))
+        search_outer = tk.Frame(self, bg=st.BG_DARK)
+        search_outer.pack(fill="x", padx=st.PADDING, pady=(st.PADDING, 4))
+
+        # Bordered container that holds the icon + entry
+        search_bar = tk.Frame(
+            search_outer,
+            bg=st.BG_MEDIUM,
+            highlightbackground=st.BORDER,
+            highlightthickness=1,
+        )
+        search_bar.pack(fill="x")
 
         tk.Label(
-            search_bar, text="🔍", bg=st.BG_DARK,
+            search_bar, text="🔍", bg=st.BG_MEDIUM,
             fg=st.TEXT_MUTED, font=st.FONT_NORMAL,
-        ).pack(side="left", padx=(0, 6))
+            padx=8,
+        ).pack(side="left")
 
         self._search_var = tk.StringVar()
         self._search_var.trace_add("write", self._on_search_change)
 
-        tk.Entry(
+        self._search_entry = tk.Entry(
             search_bar,
             textvariable=self._search_var,
             bg=st.BG_MEDIUM,
@@ -72,14 +82,18 @@ class SoftwarePanel(tk.Frame):
             font=st.FONT_NORMAL,
             relief="flat",
             bd=0,
-        ).pack(side="left", fill="x", expand=True, ipady=5, ipadx=6)
+        )
+        self._search_entry.pack(side="left", fill="x", expand=True, ipady=6)
 
         clear_btn = tk.Label(
-            search_bar, text="✕", bg=st.BG_DARK,
+            search_bar, text="✕", bg=st.BG_MEDIUM,
             fg=st.TEXT_MUTED, font=st.FONT_SMALL, cursor="hand2",
+            padx=8,
         )
-        clear_btn.pack(side="left", padx=(4, 0))
+        clear_btn.pack(side="left")
         clear_btn.bind("<Button-1>", lambda e: self._search_var.set(""))
+        clear_btn.bind("<Enter>", lambda e: clear_btn.config(fg=st.TEXT_PRIMARY))
+        clear_btn.bind("<Leave>", lambda e: clear_btn.config(fg=st.TEXT_MUTED))
 
         # ── Header bar ───────────────────────────────────────────────────
         header = tk.Frame(self, bg=st.BG_DARK)
@@ -97,6 +111,8 @@ class SoftwarePanel(tk.Frame):
         )
         da_btn.pack(side="right", padx=(0, 8))
         da_btn.bind("<Button-1>", lambda e: self._select_all(False))
+        da_btn.bind("<Enter>", lambda e: da_btn.config(fg=st.TEXT_PRIMARY))
+        da_btn.bind("<Leave>", lambda e: da_btn.config(fg=st.TEXT_MUTED))
 
         sa_btn = tk.Label(
             header, text="Select All", bg=st.BG_DARK,
@@ -104,6 +120,8 @@ class SoftwarePanel(tk.Frame):
         )
         sa_btn.pack(side="right", padx=(0, 8))
         sa_btn.bind("<Button-1>", lambda e: self._select_all(True))
+        sa_btn.bind("<Enter>", lambda e: sa_btn.config(fg=st.ACCENT_HOVER))
+        sa_btn.bind("<Leave>", lambda e: sa_btn.config(fg=st.ACCENT))
 
         # ── Scrollable canvas ────────────────────────────────────────────
         container = tk.Frame(self, bg=st.BG_DARK)
@@ -187,16 +205,24 @@ class SoftwarePanel(tk.Frame):
         card_bg = st.BG_MEDIUM
 
         card = tk.Frame(
-            self._inner, bg=card_bg, pady=8, padx=10,
+            self._inner, bg=card_bg, pady=6, padx=10,
             relief="flat", bd=0, cursor="hand2",
         )
         # Do NOT pack here — _apply_filters will pack/pack_forget.
         self._card_frames[entry.id] = card
 
+        # Left selection stripe (3 px; visible when checked)
+        sel_stripe = tk.Frame(card, bg=card_bg, width=3)
+        sel_stripe.pack(side="left", fill="y")
+        sel_stripe.pack_propagate(False)
+        card._sel_stripe = sel_stripe  # type: ignore[attr-defined]
+
+        var.trace_add("write", lambda *_a, eid=entry.id: self._on_card_checked(eid))
+
         _bind_click(card, var, self._toggle, entry, self._open_detail)
 
         # ── Left section (icon + text) ────────────────────────────────────
-        left = tk.Frame(card, bg=card_bg)
+        left = tk.Frame(card, bg=card_bg, padx=4)
         left.pack(side="left", fill="both", expand=True)
         _bind_click(left, var, self._toggle, entry, self._open_detail)
 
@@ -231,7 +257,7 @@ class SoftwarePanel(tk.Frame):
         # Installed badge — created hidden; set_installed_ids() shows/hides it.
         inst_lbl = tk.Label(
             right, text="✓ installed",
-            bg="#1e3a2f", fg=st.SUCCESS, font=st.FONT_SMALL, padx=6, pady=2,
+            bg=st.SUCCESS_BG, fg=st.SUCCESS, font=st.FONT_SMALL, padx=6, pady=2,
         )
         self._card_inst_labels[entry.id] = inst_lbl
         # (not packed yet — shown on demand)
@@ -308,10 +334,32 @@ class SoftwarePanel(tk.Frame):
 
     def _update_count_label(self):
         count    = len(self._visible_entries)
-        selected = sum(1 for e in self._visible_entries if self._checked[e.id].get())
-        self._count_label.config(text=f"{count} apps  |  {selected} selected")
+        selected = sum(1 for e in self._all_entries if self._checked[e.id].get())
+        parts = [f"{count} app{'s' if count != 1 else ''}"]
+        if selected:
+            parts.append(f"{selected} selected")
+        self._count_label.config(text="  ·  ".join(parts))
+
+    def _on_card_checked(self, entry_id: str):
+        """Update card background + stripe when its checkbox value changes."""
+        checked = self._checked[entry_id].get()
+        card    = self._card_frames.get(entry_id)
+        if card is None:
+            return
+        bg = st.CARD_SELECTED if checked else st.BG_MEDIUM
+        card.config(bg=bg)
+        card._sel_stripe.config(bg=st.ACCENT if checked else bg)  # type: ignore[attr-defined]
+        for w in self._card_hover_widgets.get(entry_id, []):
+            try:
+                w.config(bg=bg)
+            except tk.TclError:
+                pass
+        self._update_count_label()
 
     def _card_hover(self, entry_id: str, card: tk.Frame, enter: bool):
+        # Don't change background if the card is checked
+        if self._checked[entry_id].get():
+            return
         bg = st.BG_LIGHT if enter else st.BG_MEDIUM
         card.config(bg=bg)
         for w in self._card_hover_widgets[entry_id]:

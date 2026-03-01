@@ -25,6 +25,11 @@ from gui.components.category_panel import CategoryPanel
 from gui.components.progress_panel import ProgressPanel
 from gui.components.software_panel import SoftwarePanel
 
+# Build per-category counts from catalog
+_CAT_COUNTS: dict[str, int] = {}
+for _e in CATALOG:
+    _CAT_COUNTS[_e.category] = _CAT_COUNTS.get(_e.category, 0) + 1
+
 
 class LiniteApp(tk.Tk):
     """Root window for the Linite application."""
@@ -34,7 +39,7 @@ class LiniteApp(tk.Tk):
         self.title("Linite — Linux Software Installer")
         self.configure(bg=st.BG_DARK)
         self.geometry(f"{st.WINDOW_W}x{st.WINDOW_H}")
-        self.minsize(860, 580)
+        self.minsize(880, 600)
 
         # Detect distro
         self._distro: DistroInfo = distro_mod.detect()
@@ -44,6 +49,7 @@ class LiniteApp(tk.Tk):
         self._update_distro_label()
         # Load installed state from history in background
         self._refresh_installed_state()
+        self._bind_shortcuts()
 
     # ── UI construction ───────────────────────────────────────────────────
 
@@ -87,6 +93,7 @@ class LiniteApp(tk.Tk):
             body,
             categories=CATEGORIES,
             on_select=self._on_category_select,
+            counts=_CAT_COUNTS,
             width=st.SIDEBAR_W,
         )
         self._cat_panel.pack(side="left", fill="y")
@@ -176,7 +183,7 @@ class LiniteApp(tk.Tk):
     def _update_distro_label(self):
         d = self._distro
         self._distro_label.config(
-            text=f"🖥  {d.display_name}  |  PM: {d.package_manager}"
+            text=f"🖥  {d.display_name}  ·  {d.package_manager.upper()}"
         )
 
     def _on_category_select(self, category: str):
@@ -192,14 +199,23 @@ class LiniteApp(tk.Tk):
         )
         self.after(300, self._poll_selection)
 
+    def _bind_shortcuts(self):
+        """Register keyboard shortcuts for common actions."""
+        self.bind("<Return>",   lambda _e: self._on_install())
+        self.bind("<Control-a>", lambda _e: self._sw_panel._select_all(True))
+        self.bind("<Escape>",   lambda _e: (self._on_cancel() if self._busy else None))
+
     def _set_busy(self, busy: bool):
         self._busy = busy
         state = "disabled" if busy else "normal"
         for btn in (self._install_btn, self._uninstall_btn,
                     self._update_btn, self._export_btn, self._import_btn):
             btn.config(state=state)
+        # Busy dot in title bar: green when active
+        dot_color = st.SUCCESS if busy else st.BG_MEDIUM
+        self._busy_dot.config(fg=dot_color)
         if busy:
-            self._cancel_btn.pack(side="right", padx=(0, 8), pady=10)
+            self._cancel_btn.pack(side="right", padx=(0, 4), pady=10)
         else:
             self._cancel_btn.pack_forget()
 
@@ -309,6 +325,7 @@ class LiniteApp(tk.Tk):
 
         self._prog_panel.reset()
         self._prog_panel.set_status("Updating …")
+        self._prog_panel.set_indeterminate(True)
         self._set_busy(True)
         clear_cancel()
 
@@ -321,6 +338,7 @@ class LiniteApp(tk.Tk):
 
             results = update_system(self._distro, progress_cb=progress)
             all_ok = all(rc == 0 for rc, _ in results.values())
+            self.after(0, lambda: self._prog_panel.set_indeterminate(False))
             self.after(0, lambda: self._set_busy(False))
             status_text = "Update complete ✓" if all_ok else "Update finished with errors"
             self.after(0, lambda: self._prog_panel.set_status(status_text))
