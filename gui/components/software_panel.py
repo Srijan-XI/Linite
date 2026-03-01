@@ -1,9 +1,18 @@
 """
 Linite - Software Selection Panel
 Scrollable grid of app cards with:
-  • Real-time search bar
+  • Real-time search bar (debounced 200 ms)
   • Installed-state badge (detected from history)
   • Double-click / right-click to open detail popup
+
+Performance notes
+-----------------
+* All card widgets are built ONCE in _build_all_cards(); filtering only
+  calls pack() / pack_forget() — no widget creation on every keystroke.
+* Mousewheel is bound only while the pointer is inside the canvas, so it
+  does not steal scroll events from other parts of the UI.
+* Hover widget lists are cached at build time; _card_hover() is O(1).
+* Search changes are debounced 200 ms to avoid re-renders on every key.
 """
 
 import tkinter as tk
@@ -12,6 +21,8 @@ from typing import Callable, Dict, List, Optional, Set
 
 from data.software_catalog import SoftwareEntry
 from gui import styles as st
+
+_SEARCH_DEBOUNCE_MS = 200
 
 
 class SoftwarePanel(tk.Frame):
@@ -32,21 +43,27 @@ class SoftwarePanel(tk.Frame):
         self._on_detail         = on_detail
         self._current_category  = "All"
         self._search_text       = ""
+        self._search_after_id: Optional[str] = None   # debounce handle
+
+        # Per-card caches built once by _build_all_cards()
+        self._card_frames:        Dict[str, tk.Frame]        = {}
+        self._card_hover_widgets: Dict[str, List[tk.Widget]] = {}
+        self._card_name_labels:   Dict[str, tk.Label]        = {}
+        self._card_inst_labels:   Dict[str, tk.Label]        = {}
 
         # ── Search bar ───────────────────────────────────────────────────
         search_bar = tk.Frame(self, bg=st.BG_DARK)
         search_bar.pack(fill="x", padx=st.PADDING, pady=(st.PADDING, 2))
 
-        search_icon = tk.Label(
+        tk.Label(
             search_bar, text="🔍", bg=st.BG_DARK,
             fg=st.TEXT_MUTED, font=st.FONT_NORMAL,
-        )
-        search_icon.pack(side="left", padx=(0, 6))
+        ).pack(side="left", padx=(0, 6))
 
         self._search_var = tk.StringVar()
         self._search_var.trace_add("write", self._on_search_change)
 
-        search_entry = tk.Entry(
+        tk.Entry(
             search_bar,
             textvariable=self._search_var,
             bg=st.BG_MEDIUM,
@@ -55,8 +72,7 @@ class SoftwarePanel(tk.Frame):
             font=st.FONT_NORMAL,
             relief="flat",
             bd=0,
-        )
-        search_entry.pack(side="left", fill="x", expand=True, ipady=5, ipadx=6)
+        ).pack(side="left", fill="x", expand=True, ipady=5, ipadx=6)
 
         clear_btn = tk.Label(
             search_bar, text="✕", bg=st.BG_DARK,
@@ -105,15 +121,17 @@ class SoftwarePanel(tk.Frame):
 
         self._inner.bind("<Configure>", self._on_inner_configure)
         self._canvas.bind("<Configure>", self._on_canvas_configure)
-        self._canvas.bind_all("<MouseWheel>", self._on_mousewheel)
-        self._canvas.bind_all("<Button-4>",   self._on_mousewheel)
-        self._canvas.bind_all("<Button-5>",   self._on_mousewheel)
 
-        # Initialise BooleanVars and draw
+        # Mousewheel scoped to canvas — avoids stealing scroll from other widgets.
+        self._canvas.bind("<Enter>", self._bind_mousewheel)
+        self._canvas.bind("<Leave>", self._unbind_mousewheel)
+
+        # Pre-build every BooleanVar and every card widget once.
         for entry in self._all_entries:
             self._checked[entry.id] = tk.BooleanVar(value=False)
 
-        self._render()
+        self._build_all_cards()
+        self._apply_filters()
 
     # ── Public API ────────────────────────────────────────────────────────
 
@@ -122,9 +140,25 @@ class SoftwarePanel(tk.Frame):
         self._apply_filters()
 
     def set_installed_ids(self, ids: Set[str]):
-        """Mark which app IDs are already installed (called from background thread via after())."""
+        """
+        Mark which app IDs are already installed.
+        Updates badge visibility and name dimming without recreating widgets.
+        """
+        prev = self._installed_ids
         self._installed_ids = ids
-        self._render()
+
+        changed = prev.symmetric_difference(ids)
+        for app_id in changed:
+            inst_lbl  = self._card_inst_labels.get(app_id)
+            name_lbl  = self._card_name_labels.get(app_id)
+            installed = app_id in ids
+            if inst_lbl is not None:
+                if installed:
+                    inst_lbl.pack(side="right", padx=(0, 6))
+                else:
+                    inst_lbl.pack_forget()
+            if name_lbl is not None:
+                name_lbl.config(fg=st.TEXT_MUTED if installed else st.TEXT_PRIMARY)
 
     def get_selected(self) -> List[SoftwareEntry]:
         return [e for e in self._all_entries if self._checked[e.id].get()]
@@ -138,62 +172,25 @@ class SoftwarePanel(tk.Frame):
             self._checked[entry.id].set(entry.id in ids)
         self._on_check_change()
 
-    # ── Filtering logic ───────────────────────────────────────────────────
+    # ── Card construction (runs once) ─────────────────────────────────────
 
-    def _on_search_change(self, *_):
-        self._search_text = self._search_var.get().lower().strip()
-        self._apply_filters()
-
-    def _apply_filters(self):
-        entries = self._all_entries
-
-        # Category filter
-        if self._current_category != "All":
-            entries = [e for e in entries if e.category == self._current_category]
-
-        # Search filter
-        if self._search_text:
-            entries = [
-                e for e in entries
-                if self._search_text in e.name.lower()
-                or self._search_text in e.description.lower()
-                or self._search_text in e.category.lower()
-                or self._search_text in e.id.lower()
-            ]
-
-        self._visible_entries = entries
-        self._render()
-
-    # ── Rendering ─────────────────────────────────────────────────────────
-
-    def _render(self):
-        for widget in self._inner.winfo_children():
-            widget.destroy()
-
-        count    = len(self._visible_entries)
-        selected = sum(1 for e in self._visible_entries if self._checked[e.id].get())
-        self._count_label.config(text=f"{count} apps  |  {selected} selected")
-
-        for entry in self._visible_entries:
+    def _build_all_cards(self):
+        """Create every card widget once; _apply_filters() shows/hides them."""
+        for entry in self._all_entries:
             self._make_card(entry)
 
-        self._inner.update_idletasks()
-        self._canvas.config(scrollregion=self._canvas.bbox("all"))
-
     def _make_card(self, entry: SoftwareEntry):
-        var        = self._checked[entry.id]
-        installed  = entry.id in self._installed_ids
-        card_bg    = st.BG_MEDIUM
+        var     = self._checked[entry.id]
+        card_bg = st.BG_MEDIUM
 
         card = tk.Frame(
             self._inner, bg=card_bg, pady=8, padx=10,
             relief="flat", bd=0, cursor="hand2",
         )
-        card.pack(fill="x", padx=st.PADDING, pady=4)
+        # Do NOT pack here — _apply_filters will pack/pack_forget.
+        self._card_frames[entry.id] = card
 
-        card.bind("<Button-1>",        lambda e, v=var: self._toggle(v))
-        card.bind("<Double-Button-1>", lambda e, en=entry: self._open_detail(en))
-        card.bind("<Button-3>",        lambda e, en=entry: self._open_detail(en))
+        _bind_click(card, var, self._toggle, entry, self._open_detail)
 
         # ── Left section (icon + text) ────────────────────────────────────
         left = tk.Frame(card, bg=card_bg)
@@ -208,14 +205,13 @@ class SoftwarePanel(tk.Frame):
         text_frame.pack(side="left", padx=(8, 0), fill="x", expand=True)
         _bind_click(text_frame, var, self._toggle, entry, self._open_detail)
 
-        # App name (dim if installed)
-        name_fg = st.TEXT_MUTED if installed else st.TEXT_PRIMARY
         name_lbl = tk.Label(
             text_frame, text=entry.name,
-            bg=card_bg, fg=name_fg, font=st.FONT_MEDIUM, anchor="w",
+            bg=card_bg, fg=st.TEXT_PRIMARY, font=st.FONT_MEDIUM, anchor="w",
         )
         name_lbl.pack(anchor="w")
         _bind_click(name_lbl, var, self._toggle, entry, self._open_detail)
+        self._card_name_labels[entry.id] = name_lbl
 
         desc_lbl = tk.Label(
             text_frame, text=entry.description,
@@ -229,11 +225,13 @@ class SoftwarePanel(tk.Frame):
         right = tk.Frame(card, bg=card_bg)
         right.pack(side="right")
 
-        if installed:
-            tk.Label(
-                right, text="✓ installed",
-                bg="#1e3a2f", fg=st.SUCCESS, font=st.FONT_SMALL, padx=6, pady=2,
-            ).pack(side="right", padx=(0, 6))
+        # Installed badge — created hidden; set_installed_ids() shows/hides it.
+        inst_lbl = tk.Label(
+            right, text="✓ installed",
+            bg="#1e3a2f", fg=st.SUCCESS, font=st.FONT_SMALL, padx=6, pady=2,
+        )
+        self._card_inst_labels[entry.id] = inst_lbl
+        # (not packed yet — shown on demand)
 
         tk.Label(
             right, text=entry.category,
@@ -248,25 +246,76 @@ class SoftwarePanel(tk.Frame):
         )
         cb.pack(side="right")
 
-        # Hover effect
-        all_widgets = [card, left, text_frame, icon_label, name_lbl, desc_lbl, right]
-        for w in all_widgets:
-            w.bind("<Enter>", lambda e, c=card: self._card_hover(c, True))
-            w.bind("<Leave>", lambda e, c=card: self._card_hover(c, False))
+        # Cache hover targets at build time for O(1) updates.
+        hover_targets: List[tk.Widget] = [
+            card, left, text_frame, icon_label, name_lbl, desc_lbl, right, cb,
+        ]
+        self._card_hover_widgets[entry.id] = hover_targets
 
-    def _card_hover(self, card: tk.Frame, enter: bool):
+        for w in hover_targets:
+            w.bind("<Enter>", lambda e, eid=entry.id, c=card: self._card_hover(eid, c, True))
+            w.bind("<Leave>", lambda e, eid=entry.id, c=card: self._card_hover(eid, c, False))
+
+    # ── Filtering logic ───────────────────────────────────────────────────
+
+    def _on_search_change(self, *_):
+        """Debounce: wait 200 ms of idle before applying the search filter."""
+        if self._search_after_id is not None:
+            self.after_cancel(self._search_after_id)
+        self._search_after_id = self.after(_SEARCH_DEBOUNCE_MS, self._commit_search)
+
+    def _commit_search(self):
+        self._search_after_id = None
+        self._search_text = self._search_var.get().lower().strip()
+        self._apply_filters()
+
+    def _apply_filters(self):
+        """Show/hide pre-built card frames — no widget creation."""
+        entries = self._all_entries
+
+        if self._current_category != "All":
+            entries = [e for e in entries if e.category == self._current_category]
+
+        if self._search_text:
+            q = self._search_text
+            entries = [
+                e for e in entries
+                if q in e.name.lower()
+                or q in e.description.lower()
+                or q in e.category.lower()
+                or q in e.id.lower()
+            ]
+
+        self._visible_entries = entries
+        visible_ids = {e.id for e in entries}
+
+        # Reset scroll before revealing new cards to avoid visual jump.
+        self._canvas.yview_moveto(0)
+
+        for entry in self._all_entries:
+            card = self._card_frames[entry.id]
+            if entry.id in visible_ids:
+                card.pack(fill="x", padx=st.PADDING, pady=4)
+            else:
+                card.pack_forget()
+
+        self._update_count_label()
+
+    # ── Rendering helpers ─────────────────────────────────────────────────
+
+    def _update_count_label(self):
+        count    = len(self._visible_entries)
+        selected = sum(1 for e in self._visible_entries if self._checked[e.id].get())
+        self._count_label.config(text=f"{count} apps  |  {selected} selected")
+
+    def _card_hover(self, entry_id: str, card: tk.Frame, enter: bool):
         bg = st.BG_LIGHT if enter else st.BG_MEDIUM
         card.config(bg=bg)
-        for child in card.winfo_children():
+        for w in self._card_hover_widgets[entry_id]:
             try:
-                child.config(bg=bg)
+                w.config(bg=bg)
             except tk.TclError:
                 pass
-            for gc in child.winfo_children():
-                try:
-                    gc.config(bg=bg)
-                except tk.TclError:
-                    pass
 
     def _open_detail(self, entry: SoftwareEntry):
         if self._on_detail:
@@ -277,9 +326,7 @@ class SoftwarePanel(tk.Frame):
         self._on_check_change()
 
     def _on_check_change(self):
-        selected = sum(1 for e in self._visible_entries if self._checked[e.id].get())
-        count    = len(self._visible_entries)
-        self._count_label.config(text=f"{count} apps  |  {selected} selected")
+        self._update_count_label()
 
     def _select_all(self, value: bool):
         for entry in self._visible_entries:
@@ -294,13 +341,24 @@ class SoftwarePanel(tk.Frame):
     def _on_canvas_configure(self, event):
         self._canvas.itemconfig(self._inner_id, width=event.width)
 
+    def _bind_mousewheel(self, _event=None):
+        """Activate scroll only while the pointer is inside the canvas."""
+        self._canvas.bind("<MouseWheel>", self._on_mousewheel)   # Windows / macOS
+        self._canvas.bind("<Button-4>",   self._on_mousewheel)   # Linux scroll up
+        self._canvas.bind("<Button-5>",   self._on_mousewheel)   # Linux scroll down
+
+    def _unbind_mousewheel(self, _event=None):
+        self._canvas.unbind("<MouseWheel>")
+        self._canvas.unbind("<Button-4>")
+        self._canvas.unbind("<Button-5>")
+
     def _on_mousewheel(self, event):
         if event.num == 4:
-            self._canvas.yview_scroll(-1, "units")
+            self._canvas.yview_scroll(-3, "units")
         elif event.num == 5:
-            self._canvas.yview_scroll(1, "units")
+            self._canvas.yview_scroll(3, "units")
         else:
-            self._canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+            self._canvas.yview_scroll(int(-1 * (event.delta / 120)) * 3, "units")
 
 
 # ── Helper: bind left-click + double-click on a widget ───────────────────────
