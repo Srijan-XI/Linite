@@ -31,7 +31,6 @@ class BasePackageManager(ABC):
         Execute a package-manager command.
         Returns (returncode, combined_output).
         """
-        import os
         cmd = (["sudo"] if sudo else []) + args
         logger.debug("Running: %s", " ".join(cmd))
 
