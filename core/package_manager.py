@@ -7,6 +7,7 @@ import subprocess
 import shlex
 import logging
 import os
+import time
 from abc import ABC, abstractmethod
 from typing import List, Optional, Callable
 
@@ -88,17 +89,55 @@ class BasePackageManager(ABC):
 class AptPackageManager(BasePackageManager):
     name = "apt"
 
+    # ── Lock-contention constants ────────────────────────────────────────────
+    _LOCK_MSG        = "Could not get lock /var/lib/dpkg/lock"
+    _LOCK_RETRY_WAIT = 10   # seconds between retries
+    _LOCK_MAX_WAIT   = 300  # give up after this many total seconds
+
+    def _run_apt(
+        self,
+        args: List[str],
+        sudo: bool = True,
+        env: Optional[dict] = None,
+        progress_cb: Optional[Callable[[str], None]] = None,
+    ) -> tuple[int, str]:
+        """
+        Run an apt/apt-get command, transparently retrying when the dpkg
+        frontend lock is held by another process.
+        """
+        elapsed = 0
+        while True:
+            rc, out = self.run(args, sudo=sudo, env=env, progress_cb=progress_cb)
+            if rc == 0 or self._LOCK_MSG not in out:
+                return rc, out
+            if elapsed >= self._LOCK_MAX_WAIT:
+                logger.error(
+                    "Gave up waiting for dpkg lock after %ds – last error:\n%s",
+                    elapsed, out,
+                )
+                return rc, out
+            msg = (
+                f"dpkg lock held by another process – "
+                f"retrying in {self._LOCK_RETRY_WAIT}s "
+                f"({elapsed}s elapsed, limit {self._LOCK_MAX_WAIT}s) …"
+            )
+            logger.warning(msg)
+            if progress_cb:
+                progress_cb(msg)
+            time.sleep(self._LOCK_RETRY_WAIT)
+            elapsed += self._LOCK_RETRY_WAIT
+
     def _refresh(self, progress_cb=None):
-        return self.run(["apt-get", "update", "-y"], progress_cb=progress_cb)
+        return self._run_apt(["apt-get", "update", "-y"], progress_cb=progress_cb)
 
     def install(self, packages, progress_cb=None):
         self._refresh(progress_cb)
         cmd = ["apt-get", "install", "-y", "--no-install-recommends"] + packages
-        return self.run(cmd, env={"DEBIAN_FRONTEND": "noninteractive"}, progress_cb=progress_cb)
+        return self._run_apt(cmd, env={"DEBIAN_FRONTEND": "noninteractive"}, progress_cb=progress_cb)
 
     def update_all(self, progress_cb=None):
         self._refresh(progress_cb)
-        return self.run(
+        return self._run_apt(
             ["apt-get", "upgrade", "-y"],
             progress_cb=progress_cb,
         )
