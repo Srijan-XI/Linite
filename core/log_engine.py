@@ -7,12 +7,12 @@ system-tweak operation performed by Linite.
 Storage layout
 --------------
 ~/.config/linite/logs/
-    YYYY-MM-DD.yaml      One file per calendar day (UTC).
-    summary.yaml         Aggregated counters, updated on every write.
+    YYYY-MM-DD.json      One file per calendar day (UTC).
+    summary.json         Aggregated counters, updated on every write.
 
 Record schema
 -------------
-Each YAML file holds a list of transaction dicts:
+Each JSON file holds a list of transaction dicts:
 
     transaction_id: a1b2c3d4
     session_id:     e5f6a7b8            # groups ops from one Linite run
@@ -49,7 +49,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-import yaml
+import json
 
 _log = _logging.getLogger(__name__)
 
@@ -183,7 +183,7 @@ class TransactionLogEngine:
 
     def _daily_path(self, dt: Optional[datetime] = None) -> Path:
         d = dt or datetime.now(timezone.utc)
-        return self._dir / f"{d.date().isoformat()}.yaml"
+        return self._dir / f"{d.date().isoformat()}.json"
 
     def _append(self, rec: TransactionRecord) -> None:
         """Append one record dict to the current day's YAML file."""
@@ -197,11 +197,21 @@ class TransactionLogEngine:
             _log.error("Failed to write transaction log: %s", exc)
 
     def _update_summary(self, rec: TransactionRecord) -> None:
-        """Increment running counters in summary.yaml."""
-        path = self._dir / "summary.yaml"
+        """Increment running counters in summary.json."""
+        path    = self._dir / "summary.json"
+        _legacy = self._dir / "summary.yaml"
         try:
-            raw = yaml.safe_load(path.read_text(encoding="utf-8")) \
-                if path.exists() else {}
+            if path.exists():
+                raw = json.loads(path.read_text(encoding="utf-8"))
+            elif _legacy.exists():
+                try:
+                    import yaml as _yaml  # local — only during migration
+                    raw = _yaml.safe_load(_legacy.read_text(encoding="utf-8")) or {}
+                    _legacy.rename(_legacy.with_suffix(".yaml.bak"))
+                except ImportError:
+                    raw = {}
+            else:
+                raw = {}
             if not isinstance(raw, dict):
                 raw = {}
 
@@ -231,12 +241,11 @@ class TransactionLogEngine:
                 raw["install_counts"] = ic
 
             path.write_text(
-                yaml.dump(raw, default_flow_style=False, allow_unicode=True,
-                          sort_keys=False),
+                json.dumps(raw, indent=2, ensure_ascii=False),
                 encoding="utf-8",
             )
         except Exception as exc:
-            _log.warning("Failed to update summary.yaml: %s", exc)
+            _log.warning("Failed to update summary.json: %s", exc)
 
     # ── Reading / Querying ────────────────────────────────────────────────
 
@@ -253,12 +262,12 @@ class TransactionLogEngine:
             return []
 
         daily_files = sorted(
-            p for p in self._dir.glob("*.yaml")
-            if p.name != "summary.yaml"
+            p for p in self._dir.glob("*.json")
+            if p.name != "summary.json"
         )
         records: List[TransactionRecord] = []
         for path in daily_files:
-            if path.name == "summary.yaml":
+            if path.name == "summary.json":
                 continue
             for d in _safe_load_list(path):
                 try:
@@ -394,12 +403,12 @@ class TransactionLogEngine:
         Path(path).write_text("\n".join(lines), encoding="utf-8")
         return len(records)
 
-    def export_yaml(self, path: str, since: Optional[datetime] = None) -> int:
-        """Export all records as a single YAML file.  Returns record count."""
+    def export_json(self, path: str, since: Optional[datetime] = None) -> int:
+        """Export all records as a single JSON file.  Returns record count."""
         records = self.query(since=since, newest_first=False)
         data = [r.to_dict() for r in records]
         Path(path).write_text(
-            yaml.dump(data, default_flow_style=False, allow_unicode=True),
+            json.dumps(data, indent=2, ensure_ascii=False),
             encoding="utf-8",
         )
         return len(records)
@@ -416,8 +425,12 @@ class TransactionLogEngine:
         removed = 0
         if not self._dir.exists():
             return 0
-        for path in self._dir.glob("????.*.yaml"):
-            if path.name == "summary.yaml":
+        for path in (
+            p
+            for pat in ("????.*.json", "????.*.yaml")  # include legacy YAML
+            for p in self._dir.glob(pat)
+        ):
+            if path.name in ("summary.json", "summary.yaml"):
                 continue
             try:
                 file_date_str = path.stem   # "YYYY-MM-DD"
@@ -435,7 +448,9 @@ class TransactionLogEngine:
         """Delete all log files.  Use with caution."""
         if not self._dir.exists():
             return
-        for path in self._dir.glob("*.yaml"):
+        for path in (
+            list(self._dir.glob("*.json")) + list(self._dir.glob("*.yaml"))
+        ):
             path.unlink(missing_ok=True)
 
 
@@ -444,19 +459,35 @@ class TransactionLogEngine:
 # ---------------------------------------------------------------------------
 
 def _safe_load_list(path: Path) -> list:
+    """Load a JSON list from *path*; transparently migrate a legacy .yaml counterpart."""
+    if not path.exists() and path.suffix == ".json":
+        legacy = path.with_suffix(".yaml")
+        if legacy.exists():
+            return _migrate_legacy_log(legacy, path)
     try:
-        raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+        raw = json.loads(path.read_text(encoding="utf-8"))
         return raw if isinstance(raw, list) else []
     except Exception:
         return []
 
 
+def _migrate_legacy_log(yaml_path: Path, json_path: Path) -> list:
+    """One-time migration: read a YAML daily log, save as JSON, archive the source."""
+    try:
+        import yaml as _yaml  # local — only invoked when migrating old files
+        raw  = _yaml.safe_load(yaml_path.read_text(encoding="utf-8"))
+        data = raw if isinstance(raw, list) else []
+        json_path.write_text(json.dumps(data, indent=2, ensure_ascii=False),
+                             encoding="utf-8")
+        yaml_path.rename(yaml_path.with_suffix(".yaml.bak"))
+        return data
+    except Exception:
+        return []
+
+
 def _safe_dump_list(path: Path, data: list) -> None:
-    path.write_text(
-        yaml.dump(data, default_flow_style=False, allow_unicode=True,
-                  sort_keys=False),
-        encoding="utf-8",
-    )
+    path.write_text(json.dumps(data, indent=2, ensure_ascii=False),
+                    encoding="utf-8")
 
 
 # ---------------------------------------------------------------------------
