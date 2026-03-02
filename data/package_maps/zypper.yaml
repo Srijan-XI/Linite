@@ -1,0 +1,129 @@
+# Linite Zypper Package Map  (openSUSE Leap / Tumbleweed)
+---
+
+firefox:
+  packages: [MozillaFirefox]
+
+chromium:
+  packages: [chromium]
+
+git:
+  packages: [git]
+
+vscode:
+  packages: [code]
+  pre_commands:
+    - "rpm --import https://packages.microsoft.com/keys/microsoft.asc"
+    - "zypper addrepo https://packages.microsoft.com/yumrepos/vscode vscode"
+
+python3:
+  packages: [python3, python3-pip]
+
+nodejs:
+  packages: [nodejs20, npm20]
+
+docker:
+  packages: [docker, docker-compose]
+  pre_commands:
+    - "zypper addrepo https://download.docker.com/linux/sles/docker-ce.repo"
+  post_commands:
+    - "systemctl enable --now docker"
+    - "usermod -aG docker $SUDO_USER"
+
+vim:
+  packages: [vim]
+
+neovim:
+  packages: [neovim]
+
+curl:
+  packages: [curl]
+
+wget:
+  packages: [wget]
+
+htop:
+  packages: [htop]
+
+vlc:
+  packages: [vlc]
+
+mpv:
+  packages: [mpv]
+
+audacity:
+  packages: [audacity]
+
+handbrake:
+  packages: [HandBrake-gui]
+
+thunderbird:
+  packages: [MozillaThunderbird]
+
+flameshot:
+  packages: [flameshot]
+
+wireshark:
+  packages: [wireshark]
+
+7zip:
+  packages: [p7zip]
+
+neofetch:
+  packages: [neofetch]
+
+flatpak:
+  packages: [flatpak]
+  post_commands:
+    - "flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo"
+
+gimp:
+  packages: [gimp]
+
+inkscape:
+  packages: [inkscape]
+
+blender:
+  packages: [blender]
+
+libreoffice:
+  packages: [libreoffice]
+
+okular:
+  packages: [okular]
+
+evince:
+  packages: [evince]
+
+qbittorrent:
+  packages: [qbittorrent]
+
+deluge:
+  packages: [deluge]
+
+transmission:
+  packages: [transmission-gtk]
+
+qemu:
+  packages: [qemu, virt-manager, libvirt]
+
+openjdk:
+  packages: [java-21-openjdk]
+
+nmap:
+  packages: [nmap]
+
+hydra:
+  packages: [hydra]
+
+john:
+  packages: [john]
+
+aircrack-ng:
+  packages: [aircrack-ng]
+
+hashcat:
+  packages: [hashcat]
+
+sqlmap:
+  packages: [sqlmap]

@@ -1,0 +1,75 @@
+# Linite Snap Package Map
+# Packages installed via: snap install [--classic] <name>
+---
+
+vscode:
+  packages: [code]
+  snap_classic: true
+
+notepadplusplus:
+  packages: [notepad-plus-plus]
+  snap_classic: true
+
+vlc:
+  packages: [vlc]
+
+obs:
+  packages: [obs-studio]
+
+discord:
+  packages: [discord]
+
+slack:
+  packages: [slack]
+  snap_classic: true
+
+spotify:
+  packages: [spotify]
+
+telegram:
+  packages: [telegram-desktop]
+
+gimp:
+  packages: [gimp]
+
+inkscape:
+  packages: [inkscape]
+
+blender:
+  packages: [blender]
+  snap_classic: true
+
+libreoffice:
+  packages: [libreoffice]
+
+thunderbird:
+  packages: [thunderbird]
+
+chromium:
+  packages: [chromium]
+
+firefox:
+  packages: [firefox]
+
+brave:
+  packages: [brave]
+
+steam:
+  packages: [steam]
+
+lutris:
+  packages: [lutris]
+
+htop:
+  packages: [htop]
+
+neovim:
+  packages: [nvim]
+  snap_classic: true
+
+zoom:
+  packages: [zoom-client]
+
+skype:
+  packages: [skype]
+  snap_classic: true

@@ -1,0 +1,270 @@
+# Linite APT Package Map
+# -----------------------
+# Maps catalog app IDs → APT package specs.
+# Empty entries are omitted (app will fall back to flatpak/snap or fail gracefully).
+# pre_commands run before apt-get install; post_commands run after.
+---
+
+# ── Web Browsers ──────────────────────────────────────────────────────────────
+
+firefox:
+  packages: [firefox]
+
+chromium:
+  packages: [chromium-browser]
+
+brave:
+  packages: [brave-browser]
+  pre_commands:
+    - "curl -fsSL https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg | gpg --dearmor | tee /usr/share/keyrings/brave-browser-archive-keyring.gpg > /dev/null"
+    - 'echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg arch=amd64] https://brave-browser-apt-release.s3.brave.com/ stable main" | tee /etc/apt/sources.list.d/brave-browser-release.list'
+    - "apt-get update"
+
+# google-chrome: no native deb in canonical repos — use flatpak or script
+# opera: best installed via flatpak or official deb from opera.com
+# tor-browser: via flatpak or torbrowser-launcher
+# vivaldi: via official vivaldi deb repo
+
+# ── Development ───────────────────────────────────────────────────────────────
+
+git:
+  packages: [git]
+
+vscode:
+  packages: [code]
+  pre_commands:
+    - "wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/packages.microsoft.gpg"
+    - 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/trusted.gpg.d/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | tee /etc/apt/sources.list.d/vscode.list'
+    - "apt-get update"
+
+python3:
+  packages: [python3, python3-pip, python3-venv]
+
+nodejs:
+  packages: [nodejs, npm]
+  pre_commands:
+    - "curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -"
+
+docker:
+  packages: [docker-ce, docker-ce-cli, containerd.io, docker-buildx-plugin, docker-compose-plugin]
+  pre_commands:
+    - "apt-get install -y ca-certificates curl gnupg"
+    - "install -m 0755 -d /etc/apt/keyrings"
+    - "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg"
+    - "chmod a+r /etc/apt/keyrings/docker.gpg"
+    - 'echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo \"$VERSION_CODENAME\") stable" | tee /etc/apt/sources.list.d/docker.list'
+    - "apt-get update"
+  post_commands:
+    - "systemctl enable --now docker"
+    - "usermod -aG docker $SUDO_USER"
+
+vim:
+  packages: [vim]
+
+neovim:
+  packages: [neovim]
+
+gh:
+  packages: [gh]
+  pre_commands:
+    - "curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg"
+    - 'echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list'
+    - "apt-get update"
+
+curl:
+  packages: [curl]
+
+wget:
+  packages: [wget]
+
+htop:
+  packages: [htop]
+
+# ── Media ─────────────────────────────────────────────────────────────────────
+
+vlc:
+  packages: [vlc]
+
+mpv:
+  packages: [mpv]
+
+obs:
+  packages: [obs-studio]
+  pre_commands:
+    - "apt-get install -y software-properties-common"
+    - "add-apt-repository ppa:obsproject/obs-studio -y"
+    - "apt-get update"
+
+audacity:
+  packages: [audacity]
+
+handbrake:
+  packages: [handbrake-gtk]
+
+# spotify: no official apt repo — flatpak/snap preferred
+
+# ── Communication ─────────────────────────────────────────────────────────────
+
+thunderbird:
+  packages: [thunderbird]
+
+# discord, slack, zoom, telegram: prefer flatpak or official deb from vendor
+# dropbox: official deb repo or flatpak
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+
+flameshot:
+  packages: [flameshot]
+
+wireshark:
+  packages: [wireshark]
+
+7zip:
+  packages: [p7zip-full, p7zip-rar]
+
+timeshift:
+  packages: [timeshift]
+
+neofetch:
+  packages: [neofetch]
+
+flatpak:
+  packages: [flatpak]
+  post_commands:
+    - "flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo"
+
+# ── Gaming ────────────────────────────────────────────────────────────────────
+
+steam:
+  packages: [steam-installer]
+  pre_commands:
+    - "dpkg --add-architecture i386"
+    - "apt-get update"
+
+lutris:
+  packages: [lutris]
+  pre_commands:
+    - "add-apt-repository ppa:lutris-team/lutris -y"
+    - "apt-get update"
+
+# ── Graphics ──────────────────────────────────────────────────────────────────
+
+gimp:
+  packages: [gimp]
+
+inkscape:
+  packages: [inkscape]
+
+blender:
+  packages: [blender]
+
+# ── Office ────────────────────────────────────────────────────────────────────
+
+libreoffice:
+  packages: [libreoffice]
+
+okular:
+  packages: [okular]
+
+evince:
+  packages: [evince]
+
+# openoffice: prefer flatpak; no standard apt package
+# foxitreader: prefer flatpak
+
+# ── Torrents ─────────────────────────────────────────────────────────────────
+
+qbittorrent:
+  packages: [qbittorrent]
+
+qbittorrent-nox:
+  packages: [qbittorrent-nox]
+
+deluge:
+  packages: [deluge]
+
+transmission:
+  packages: [transmission-gtk]
+
+# ── Virtualization ────────────────────────────────────────────────────────────
+
+virtualbox:
+  packages: [virtualbox]
+  pre_commands:
+    - "curl -fsSL https://www.virtualbox.org/download/oracle_vbox_2016.asc | gpg --dearmor | tee /usr/share/keyrings/virtualbox.gpg > /dev/null"
+    - 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/virtualbox.gpg] https://download.virtualbox.org/virtualbox/debian $(. /etc/os-release && echo $VERSION_CODENAME) contrib" | tee /etc/apt/sources.list.d/virtualbox.list'
+    - "apt-get update"
+
+qemu:
+  packages: [qemu-system, qemu-utils, virt-manager, libvirt-daemon-system]
+
+# ── Java ─────────────────────────────────────────────────────────────────────
+
+openjdk:
+  packages: [default-jdk]
+
+eclipse-temurin:
+  packages: [temurin-21-jdk]
+  pre_commands:
+    - "apt-get install -y wget gnupg"
+    - "mkdir -p /etc/apt/keyrings"
+    - "wget -O - https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor | tee /etc/apt/keyrings/adoptium.gpg > /dev/null"
+    - 'echo "deb [signed-by=/etc/apt/keyrings/adoptium.gpg] https://packages.adoptium.net/artifactory/deb $(. /etc/os-release && echo $VERSION_CODENAME) main" | tee /etc/apt/sources.list.d/adoptium.list'
+    - "apt-get update"
+
+amazon-corretto:
+  packages: [java-21-amazon-corretto-jdk]
+  pre_commands:
+    - "curl -fsSL https://apt.corretto.aws/corretto.key | gpg --dearmor | tee /usr/share/keyrings/corretto-keyring.gpg > /dev/null"
+    - 'echo "deb [signed-by=/usr/share/keyrings/corretto-keyring.gpg] https://apt.corretto.aws stable main" | tee /etc/apt/sources.list.d/corretto.list'
+    - "apt-get update"
+
+zulu-jdk:
+  packages: [zulu21-jdk]
+  pre_commands:
+    - "curl -fsSL https://repos.azul.com/azul-repo.key | gpg --dearmor | tee /etc/apt/trusted.gpg.d/azul.gpg > /dev/null"
+    - 'echo "deb [signed-by=/etc/apt/trusted.gpg.d/azul.gpg] https://repos.azul.com/zulu/deb stable main" | tee /etc/apt/sources.list.d/zulu.list'
+    - "apt-get update"
+
+# oracle-jdk: requires manual download — covered by script spec in catalog
+
+# ── Security ─────────────────────────────────────────────────────────────────
+
+nmap:
+  packages: [nmap]
+
+zenmap:
+  packages: [zenmap]
+
+wireshark:
+  packages: [wireshark]
+
+hydra:
+  packages: [hydra]
+
+john:
+  packages: [john]
+
+aircrack-ng:
+  packages: [aircrack-ng]
+
+hashcat:
+  packages: [hashcat]
+
+sqlmap:
+  packages: [sqlmap]
+
+metasploit:
+  packages: [metasploit-framework]
+  pre_commands:
+    - "curl -fsSL https://apt.metasploit.com/metasploit-framework.list -o /etc/apt/sources.list.d/metasploit-framework.list"
+    - "curl -fsSL https://apt.metasploit.com/pubkey.gpg | gpg --dearmor | tee /etc/apt/trusted.gpg.d/metasploit.gpg > /dev/null"
+    - "apt-get update"
+  post_commands:
+    - "msfdb init"
+
+angryip:
+  packages: [ipscan]
+  pre_commands:
+    - "curl -fsSL https://github.com/angryip/ipscan/releases/latest/download/ipscan_3.9.1_amd64.deb -o /tmp/ipscan.deb"
+    - "dpkg -i /tmp/ipscan.deb || apt-get install -f -y"

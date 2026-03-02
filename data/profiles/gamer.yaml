@@ -1,0 +1,39 @@
+id: gamer
+name: Gamer
+icon: "🎮"
+color: "#ff79c6"
+tagline: Maximum frames, zero limits
+description: |
+  The complete Linux gaming stack: Steam for your library, Lutris for
+  legacy and Windows titles via Wine/Proton, Discord for party chat, and
+  OBS for streaming or recording your best moments.
+
+packages:
+  - steam
+  - lutris
+  - discord
+  - obs
+  - vlc
+  - spotify
+  - htop
+  - firefox
+  - flatpak
+
+system_tweaks:
+  - id: steam_multilib
+    description: "Enable 32-bit (multilib) support for Steam on Arch"
+    command: "grep -q '\\[multilib\\]' /etc/pacman.conf || sed -i '/\\[multilib\\]/{n;s/^#//}' /etc/pacman.conf && pacman -Sy"
+    requires_package: steam
+    run_as_root: true
+
+  - id: flathub_remote
+    description: "Add Flathub remote for Flatpak"
+    command: "flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo"
+    requires_package: flatpak
+    run_as_root: true
+
+  - id: gamemode_hint
+    description: "Hint: install gamemode for better in-game CPU scheduling"
+    command: "echo 'Tip: install gamemode (available in most distro repos) for extra FPS.'"
+    requires_package: ""
+    run_as_root: false

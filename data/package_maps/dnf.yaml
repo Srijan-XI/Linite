@@ -1,0 +1,193 @@
+# Linite DNF Package Map  (Fedora / RHEL / CentOS / AlmaLinux / Rocky)
+---
+
+firefox:
+  packages: [firefox]
+
+chromium:
+  packages: [chromium]
+
+brave:
+  packages: [brave-browser]
+  pre_commands:
+    - "dnf install -y dnf-plugins-core"
+    - "dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo"
+
+git:
+  packages: [git]
+
+vscode:
+  packages: [code]
+  pre_commands:
+    - "rpm --import https://packages.microsoft.com/keys/microsoft.asc"
+    - 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" | tee /etc/yum.repos.d/vscode.repo'
+
+python3:
+  packages: [python3, python3-pip]
+
+nodejs:
+  packages: [nodejs, npm]
+  pre_commands:
+    - "curl -fsSL https://rpm.nodesource.com/setup_lts.x | bash -"
+
+docker:
+  packages: [docker-ce, docker-ce-cli, containerd.io, docker-buildx-plugin, docker-compose-plugin]
+  pre_commands:
+    - "dnf install -y dnf-plugins-core"
+    - "dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo"
+  post_commands:
+    - "systemctl enable --now docker"
+    - "usermod -aG docker $SUDO_USER"
+
+vim:
+  packages: [vim-enhanced]
+
+neovim:
+  packages: [neovim]
+
+gh:
+  packages: [gh]
+  pre_commands:
+    - "dnf install -y 'dnf-command(config-manager)'"
+    - "dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo"
+
+curl:
+  packages: [curl]
+
+wget:
+  packages: [wget]
+
+htop:
+  packages: [htop]
+
+vlc:
+  packages: [vlc]
+  pre_commands:
+    - "dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm"
+    - "dnf install -y https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm"
+
+mpv:
+  packages: [mpv]
+
+obs:
+  packages: [obs-studio]
+  pre_commands:
+    - "dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm"
+    - "dnf install -y https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm"
+
+audacity:
+  packages: [audacity]
+
+handbrake:
+  packages: [HandBrake-gui]
+
+thunderbird:
+  packages: [thunderbird]
+
+flameshot:
+  packages: [flameshot]
+
+wireshark:
+  packages: [wireshark]
+
+7zip:
+  packages: [p7zip, p7zip-plugins]
+
+timeshift:
+  packages: [timeshift]
+
+neofetch:
+  packages: [neofetch]
+
+flatpak:
+  packages: [flatpak]
+  post_commands:
+    - "flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo"
+
+steam:
+  packages: [steam]
+  pre_commands:
+    - "dnf install -y https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm"
+
+lutris:
+  packages: [lutris]
+  pre_commands:
+    - "dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm"
+    - "dnf install -y https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm"
+
+gimp:
+  packages: [gimp]
+
+inkscape:
+  packages: [inkscape]
+
+blender:
+  packages: [blender]
+
+libreoffice:
+  packages: [libreoffice]
+
+okular:
+  packages: [okular]
+
+evince:
+  packages: [evince]
+
+qbittorrent:
+  packages: [qbittorrent]
+
+qbittorrent-nox:
+  packages: [qbittorrent-nox]
+
+deluge:
+  packages: [deluge]
+
+transmission:
+  packages: [transmission-gtk]
+
+virtualbox:
+  packages: [VirtualBox]
+  pre_commands:
+    - "dnf config-manager --add-repo https://download.virtualbox.org/virtualbox/rpm/fedora/virtualbox.repo"
+
+qemu:
+  packages: [qemu-kvm, virt-manager, libvirt, virt-install]
+
+openjdk:
+  packages: [java-latest-openjdk]
+
+eclipse-temurin:
+  packages: [temurin-21-jdk]
+  pre_commands:
+    - "curl -fsSL https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor | tee /etc/pki/rpm-gpg/RPM-GPG-KEY-adoptium"
+    - 'printf "[Adoptium]\nname=Adoptium\nbaseurl=https://packages.adoptium.net/artifactory/rpm/fedora/$(rpm -E %fedora)/$(uname -m)\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.adoptium.net/artifactory/api/gpg/key/public\n" | tee /etc/yum.repos.d/adoptium.repo'
+
+amazon-corretto:
+  packages: [java-21-amazon-corretto-devel]
+  pre_commands:
+    - "curl -fsSL https://yum.corretto.aws/corretto.key | gpg --dearmor | tee /etc/pki/rpm-gpg/RPM-GPG-KEY-corretto"
+    - "curl -fsSL -o /etc/yum.repos.d/corretto.repo https://yum.corretto.aws/corretto.repo"
+
+zulu-jdk:
+  packages: [zulu21-jdk]
+  pre_commands:
+    - "curl -fsSL https://repos.azul.com/azul-repo.key | gpg --dearmor | tee /etc/pki/rpm-gpg/RPM-GPG-KEY-azul"
+    - "curl -fsSL -o /etc/yum.repos.d/zulu.repo https://repos.azul.com/zulu/deb/azul-repo.conf"
+
+nmap:
+  packages: [nmap]
+
+hydra:
+  packages: [hydra]
+
+john:
+  packages: [john]
+
+aircrack-ng:
+  packages: [aircrack-ng]
+
+hashcat:
+  packages: [hashcat]
+
+sqlmap:
+  packages: [sqlmap]

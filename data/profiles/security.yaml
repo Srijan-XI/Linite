@@ -1,0 +1,42 @@
+id: security
+name: Security / Pentester
+icon: "🔐"
+color: "#ff5555"
+tagline: Recon, scanning & analysis toolkit
+description: |
+  Essential open-source security tools: Nmap for network discovery,
+  Wireshark for packet analysis, Metasploit for penetration testing, and
+  several password-auditing and wireless utilities. For ethical use only.
+
+packages:
+  - nmap
+  - wireshark
+  - metasploit
+  - hydra
+  - john
+  - aircrack-ng
+  - sqlmap
+  - burpsuite
+  - firefox
+  - curl
+  - wget
+  - htop
+
+system_tweaks:
+  - id: wireshark_group
+    description: "Add user to wireshark group (packet capture without sudo)"
+    command: "usermod -aG wireshark $SUDO_USER"
+    requires_package: wireshark
+    run_as_root: true
+
+  - id: msfdb_init
+    description: "Initialise Metasploit database"
+    command: "msfdb init"
+    requires_package: metasploit
+    run_as_root: true
+
+  - id: aircrack_monitor_mode
+    description: "Enable monitor-mode permissions hint"
+    command: "echo 'Tip: use airmon-ng to put your WiFi adapter into monitor mode.'"
+    requires_package: aircrack-ng
+    run_as_root: false
