@@ -268,3 +268,70 @@ angryip:
   pre_commands:
     - "curl -fsSL https://github.com/angryip/ipscan/releases/latest/download/ipscan_3.9.1_amd64.deb -o /tmp/ipscan.deb"
     - "dpkg -i /tmp/ipscan.deb || apt-get install -f -y"
+
+# ── Password Managers ─────────────────────────────────────────────────────────
+1password:
+  packages: [1password]
+  pre_commands:
+    - "curl -sS https://downloads.1password.com/linux/keys/1password.asc | gpg --dearmor | tee /usr/share/keyrings/1password-archive-keyring.gpg > /dev/null"
+    - 'echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/$(dpkg --print-architecture) stable main" | tee /etc/apt/sources.list.d/1password.list'
+    - "apt-get update"
+
+keepassxc:
+  packages: [keepassxc]
+
+# ── Video Editors ─────────────────────────────────────────────────────────────
+kdenlive:
+  packages: [kdenlive]
+
+openshot:
+  packages: [openshot-qt]
+
+# ── Terminal Emulators ────────────────────────────────────────────────────────
+alacritty:
+  packages: [alacritty]
+
+kitty:
+  packages: [kitty]
+
+wezterm:
+  packages: [wezterm]
+  pre_commands:
+    - "curl -fsSL https://apt.fury.io/wez/gpg.key | gpg --dearmor | tee /usr/share/keyrings/wezterm.gpg > /dev/null"
+    - 'echo "deb [signed-by=/usr/share/keyrings/wezterm.gpg] https://apt.fury.io/wez/ * *" | tee /etc/apt/sources.list.d/wezterm.list'
+    - "apt-get update"
+
+tilix:
+  packages: [tilix]
+
+# ── VPN ───────────────────────────────────────────────────────────────────────
+protonvpn:
+  packages: [proton-vpn-gnome-desktop]
+  pre_commands:
+    - "curl -fsSL https://repo.protonvpn.com/debian/public_key.asc | gpg --dearmor | tee /usr/share/keyrings/protonvpn.gpg > /dev/null"
+    - 'echo "deb [signed-by=/usr/share/keyrings/protonvpn.gpg] https://repo.protonvpn.com/debian unstable main" | tee /etc/apt/sources.list.d/protonvpn.list'
+    - "apt-get update"
+
+wireguard:
+  packages: [wireguard]
+
+mullvad:
+  packages: [mullvad-vpn]
+  pre_commands:
+    - "curl -fsSL https://repository.mullvad.net/deb/mullvad-keyring.asc | gpg --dearmor | tee /usr/share/keyrings/mullvad-keyring.gpg > /dev/null"
+    - 'echo "deb [signed-by=/usr/share/keyrings/mullvad-keyring.gpg] https://repository.mullvad.net/deb/stable $(. /etc/os-release && echo $VERSION_CODENAME) main" | tee /etc/apt/sources.list.d/mullvad.list'
+    - "apt-get update"
+
+openvpn:
+  packages: [openvpn]
+
+# ── Note Taking ───────────────────────────────────────────────────────────────
+cherrytree:
+  packages: [cherrytree]
+
+# ── Gaming ────────────────────────────────────────────────────────────────────
+gamemode:
+  packages: [gamemode]
+
+mangohud:
+  packages: [mangohud]

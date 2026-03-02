@@ -73,3 +73,21 @@ zoom:
 skype:
   packages: [skype]
   snap_classic: true
+
+# ── Password Managers ─────────────────────────────────────────────────────────
+bitwarden:
+  packages: [bitwarden]
+
+# ── Video Editors ─────────────────────────────────────────────────────────────
+kdenlive:
+  packages: [kdenlive]
+
+shotcut:
+  packages: [shotcut]
+
+# ── Note Taking ───────────────────────────────────────────────────────────────
+obsidian:
+  packages: [obsidian]
+
+joplin:
+  packages: [joplin-desktop]

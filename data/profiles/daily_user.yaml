@@ -19,6 +19,8 @@ packages:
   - telegram
   - dropbox
   - flameshot
+  - keepassxc
+  - obsidian
   - htop
 
 system_tweaks:

@@ -16,6 +16,7 @@ packages:
   - docker
   - gh
   - neovim
+  - alacritty
   - curl
   - wget
   - htop
