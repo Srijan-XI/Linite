@@ -387,10 +387,87 @@ class SnapPackageManager(BasePackageManager):
 class FlatpakPackageManager(BasePackageManager):
     name = "flatpak"
 
+    # Well-known remote → .flatpakrepo URL
+    _REMOTE_URLS: dict = {
+        "flathub": "https://dl.flathub.org/repo/flathub.flatpakrepo",
+        "flathub-beta": "https://flathub.org/beta-repo/flathub-beta.flatpakrepo",
+        "gnome-nightly": "https://nightly.gnome.org/gnome-nightly.flatpakrepo",
+        "kde-runtime": "https://distribute.kde.org/kdeapps.flatpakrepo",
+    }
+
+    def _ensure_remote(self, remote: str, progress_cb=None) -> None:
+        """
+        Register *remote* as a Flatpak remote if it is not already present.
+        Works for both --user and --system installations; tries --system
+        first (requires sudo), then falls back to --user.
+        """
+        # Check whether the remote is already registered (no sudo needed).
+        rc, out = self.run(
+            ["flatpak", "remote-list", "--columns=name"],
+            sudo=False,
+        )
+        if rc == 0 and remote in out.split():
+            logger.debug("Flatpak remote '%s' already registered.", remote)
+            return
+
+        url = self._REMOTE_URLS.get(remote)
+        if not url:
+            msg = (
+                f"[flatpak] Unknown remote '{remote}' and no URL configured; "
+                "skipping remote-add. Install may fail."
+            )
+            logger.warning(msg)
+            if progress_cb:
+                progress_cb(msg)
+            return
+
+        msg = f"[flatpak] Adding remote '{remote}' ({url}) …"
+        logger.info(msg)
+        if progress_cb:
+            progress_cb(msg)
+
+        # Try system-wide first; fall back to user-level if that fails.
+        rc, out = self.run(
+            ["flatpak", "remote-add", "--if-not-exists", "--system", remote, url],
+            sudo=True,
+            progress_cb=progress_cb,
+        )
+        if rc != 0:
+            logger.warning(
+                "System-wide remote-add failed (rc=%d); retrying as --user …", rc
+            )
+            rc, out = self.run(
+                ["flatpak", "remote-add", "--if-not-exists", "--user", remote, url],
+                sudo=False,
+                progress_cb=progress_cb,
+            )
+            if rc != 0:
+                logger.error(
+                    "Failed to add Flatpak remote '%s': %s", remote, out
+                )
+
     def install(self, packages, progress_cb=None):
-        # packages are expected to be Flatpak app IDs
+        """Install Flatpak app IDs (no remote prefix)."""
         return self.run(
             ["flatpak", "install", "-y", "--noninteractive"] + packages,
+            sudo=False,
+            progress_cb=progress_cb,
+        )
+
+    def install_from_remote(
+        self,
+        remote: str,
+        packages: List[str],
+        progress_cb=None,
+    ) -> tuple[int, str]:
+        """
+        Ensure *remote* is registered, then install *packages* from it.
+        This avoids the 'No remote refs found' error when Flathub (or any
+        other remote) has not been configured on the system.
+        """
+        self._ensure_remote(remote, progress_cb=progress_cb)
+        return self.run(
+            ["flatpak", "install", "-y", "--noninteractive", remote] + packages,
             sudo=False,
             progress_cb=progress_cb,
         )

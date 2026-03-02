@@ -12,7 +12,7 @@
 | Metric | Value |
 |---|---|
 | Total apps in catalog | ~90+ across 17 categories |
-| 3rd-party dependencies | 1 (PyYAML only) |
+| 3rd-party dependencies | 0 |
 | Supported package managers | 6 (apt, dnf, pacman, zypper, flatpak, snap) |
 | Profiles / presets | 6 (developer, student, gamer, content\_creator, daily\_user, security) |
 | Lines of code | ~4,500+ |
@@ -316,30 +316,26 @@ Enables easy machine cloning and sharing configurations with teammates.
 
 ## 3. Dependency Reduction
 
-### ❌ Eliminate PyYAML → stdlib TOML *(highest value, zero runtime cost)*
+### ✅ Eliminate PyYAML → stdlib TOML *(highest value, zero runtime cost)*
 
 PyYAML is the **only** 3rd-party dependency. Python 3.11+ ships `tomllib` in the standard library with no install required. Migrating all YAML data files to TOML would make Linite a truly zero-dependency project.
 
-> **Current state:** `pyyaml>=6.0` is still present in `requirements.txt`. No `tomllib` usage found anywhere in the codebase. All YAML files remain as `.yaml`.
+> **Completed.** All data files converted to TOML; all loaders updated to `tomllib`; `pyyaml>=6.0` removed from `requirements.txt`. History reverts to JSON (write-support; no extra dep). User-created profiles serialised via a hand-written `_profile_to_toml()` helper. Legacy `.yaml` files auto-migrated to `.toml`/`.json` on first run.
 
-**Files to migrate:**
+**Files migrated:**
 
-| Current | Proposed |
+| Previous | Final |
 |---|---|
 | `data/profiles/*.yaml` | `data/profiles/*.toml` |
 | `data/package_maps/*.yaml` | `data/package_maps/*.toml` |
-| `~/.config/linite/history.yaml` | `~/.config/linite/history.toml` |
-| `~/.config/linite/profiles/*.yaml` | `~/.config/linite/profiles/*.toml` |
+| `~/.config/linite/history.yaml` | `~/.config/linite/history.json` (JSON — writable without extra dep) |
+| `~/.config/linite/profiles/*.yaml` | `~/.config/linite/profiles/*.toml` (auto-migrated) |
 
-**Code changes:**
-- `core/history.py` — replace `yaml.safe_load` / `yaml.dump` with `tomllib.load` / manual TOML write (or `tomli-w` for writes)
-- `core/profile_engine.py` — replace YAML loader with `tomllib`
-- `core/package_map.py` — replace YAML loader with `tomllib`
-- `requirements.txt` — **delete PyYAML entry** (file becomes empty or removed)
-
-> `history.py` already has a JSON → YAML migration pattern; extend it to also migrate YAML → TOML for existing users.
-
-> **Alternative:** If YAML authoring is preferred for human-edited files, keep PyYAML only for user-facing files and use `tomllib` everywhere else.
+**Code changes applied:**
+- `core/history.py` — `yaml` removed; `json` only; YAML→JSON migration added
+- `core/profile_engine.py` — `tomllib` loader; `_profile_to_toml()` serialiser; YAML→TOML migration on startup
+- `core/package_map.py` — `tomllib` loader replacing `yaml.safe_load`
+- `requirements.txt` — PyYAML entry deleted; file now lists zero runtime deps
 
 ---
 

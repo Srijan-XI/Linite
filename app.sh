@@ -2,6 +2,7 @@
 # =============================================================================
 #  Linite - Launcher Script
 #  Usage:
+#    chmod +x app.sh  -> make it executable
 #    ./app.sh              → launch GUI
 #    ./app.sh --cli install vlc git
 #    ./app.sh --cli update

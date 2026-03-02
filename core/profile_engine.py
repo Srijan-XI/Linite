@@ -1,37 +1,30 @@
 """
 Linite - Profile Engine
 =======================
-Loads YAML-defined profiles from  data/profiles/<id>.yaml, resolves each
+Loads TOML-defined profiles from  data/profiles/<id>.toml, resolves each
 profile's app list against the software catalog, and applies system tweaks
 after a successful install.
 
-Profile YAML schema  (data/profiles/developer.yaml)
+Profile TOML schema  (data/profiles/developer.toml)
 ----------------------------------------------------
-id: developer
-name: Developer
-icon: "💻"
-color: "#7c6af7"
-tagline: Full-stack & DevOps toolbox
-description: |
-  Everything a software developer needs …
+id          = "developer"
+name        = "Developer"
+icon        = "💻"
+color       = "#7c6af7"
+tagline     = "Full-stack & DevOps toolbox"
+description = "Everything a software developer needs …"
 
-packages:
-  - git
-  - vscode
-  - python3
+packages = ["git", "vscode", "python3"]
 
-system_tweaks:
-  - id: enable_docker
-    description: "Enable Docker daemon on startup"
-    command: "systemctl enable --now docker"
-    requires_package: docker   # only run if docker was installed
-    run_as_root: true
+[[system_tweaks]]
+id                = "enable_docker"
+description       = "Enable Docker daemon on startup"
+command           = "systemctl enable --now docker"
+requires_package  = "docker"
+run_as_root       = true
 
-  - id: docker_group
-    description: "Add current user to docker group"
-    command: "usermod -aG docker $USER"
-    requires_package: docker
-    run_as_root: true
+User-created profiles are saved to  ~/.config/linite/profiles/<id>.toml.
+Legacy YAML profiles are auto-migrated to TOML on first load.
 """
 
 from __future__ import annotations
@@ -42,7 +35,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, Iterator, List, Optional, Set
 
-import yaml
+import tomllib
 
 logger = logging.getLogger(__name__)
 
@@ -108,6 +101,49 @@ def _parse_profile(data: dict, source_path: Path) -> ProfileDef:
 
 
 # ---------------------------------------------------------------------------
+# TOML serialiser (tomllib is read-only; we hand-write TOML for user profiles)
+# ---------------------------------------------------------------------------
+
+def _profile_to_toml(profile: "ProfileDef") -> str:
+    """Serialise a ProfileDef to a TOML string suitable for writing to disk."""
+
+    def _esc(s: str) -> str:
+        """Escape backslashes, double-quotes, and newlines for a TOML basic string."""
+        return s.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
+
+    lines: list[str] = [
+        "# Linite user profile — auto-generated, safe to hand-edit",
+        "",
+        f'id          = "{_esc(profile.id)}"',
+        f'name        = "{_esc(profile.name)}"',
+        f'icon        = "{_esc(profile.icon)}"',
+        f'color       = "{_esc(profile.color)}"',
+        f'tagline     = "{_esc(profile.tagline)}"',
+        f'description = "{_esc(profile.description)}"',
+        "",
+    ]
+
+    # packages as a single-line TOML array
+    if profile.packages:
+        items = ", ".join(f'"{p}"' for p in profile.packages)
+        lines.append(f"packages = [{items}]")
+    else:
+        lines.append("packages = []")
+
+    for tweak in profile.system_tweaks:
+        lines.append("")
+        lines.append("[[system_tweaks]]")
+        lines.append(f'id                = "{_esc(tweak.id)}"')
+        lines.append(f'description       = "{_esc(tweak.description)}"')
+        lines.append(f'command           = "{_esc(tweak.command)}"')
+        lines.append(f'requires_package  = "{_esc(tweak.requires_package)}"')
+        lines.append(f'run_as_root       = {"true" if tweak.run_as_root else "false"}')
+
+    lines.append("")  # trailing newline
+    return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
 # ProfileEngine
 # ---------------------------------------------------------------------------
 
@@ -130,7 +166,8 @@ class ProfileEngine:
 
     def _load_file(self, path: Path) -> Optional[ProfileDef]:
         try:
-            raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+            with path.open("rb") as fh:
+                raw = tomllib.load(fh) or {}
             return _parse_profile(raw, path)
         except Exception as exc:
             logger.error("Cannot load profile %s: %s", path, exc)
@@ -138,15 +175,35 @@ class ProfileEngine:
 
     def _load_all(self) -> Dict[str, ProfileDef]:
         """Load built-ins then overlay user profiles."""
+        # Migrate any legacy .yaml user profiles to .toml on first run
+        if self._user_dir.exists():
+            for yaml_path in list(self._user_dir.glob("*.yaml")):
+                self._migrate_yaml_profile(yaml_path)
+
         profiles: Dict[str, ProfileDef] = {}
         for directory in (self._builtin_dir, self._user_dir):
             if not directory.exists():
                 continue
-            for path in sorted(directory.glob("*.yaml")):
+            for path in sorted(directory.glob("*.toml")):
                 p = self._load_file(path)
                 if p:
                     profiles[p.id] = p
         return profiles
+
+    def _migrate_yaml_profile(self, yaml_path: Path) -> None:
+        """Convert a legacy YAML user profile to TOML and rename the original."""
+        toml_path = yaml_path.with_suffix(".toml")
+        if toml_path.exists():
+            return  # already migrated
+        try:
+            import yaml as _yaml  # local import — only needed during migration
+            raw = _yaml.safe_load(yaml_path.read_text(encoding="utf-8")) or {}
+            profile = _parse_profile(raw, yaml_path)
+            toml_path.write_text(_profile_to_toml(profile), encoding="utf-8")
+            yaml_path.rename(yaml_path.with_suffix(".yaml.bak"))
+            logger.info("Migrated user profile %s → %s", yaml_path.name, toml_path.name)
+        except Exception as exc:
+            logger.warning("Could not migrate %s: %s", yaml_path, exc)
 
     def list_profiles(self, force_reload: bool = False) -> List[ProfileDef]:
         """Return all available profiles (built-in + user), sorted by name."""
@@ -163,33 +220,10 @@ class ProfileEngine:
     # ── Saving user profiles ───────────────────────────────────────────────
 
     def save_user_profile(self, profile: ProfileDef) -> Path:
-        """Persist a ProfileDef as a YAML file in the user profiles dir."""
+        """Persist a ProfileDef as a TOML file in the user profiles dir."""
         self._user_dir.mkdir(parents=True, exist_ok=True)
-        path = self._user_dir / f"{profile.id}.yaml"
-        data = {
-            "id":          profile.id,
-            "name":        profile.name,
-            "icon":        profile.icon,
-            "color":       profile.color,
-            "tagline":     profile.tagline,
-            "description": profile.description,
-            "packages":    profile.packages,
-            "system_tweaks": [
-                {
-                    "id":               t.id,
-                    "description":      t.description,
-                    "command":          t.command,
-                    "requires_package": t.requires_package,
-                    "run_as_root":      t.run_as_root,
-                }
-                for t in profile.system_tweaks
-            ],
-        }
-        path.write_text(
-            yaml.dump(data, default_flow_style=False, allow_unicode=True,
-                      sort_keys=False),
-            encoding="utf-8",
-        )
+        path = self._user_dir / f"{profile.id}.toml"
+        path.write_text(_profile_to_toml(profile), encoding="utf-8")
         self._cache[profile.id] = profile
         logger.info("Saved profile '%s' → %s", profile.id, path)
         return path

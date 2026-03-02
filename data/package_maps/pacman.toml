@@ -1,0 +1,279 @@
+# Linite Pacman Package Map
+# --------------------------
+# Maps catalog app IDs → Pacman package specs (Arch Linux / Manjaro).
+# pre_commands/post_commands are optional shell snippets run as root.
+# AUR packages are noted in comments but not auto-installed here —
+# the user is expected to manage AUR via an AUR helper (yay/paru).
+
+# ── Web Browsers ──────────────────────────────────────────────────────────────
+
+[firefox]
+packages = ["firefox"]
+
+[chromium]
+packages = ["chromium"]
+
+# brave: AUR — yay -S brave-bin
+# ── Development ───────────────────────────────────────────────────────────────
+
+[git]
+packages = ["git"]
+
+[vscode]
+packages = ["code"]
+# AUR: yay -S visual-studio-code-bin (for official MS build)
+
+[python3]
+packages = ["python", "python-pip"]
+
+[nodejs]
+packages = ["nodejs", "npm"]
+
+[docker]
+packages = ["docker", "docker-compose"]
+post_commands = [
+  "systemctl enable --now docker",
+  "usermod -aG docker $SUDO_USER",
+]
+
+[vim]
+packages = ["vim"]
+
+[neovim]
+packages = ["neovim"]
+
+[gh]
+packages = ["github-cli"]
+
+[curl]
+packages = ["curl"]
+
+[wget]
+packages = ["wget"]
+
+[htop]
+packages = ["htop"]
+
+# ── Media ─────────────────────────────────────────────────────────────────────
+
+[vlc]
+packages = ["vlc"]
+
+[mpv]
+packages = ["mpv"]
+
+[obs]
+packages = ["obs-studio"]
+
+[audacity]
+packages = ["audacity"]
+
+[handbrake]
+packages = ["handbrake"]
+
+# spotify: AUR — yay -S spotify
+
+# ── Communication ─────────────────────────────────────────────────────────────
+
+[thunderbird]
+packages = ["thunderbird"]
+
+# discord: AUR/flatpak — yay -S discord
+# slack:   flatpak preferred
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+
+[flameshot]
+packages = ["flameshot"]
+
+[wireshark]
+packages = ["wireshark-qt"]
+post_commands = [
+  "usermod -aG wireshark $SUDO_USER",
+]
+
+["7zip"]
+packages = ["p7zip"]
+
+[timeshift]
+packages = ["timeshift"]
+# AUR: yay -S timeshift
+
+[neofetch]
+packages = ["neofetch"]
+
+[flatpak]
+packages = ["flatpak"]
+post_commands = [
+  "flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo",
+]
+
+# ── Gaming ────────────────────────────────────────────────────────────────────
+
+[steam]
+packages = ["steam"]
+pre_commands = [
+  "grep -q 'multilib' /etc/pacman.conf || sed -i '/\\[multilib\\]/{n;s/Include/Include/}' /etc/pacman.conf",
+  "pacman -Sy --noconfirm lib32-glibc lib32-gcc-libs",
+]
+
+[lutris]
+packages = ["lutris"]
+
+[heroic]
+packages = ["heroic-games-launcher-bin"]
+# AUR: yay -S heroic-games-launcher-bin
+
+[bottles]
+packages = ["bottles"]
+
+[discord]
+packages = ["discord"]
+# AUR: yay -S discord
+
+# ── Graphics ──────────────────────────────────────────────────────────────────
+
+[gimp]
+packages = ["gimp"]
+
+[inkscape]
+packages = ["inkscape"]
+
+[blender]
+packages = ["blender"]
+
+# ── Office ────────────────────────────────────────────────────────────────────
+
+[libreoffice]
+packages = ["libreoffice-fresh"]
+
+[okular]
+packages = ["okular"]
+
+[evince]
+packages = ["evince"]
+
+# ── Torrents ─────────────────────────────────────────────────────────────────
+
+[qbittorrent]
+packages = ["qbittorrent"]
+
+[transmission]
+packages = ["transmission-gtk"]
+
+# ── Virtualization ────────────────────────────────────────────────────────────
+
+[virtualbox]
+packages = ["virtualbox"]
+post_commands = [
+  "usermod -aG vboxusers $SUDO_USER",
+]
+
+[qemu]
+packages = ["qemu-full", "virt-manager", "libvirt"]
+post_commands = [
+  "systemctl enable --now libvirtd",
+  "usermod -aG libvirt $SUDO_USER",
+]
+
+# ── Java ─────────────────────────────────────────────────────────────────────
+
+[openjdk]
+packages = ["jdk-openjdk"]
+
+[eclipse-temurin]
+packages = ["jdk-temurin-bin"]
+# AUR: yay -S jdk-temurin-bin
+
+[amazon-corretto]
+packages = ["jdk-amazon-corretto-bin"]
+# AUR: yay -S jdk-amazon-corretto-bin
+
+[zulu-jdk]
+packages = ["zulu-21-bin"]
+# AUR: yay -S zulu-21-bin
+
+# ── Security ─────────────────────────────────────────────────────────────────
+
+[nmap]
+packages = ["nmap"]
+
+[hydra]
+packages = ["hydra"]
+
+[john]
+packages = ["john"]
+
+[aircrack-ng]
+packages = ["aircrack-ng"]
+
+[hashcat]
+packages = ["hashcat"]
+
+[sqlmap]
+packages = ["sqlmap"]
+
+[metasploit]
+packages = ["metasploit"]
+# AUR: yay -S metasploit
+
+# ── Password Managers ─────────────────────────────────────────────────────────
+
+["1password"]
+packages = ["1password"]
+# AUR: yay -S 1password
+
+[keepassxc]
+packages = ["keepassxc"]
+
+# ── Video Editors ─────────────────────────────────────────────────────────────
+
+[kdenlive]
+packages = ["kdenlive"]
+
+[openshot]
+packages = ["openshot"]
+
+# ── Terminal Emulators ────────────────────────────────────────────────────────
+
+[alacritty]
+packages = ["alacritty"]
+
+[kitty]
+packages = ["kitty"]
+
+[wezterm]
+packages = ["wezterm"]
+# AUR: yay -S wezterm
+
+[tilix]
+packages = ["tilix"]
+
+# ── VPN ───────────────────────────────────────────────────────────────────────
+
+[wireguard]
+packages = ["wireguard-tools"]
+
+[openvpn]
+packages = ["openvpn"]
+
+[mullvad]
+packages = ["mullvad-vpn-bin"]
+# AUR: yay -S mullvad-vpn-bin
+
+# ── Note Taking ───────────────────────────────────────────────────────────────
+
+[cherrytree]
+packages = ["cherrytree"]
+
+[obsidian]
+packages = ["obsidian"]
+# AUR: yay -S obsidian
+
+# ── Gaming extras ────────────────────────────────────────────────────────────
+
+[gamemode]
+packages = ["gamemode"]
+
+[mangohud]
+packages = ["mangohud"]

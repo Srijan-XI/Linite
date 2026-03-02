@@ -1,24 +1,21 @@
 """
-Linite - YAML Package Mapping Layer
+Linite - TOML Package Mapping Layer
 =====================================
-Loads per-PM YAML files from  data/package_maps/<pm>.yaml  and converts
+Loads per-PM TOML files from  data/package_maps/<pm>.toml  and converts
 them into PackageSpec objects.  Acts as a higher-priority source than the
 Python software_catalog: if a mapping exists here it is used; otherwise the
 catalog spec is returned as a fallback.
 
-YAML file format (data/package_maps/apt.yaml):
+TOML file format (data/package_maps/apt.toml):
 ------------------------------------------------
-vlc:
-  packages: [vlc]
+[vlc]
+packages = ["vlc"]
 
-vscode:
-  packages: [code]
-  pre_commands:
-    - "wget -qO- … | gpg --dearmor > /tmp/ms.gpg"
-  post_commands: []
+[vscode]
+packages = ["code"]
+pre_commands = ["wget -qO- … | gpg --dearmor > /tmp/ms.gpg"]
 
-spotify:
-  # No native APT build — omit entry; caller falls back to snap/flatpak.
+# spotify has no native APT build — omit entry; caller falls back to snap/flatpak.
 """
 
 from __future__ import annotations
@@ -28,23 +25,23 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Dict, List, Optional
 
-import yaml
+import tomllib
 
 from data.software_catalog import PackageSpec, SoftwareEntry, CATALOG_MAP
 
 logger = logging.getLogger(__name__)
 
-# Directory that holds per-PM YAML maps
+# Directory that holds per-PM TOML maps
 _MAPS_DIR = Path(__file__).resolve().parent.parent / "data" / "package_maps"
 
-# Supported PMs with a YAML map file
+# Supported PMs with a TOML map file
 _PM_MAP_FILES: Dict[str, str] = {
-    "apt":     "apt.yaml",
-    "dnf":     "dnf.yaml",
-    "pacman":  "pacman.yaml",
-    "zypper":  "zypper.yaml",
-    "snap":    "snap.yaml",
-    "flatpak": "flatpak.yaml",
+    "apt":     "apt.toml",
+    "dnf":     "dnf.toml",
+    "pacman":  "pacman.toml",
+    "zypper":  "zypper.toml",
+    "snap":    "snap.toml",
+    "flatpak": "flatpak.toml",
 }
 
 
@@ -63,7 +60,8 @@ def _load_pm_map(pm: str) -> Dict[str, dict]:
         logger.debug("Package map not found: %s", path)
         return {}
     try:
-        raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        with path.open("rb") as fh:
+            raw = tomllib.load(fh) or {}
         logger.debug("Loaded %d entries from %s", len(raw), path.name)
         return raw
     except Exception as exc:
@@ -108,11 +106,11 @@ class PackageMapLoader:
         Return a PackageSpec for *app_id* on *pm*.
 
         Priority:
-          1. YAML map  (data/package_maps/<pm>.yaml)
+          1. TOML map  (data/package_maps/<pm>.toml)
           2. Python catalog  (data/software_catalog.py)
           3. None  (app or PM not supported)
         """
-        # 1. YAML map
+        # 1. TOML map
         pm_map = _load_pm_map(pm)
         entry = pm_map.get(app_id)
         if entry is not None:

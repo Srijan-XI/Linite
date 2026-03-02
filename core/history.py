@@ -1,16 +1,15 @@
 """
 Linite - Install History
-Records every install/uninstall attempt to ~/.config/linite/history.yaml
+Records every install/uninstall attempt to ~/.config/linite/history.json
 
-File format (YAML list of mappings):
-  - app_id:   vlc
-    app_name: VLC Media Player
-    pm_used:  apt
-    action:   install        # "install" | "uninstall"
-    success:  true
-    timestamp: 2024-07-01T12:34:56.789012
+File format (JSON array of objects):
+  [
+    {"app_id": "vlc", "app_name": "VLC Media Player",
+     "pm_used": "apt", "action": "install",
+     "success": true, "timestamp": "2024-07-01T12:34:56.789012"}
+  ]
 
-Legacy JSON files (history.json) are transparently migrated on first read.
+Legacy YAML files (history.yaml) are transparently migrated on first read.
 """
 
 import json
@@ -19,13 +18,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Set
 
-import yaml
-
 logger = logging.getLogger(__name__)
 
 _CONFIG_DIR   = Path.home() / ".config" / "linite"
-HISTORY_FILE  = _CONFIG_DIR / "history.yaml"
-_LEGACY_FILE  = _CONFIG_DIR / "history.json"   # auto-migrated on read
+HISTORY_FILE  = _CONFIG_DIR / "history.json"
+_LEGACY_YAML  = _CONFIG_DIR / "history.yaml"   # auto-migrated on read
 
 
 # ---------------------------------------------------------------------------
@@ -33,37 +30,35 @@ _LEGACY_FILE  = _CONFIG_DIR / "history.json"   # auto-migrated on read
 # ---------------------------------------------------------------------------
 
 def _load() -> List[dict]:
-    """Load history from YAML, auto-migrating from JSON if needed."""
+    """Load history from JSON, auto-migrating from legacy YAML if needed."""
 
-    # Migrate legacy JSON → YAML once
-    if _LEGACY_FILE.exists() and not HISTORY_FILE.exists():
+    # Migrate legacy YAML → JSON once
+    if _LEGACY_YAML.exists() and not HISTORY_FILE.exists():
         try:
-            data = json.loads(_LEGACY_FILE.read_text(encoding="utf-8"))
+            import yaml as _yaml  # local import — only used during migration
+            raw = _yaml.safe_load(_LEGACY_YAML.read_text(encoding="utf-8"))
+            data = raw if isinstance(raw, list) else []
             _save(data)
-            _LEGACY_FILE.rename(_LEGACY_FILE.with_suffix(".json.bak"))
-            logger.info("Migrated history from JSON to YAML (%d entries).", len(data))
+            _LEGACY_YAML.rename(_LEGACY_YAML.with_suffix(".yaml.bak"))
+            logger.info("Migrated history from YAML to JSON (%d entries).", len(data))
         except Exception as exc:
-            logger.warning("Could not migrate history.json: %s", exc)
+            logger.warning("Could not migrate history.yaml: %s", exc)
             return []
 
     if HISTORY_FILE.exists():
         try:
-            raw = yaml.safe_load(HISTORY_FILE.read_text(encoding="utf-8"))
-            # safe_load returns None for an empty file
+            raw = json.loads(HISTORY_FILE.read_text(encoding="utf-8"))
             return raw if isinstance(raw, list) else []
         except Exception as exc:
-            logger.error("Failed to load history.yaml: %s", exc)
+            logger.error("Failed to load history.json: %s", exc)
             return []
     return []
 
 
 def _save(data: List[dict]) -> None:
-    """Persist the history list to YAML."""
+    """Persist the history list to JSON."""
     HISTORY_FILE.parent.mkdir(parents=True, exist_ok=True)
-    HISTORY_FILE.write_text(
-        yaml.dump(data, default_flow_style=False, allow_unicode=True, sort_keys=False),
-        encoding="utf-8",
-    )
+    HISTORY_FILE.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
 # ---------------------------------------------------------------------------

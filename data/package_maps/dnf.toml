@@ -1,0 +1,279 @@
+# Linite DNF Package Map
+# -----------------------
+# Maps catalog app IDs → DNF package specs (Fedora / RHEL / CentOS Stream).
+# pre_commands run before dnf install; post_commands run after.
+
+# ── Web Browsers ──────────────────────────────────────────────────────────────
+
+[firefox]
+packages = ["firefox"]
+
+[chromium]
+packages = ["chromium"]
+
+[brave]
+packages = ["brave-browser"]
+pre_commands = [
+  "dnf install -y dnf-plugins-core",
+  "dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/x86_64/",
+  "rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc",
+]
+
+# ── Development ───────────────────────────────────────────────────────────────
+
+[git]
+packages = ["git"]
+
+[vscode]
+packages = ["code"]
+pre_commands = [
+  "rpm --import https://packages.microsoft.com/keys/microsoft.asc",
+  "sh -c 'echo -e \"[code]\\nname=Visual Studio Code\\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\\nenabled=1\\ngpgcheck=1\\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc\" > /etc/yum.repos.d/vscode.repo'",
+  "dnf check-update",
+]
+
+[python3]
+packages = ["python3", "python3-pip"]
+
+[nodejs]
+packages = ["nodejs", "npm"]
+pre_commands = [
+  "dnf module enable nodejs:lts -y",
+]
+
+[docker]
+packages = ["docker-ce", "docker-ce-cli", "containerd.io", "docker-buildx-plugin", "docker-compose-plugin"]
+pre_commands = [
+  "dnf -y install dnf-plugins-core",
+  "dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo",
+]
+post_commands = [
+  "systemctl enable --now docker",
+  "usermod -aG docker $SUDO_USER",
+]
+
+[vim]
+packages = ["vim"]
+
+[neovim]
+packages = ["neovim"]
+
+[gh]
+packages = ["gh"]
+pre_commands = [
+  "dnf install -y 'dnf-command(config-manager)'",
+  "dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo",
+]
+
+[curl]
+packages = ["curl"]
+
+[wget]
+packages = ["wget"]
+
+[htop]
+packages = ["htop"]
+
+# ── Media ─────────────────────────────────────────────────────────────────────
+
+[vlc]
+packages = ["vlc"]
+pre_commands = [
+  "dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm",
+  "dnf install -y https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm",
+]
+
+[mpv]
+packages = ["mpv"]
+
+[obs]
+packages = ["obs-studio"]
+
+[audacity]
+packages = ["audacity"]
+
+[handbrake]
+packages = ["HandBrake-gui"]
+
+# ── Communication ─────────────────────────────────────────────────────────────
+
+[thunderbird]
+packages = ["thunderbird"]
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+
+[flameshot]
+packages = ["flameshot"]
+
+[wireshark]
+packages = ["wireshark"]
+
+["7zip"]
+packages = ["p7zip", "p7zip-plugins"]
+
+[neofetch]
+packages = ["neofetch"]
+
+[flatpak]
+packages = ["flatpak"]
+post_commands = [
+  "flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo",
+]
+
+# ── Gaming ────────────────────────────────────────────────────────────────────
+
+[steam]
+packages = ["steam"]
+pre_commands = [
+  "dnf install -y https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm",
+]
+
+[lutris]
+packages = ["lutris"]
+
+# ── Graphics ──────────────────────────────────────────────────────────────────
+
+[gimp]
+packages = ["gimp"]
+
+[inkscape]
+packages = ["inkscape"]
+
+[blender]
+packages = ["blender"]
+
+# ── Office ────────────────────────────────────────────────────────────────────
+
+[libreoffice]
+packages = ["libreoffice"]
+
+[evince]
+packages = ["evince"]
+
+[okular]
+packages = ["okular"]
+
+# ── Torrents ─────────────────────────────────────────────────────────────────
+
+[qbittorrent]
+packages = ["qbittorrent"]
+
+[transmission]
+packages = ["transmission-gtk"]
+
+# ── Virtualization ────────────────────────────────────────────────────────────
+
+[virtualbox]
+packages = ["VirtualBox"]
+pre_commands = [
+  "dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm",
+]
+
+[qemu]
+packages = ["qemu", "virt-manager", "libvirt"]
+post_commands = [
+  "systemctl enable --now libvirtd",
+]
+
+# ── Java ─────────────────────────────────────────────────────────────────────
+
+[openjdk]
+packages = ["java-21-openjdk", "java-21-openjdk-devel"]
+
+[eclipse-temurin]
+packages = ["temurin-21-jdk"]
+pre_commands = [
+  "rpm --import https://packages.adoptium.net/artifactory/api/gpg/key/public",
+  "tee /etc/yum.repos.d/adoptium.repo << 'EOF'\n[Adoptium]\nname=Adoptium\nbaseurl=https://packages.adoptium.net/artifactory/rpm/fedora/$releasever/$basearch\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.adoptium.net/artifactory/api/gpg/key/public\nEOF",
+]
+
+[amazon-corretto]
+packages = ["java-21-amazon-corretto-devel"]
+pre_commands = [
+  "rpm --import https://yum.corretto.aws/corretto.key",
+  "curl -fsSL https://yum.corretto.aws/corretto.repo -o /etc/yum.repos.d/corretto.repo",
+]
+
+# ── Security ─────────────────────────────────────────────────────────────────
+
+[nmap]
+packages = ["nmap"]
+
+[wireshark]
+packages = ["wireshark"]
+
+[hydra]
+packages = ["hydra"]
+
+[john]
+packages = ["john"]
+
+[aircrack-ng]
+packages = ["aircrack-ng"]
+
+[hashcat]
+packages = ["hashcat"]
+
+[sqlmap]
+packages = ["sqlmap"]
+
+[metasploit]
+packages = ["metasploit-framework"]
+pre_commands = [
+  "curl -fsSL https://rpm.metasploit.com/metasploit-framework.repo -o /etc/yum.repos.d/metasploit-framework.repo",
+]
+post_commands = [
+  "msfdb init",
+]
+
+# ── Password Managers ─────────────────────────────────────────────────────────
+
+["1password"]
+packages = ["1password"]
+pre_commands = [
+  "rpm --import https://downloads.1password.com/linux/keys/1password.asc",
+  "sh -c 'echo -e \"[1password]\\nname=1Password Stable Channel\\nbaseurl=https://downloads.1password.com/linux/rpm/stable/x86_64/\\nenabled=1\\ngpgcheck=1\\ngpgkey=https://downloads.1password.com/linux/keys/1password.asc\" > /etc/yum.repos.d/1password.repo'",
+]
+
+[keepassxc]
+packages = ["keepassxc"]
+
+# ── Video Editors ─────────────────────────────────────────────────────────────
+
+[kdenlive]
+packages = ["kdenlive"]
+
+[openshot]
+packages = ["openshot"]
+
+# ── Terminal Emulators ────────────────────────────────────────────────────────
+
+[alacritty]
+packages = ["alacritty"]
+
+[kitty]
+packages = ["kitty"]
+
+[tilix]
+packages = ["tilix"]
+
+# ── VPN ───────────────────────────────────────────────────────────────────────
+
+[wireguard]
+packages = ["wireguard-tools"]
+
+[openvpn]
+packages = ["openvpn"]
+
+# ── Note Taking ───────────────────────────────────────────────────────────────
+
+[cherrytree]
+packages = ["cherrytree"]
+
+# ── Gaming extras ────────────────────────────────────────────────────────────
+
+[gamemode]
+packages = ["gamemode"]
+
+[mangohud]
+packages = ["mangohud"]

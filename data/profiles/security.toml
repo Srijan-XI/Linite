@@ -1,0 +1,49 @@
+# Linite Profile — Security Researcher
+# ---------------------------------------
+# Nmap, Wireshark, Metasploit, Hydra, John, Hashcat — essentials for ethical hacking & CTFs.
+
+id          = "security"
+name        = "Security Researcher"
+icon        = "🔒"
+color       = "#5cb85c"
+tagline     = "Ethical hacking & CTF toolkit"
+description = """\
+Network scanners, password crackers, packet analysers, and exploitation \
+frameworks for security professionals, pentesters, and CTF competitors.\
+"""
+
+packages = [
+  "nmap",
+  "wireshark",
+  "metasploit",
+  "hydra",
+  "john",
+  "aircrack-ng",
+  "hashcat",
+  "sqlmap",
+  "angryip",
+  "git",
+  "curl",
+  "firefox",
+]
+
+[[system_tweaks]]
+id                = "wireshark_group"
+description       = "Add current user to the wireshark group (capture without root)"
+command           = "usermod -aG wireshark $SUDO_USER"
+requires_package  = "wireshark"
+run_as_root       = true
+
+[[system_tweaks]]
+id                = "msfdb_init"
+description       = "Initialise the Metasploit PostgreSQL database"
+command           = "msfdb init"
+requires_package  = "metasploit"
+run_as_root       = true
+
+[[system_tweaks]]
+id                = "aircrack_monitor_mode"
+description       = "Load the mac80211_hwsim kernel module for aircrack-ng testing"
+command           = "modprobe mac80211_hwsim"
+requires_package  = "aircrack-ng"
+run_as_root       = true

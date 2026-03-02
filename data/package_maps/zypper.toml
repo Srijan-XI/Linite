@@ -1,0 +1,243 @@
+# Linite Zypper Package Map
+# --------------------------
+# Maps catalog app IDs → Zypper package specs (openSUSE Tumbleweed / Leap).
+# pre_commands/post_commands are optional shell snippets run as root.
+
+# ── Web Browsers ──────────────────────────────────────────────────────────────
+
+[firefox]
+packages = ["MozillaFirefox"]
+
+[chromium]
+packages = ["chromium"]
+
+[brave]
+packages = ["brave-browser"]
+pre_commands = [
+  "rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc",
+  "zypper ar https://brave-browser-rpm-release.s3.brave.com/x86_64/ brave-browser",
+  "zypper refresh",
+]
+
+# ── Development ───────────────────────────────────────────────────────────────
+
+[git]
+packages = ["git"]
+
+[vscode]
+packages = ["code"]
+pre_commands = [
+  "rpm --import https://packages.microsoft.com/keys/microsoft.asc",
+  "zypper ar https://packages.microsoft.com/yumrepos/vscode vscode",
+  "zypper refresh",
+]
+
+[python3]
+packages = ["python3", "python3-pip"]
+
+[nodejs]
+packages = ["nodejs21", "npm21"]
+
+[docker]
+packages = ["docker", "docker-compose"]
+post_commands = [
+  "systemctl enable --now docker",
+  "usermod -aG docker $SUDO_USER",
+]
+
+[vim]
+packages = ["vim"]
+
+[neovim]
+packages = ["neovim"]
+
+[gh]
+packages = ["gh"]
+pre_commands = [
+  "zypper ar https://cli.github.com/packages/rpm/gh-cli.repo",
+  "zypper refresh",
+]
+
+[curl]
+packages = ["curl"]
+
+[wget]
+packages = ["wget"]
+
+[htop]
+packages = ["htop"]
+
+# ── Media ─────────────────────────────────────────────────────────────────────
+
+[vlc]
+packages = ["vlc"]
+pre_commands = [
+  "zypper ar http://download.videolan.org/pub/vlc/SuSE/Tumbleweed/ vlc",
+  "zypper refresh --gpg-auto-import-keys",
+]
+
+[mpv]
+packages = ["mpv"]
+
+[obs]
+packages = ["obs-studio"]
+
+[audacity]
+packages = ["audacity"]
+
+[handbrake]
+packages = ["HandBrake-gtk"]
+
+# ── Communication ─────────────────────────────────────────────────────────────
+
+[thunderbird]
+packages = ["MozillaThunderbird"]
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+
+[flameshot]
+packages = ["flameshot"]
+
+[wireshark]
+packages = ["wireshark-ui-qt"]
+
+["7zip"]
+packages = ["p7zip", "p7zip-full"]
+
+[neofetch]
+packages = ["neofetch"]
+
+[flatpak]
+packages = ["flatpak"]
+post_commands = [
+  "flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo",
+]
+
+# ── Gaming ────────────────────────────────────────────────────────────────────
+
+[steam]
+packages = ["steam"]
+pre_commands = [
+  "zypper ar https://download.opensuse.org/repositories/games/openSUSE_Tumbleweed/ games",
+  "zypper refresh",
+]
+
+[lutris]
+packages = ["lutris"]
+
+# ── Graphics ──────────────────────────────────────────────────────────────────
+
+[gimp]
+packages = ["gimp"]
+
+[inkscape]
+packages = ["inkscape"]
+
+[blender]
+packages = ["blender"]
+
+# ── Office ────────────────────────────────────────────────────────────────────
+
+[libreoffice]
+packages = ["libreoffice"]
+
+[evince]
+packages = ["evince"]
+
+[okular]
+packages = ["okular"]
+
+# ── Torrents ─────────────────────────────────────────────────────────────────
+
+[qbittorrent]
+packages = ["qbittorrent"]
+
+[transmission]
+packages = ["transmission-gtk"]
+
+# ── Virtualization ────────────────────────────────────────────────────────────
+
+[virtualbox]
+packages = ["virtualbox"]
+
+[qemu]
+packages = ["qemu", "virt-manager", "libvirt"]
+post_commands = [
+  "systemctl enable --now libvirtd",
+  "usermod -aG libvirt $SUDO_USER",
+]
+
+# ── Java ─────────────────────────────────────────────────────────────────────
+
+[openjdk]
+packages = ["java-21-openjdk", "java-21-openjdk-devel"]
+
+# temurin / corretto / zulu: prefer flatpak or manual install on openSUSE
+
+# ── Security ─────────────────────────────────────────────────────────────────
+
+[nmap]
+packages = ["nmap"]
+
+[wireshark]
+packages = ["wireshark-ui-qt"]
+
+[hydra]
+packages = ["hydra"]
+
+[john]
+packages = ["john"]
+
+[aircrack-ng]
+packages = ["aircrack-ng"]
+
+[hashcat]
+packages = ["hashcat"]
+
+[sqlmap]
+packages = ["python3-sqlmap"]
+
+# ── Password Managers ─────────────────────────────────────────────────────────
+
+[keepassxc]
+packages = ["keepassxc"]
+
+# ── Video Editors ─────────────────────────────────────────────────────────────
+
+[kdenlive]
+packages = ["kdenlive"]
+
+[openshot]
+packages = ["openshot-qt"]
+
+# ── Terminal Emulators ────────────────────────────────────────────────────────
+
+[alacritty]
+packages = ["alacritty"]
+
+[kitty]
+packages = ["kitty"]
+
+[tilix]
+packages = ["tilix"]
+
+# ── VPN ───────────────────────────────────────────────────────────────────────
+
+[wireguard]
+packages = ["wireguard-tools"]
+
+[openvpn]
+packages = ["openvpn"]
+
+# ── Note Taking ───────────────────────────────────────────────────────────────
+
+[cherrytree]
+packages = ["cherrytree"]
+
+# ── Gaming extras ────────────────────────────────────────────────────────────
+
+[gamemode]
+packages = ["gamemode"]
+
+[mangohud]
+packages = ["mangohud"]
