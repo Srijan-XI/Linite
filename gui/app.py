@@ -2,7 +2,8 @@
 Linite - Main Application Window
 Assembles all panels into the final Tkinter app.
 Features: parallel installs, search, installed-state, detail popup,
-          uninstall, export/import profiles, quick-start presets.
+          uninstall, export/import profiles, quick-start presets,
+          transaction log.
 """
 
 import logging
@@ -14,6 +15,7 @@ from typing import List, Optional
 from core import distro as distro_mod
 from core.distro import DistroInfo
 from core.history import get_installed_ids
+from core.log_engine import tx_log
 from core.installer import install_apps, Status as InstallStatus
 from core.package_manager import clear_cancel, request_cancel
 from core.profiles import load_profile, save_profile
@@ -23,6 +25,7 @@ from data.software_catalog import CATALOG, CATALOG_MAP, CATEGORIES, SoftwareEntr
 from gui import styles as st
 from gui.components.app_detail import AppDetailWindow
 from gui.components.category_panel import CategoryPanel
+from gui.components.log_viewer import LogViewerDialog
 from gui.components.preset_panel import PresetPickerDialog
 from gui.components.progress_panel import ProgressPanel
 from gui.components.software_panel import SoftwarePanel
@@ -80,9 +83,9 @@ class LiniteApp(tk.Tk):
         )
         self._distro_label.pack(side="right")
 
-        # Quick-Start preset button  (right side of title bar)
+        # Quick-Start preset button
         qs_btn = tk.Button(
-            title_bar, text="⚡  Quick Start",
+            title_bar, text="\u26a1  Quick Start",
             bg=st.ACCENT_DIM, fg="#c8bfff", font=st.FONT_SMALL,
             relief="flat", bd=0, padx=14, pady=6,
             cursor="hand2",
@@ -92,6 +95,19 @@ class LiniteApp(tk.Tk):
         qs_btn.pack(side="right", padx=(0, 4), pady=10)
         qs_btn.bind("<Enter>", lambda _e: qs_btn.config(bg=st.ACCENT))
         qs_btn.bind("<Leave>", lambda _e: qs_btn.config(bg=st.ACCENT_DIM))
+
+        # View Log button
+        log_btn = tk.Button(
+            title_bar, text="\U0001f4cb  Log",
+            bg=st.BG_LIGHT, fg=st.TEXT_SECONDARY, font=st.FONT_SMALL,
+            relief="flat", bd=0, padx=12, pady=6,
+            cursor="hand2",
+            activebackground=st.BG_MEDIUM, activeforeground=st.TEXT_PRIMARY,
+            command=self._on_view_log,
+        )
+        log_btn.pack(side="right", padx=(0, 4), pady=10)
+        log_btn.bind("<Enter>", lambda _e: log_btn.config(bg=st.BG_MEDIUM))
+        log_btn.bind("<Leave>", lambda _e: log_btn.config(bg=st.BG_LIGHT))
 
         # ── Main body ──────────────────────────────────────────────────────
         body = tk.Frame(self, bg=st.BG_DARK)
@@ -219,10 +235,11 @@ class LiniteApp(tk.Tk):
 
     def _bind_shortcuts(self):
         """Register keyboard shortcuts for common actions."""
-        self.bind("<Return>",   lambda _e: self._on_install())
+        self.bind("<Return>",    lambda _e: self._on_install())
         self.bind("<Control-a>", lambda _e: self._sw_panel._select_all(True))
-        self.bind("<Escape>",   lambda _e: (self._on_cancel() if self._busy else None))
+        self.bind("<Escape>",    lambda _e: (self._on_cancel() if self._busy else None))
         self.bind("<Control-q>", lambda _e: self._on_quick_start())
+        self.bind("<Control-l>", lambda _e: self._on_view_log())
 
     def _set_busy(self, busy: bool):
         self._busy = busy
@@ -250,6 +267,12 @@ class LiniteApp(tk.Tk):
             ids = get_installed_ids()
             self.after(0, lambda: self._sw_panel.set_installed_ids(ids))
         threading.Thread(target=_load, daemon=True).start()
+
+    # ── Log viewer ─────────────────────────────────────────────────────────
+
+    def _on_view_log(self):
+        """Open the Transaction Log viewer dialog."""
+        LogViewerDialog(self)
 
     # ── Quick-Start presets ────────────────────────────────────────────────
 
@@ -305,9 +328,21 @@ class LiniteApp(tk.Tk):
                 results = install_apps(selected, self._distro, progress_cb=progress)
                 for result in results:
                     success = result.status == InstallStatus.SUCCESS
-                    self.after(0, lambda r=result, s=success: self._prog_panel.app_done(r.app_name, s))
+                    self.after(0, lambda r=result, s=success:
+                               self._prog_panel.app_done(r.app_name, s))
+                    # ── Transaction log ───────────────────────────────────
+                    tx_log.log(
+                        action   = "install",
+                        status   = "success" if success else "failed",
+                        app_id   = result.app_id,
+                        app_name = result.app_name,
+                        pm_used  = result.pm_used,
+                        output   = result.output,
+                        error    = result.error,
+                    )
                 all_ok = all(r.status == InstallStatus.SUCCESS for r in results)
-                msg = "All apps installed successfully!" if all_ok else "Some apps failed to install. Check the log."
+                msg = "All apps installed successfully!" if all_ok \
+                      else "Some apps failed to install. Check the log."
             except Exception as exc:
                 logger.exception("Unexpected error during install")
                 msg = f"Installation failed unexpectedly:\n{exc}"
@@ -344,12 +379,24 @@ class LiniteApp(tk.Tk):
 
             try:
                 results = uninstall_apps(selected, self._distro, progress_cb=progress)
-                for app_id, (rc, _) in results.items():
+                for app_id, (rc, out) in results.items():
                     entry = CATALOG_MAP.get(app_id)
-                    name = entry.name if entry else app_id
-                    self.after(0, lambda n=name, s=(rc == 0): self._prog_panel.app_done(n, s))
+                    name  = entry.name if entry else app_id
+                    success = (rc == 0)
+                    self.after(0, lambda n=name, s=success:
+                               self._prog_panel.app_done(n, s))
+                    # ── Transaction log ───────────────────────────────────
+                    tx_log.log(
+                        action   = "uninstall",
+                        status   = "success" if success else "failed",
+                        app_id   = app_id,
+                        app_name = name,
+                        output   = out,
+                        error    = "" if success else out,
+                    )
                 all_ok = all(rc == 0 for rc, _ in results.values())
-                msg = "Apps removed successfully!" if all_ok else "Some apps failed to uninstall. Check the log."
+                msg = "Apps removed successfully!" if all_ok \
+                      else "Some apps failed to uninstall. Check the log."
             except Exception as exc:
                 logger.exception("Unexpected error during uninstall")
                 msg = f"Uninstall failed unexpectedly:\n{exc}"
