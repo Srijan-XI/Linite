@@ -11,8 +11,13 @@ description: |
 packages:
   - steam
   - lutris
+  - heroic
+  - bottles
   - discord
   - obs
+  - mangohud
+  - gamemode
+  - protonup-qt
   - vlc
   - spotify
   - htop
@@ -32,8 +37,8 @@ system_tweaks:
     requires_package: flatpak
     run_as_root: true
 
-  - id: gamemode_hint
-    description: "Hint: install gamemode for better in-game CPU scheduling"
-    command: "echo 'Tip: install gamemode (available in most distro repos) for extra FPS.'"
-    requires_package: ""
-    run_as_root: false
+  - id: gamemode_enable
+    description: "Add current user to gamemode group"
+    command: "usermod -aG gamemode ${SUDO_USER:-$USER} || true"
+    requires_package: gamemode
+    run_as_root: true

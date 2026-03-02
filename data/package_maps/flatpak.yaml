@@ -157,3 +157,77 @@ angryip:
 wireshark:
   packages: [org.wireshark.Wireshark]
   flatpak_remote: flathub
+
+# ── Password Managers ─────────────────────────────────────────────────────────
+bitwarden:
+  packages: [com.bitwarden.desktop]
+  flatpak_remote: flathub
+
+keepassxc:
+  packages: [org.keepassxc.KeePassXC]
+  flatpak_remote: flathub
+
+# ── Video Editors ─────────────────────────────────────────────────────────────
+kdenlive:
+  packages: [org.kde.kdenlive]
+  flatpak_remote: flathub
+
+shotcut:
+  packages: [org.shotcut.Shotcut]
+  flatpak_remote: flathub
+
+openshot:
+  packages: [org.openshot.OpenShot]
+  flatpak_remote: flathub
+
+# ── Terminal Emulators ────────────────────────────────────────────────────────
+alacritty:
+  packages: [org.alacritty.Alacritty]
+  flatpak_remote: flathub
+
+kitty:
+  packages: [net.kovidgoyal.kitty]
+  flatpak_remote: flathub
+
+wezterm:
+  packages: [org.wezfurlong.wezterm]
+  flatpak_remote: flathub
+
+tilix:
+  packages: [com.gexperts.Tilix]
+  flatpak_remote: flathub
+
+# ── VPN ───────────────────────────────────────────────────────────────────────
+protonvpn:
+  packages: [com.protonvpn.www]
+  flatpak_remote: flathub
+
+# ── Note Taking ───────────────────────────────────────────────────────────────
+obsidian:
+  packages: [md.obsidian.Obsidian]
+  flatpak_remote: flathub
+
+joplin:
+  packages: [net.cozic.joplin_desktop]
+  flatpak_remote: flathub
+
+logseq:
+  packages: [com.logseq.Logseq]
+  flatpak_remote: flathub
+
+cherrytree:
+  packages: [com.giuspen.cherrytree]
+  flatpak_remote: flathub
+
+# ── Gaming ────────────────────────────────────────────────────────────────────
+heroic:
+  packages: [com.heroicgameslauncher.hgl]
+  flatpak_remote: flathub
+
+bottles:
+  packages: [com.usebottles.bottles]
+  flatpak_remote: flathub
+
+protonup-qt:
+  packages: [net.davidotek.pupgui2]
+  flatpak_remote: flathub
