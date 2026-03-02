@@ -227,7 +227,7 @@ Add `"appimage"` as a 4th fallback (after flatpak → snap). Many apps (Obsidian
 
 ### 🟠 Medium Priority
 
-#### ❌ F. AUR Helper Auto-Install for Arch
+#### ✅ F. AUR Helper Auto-Install for Arch
 `core/detection.py` already identifies Arch Linux. If neither `yay` nor `paru` is present, offer to install one automatically. This unlocks the `"aur"` pm key in `install_specs`.
 
 ---
@@ -241,7 +241,7 @@ linite --daemon &
 
 ---
 
-#### ❌ H. Fuzzy Search in GUI
+#### ✅ H. Fuzzy Search in GUI
 Replace exact-match filtering in `SoftwarePanel` with fuzzy matching. Typing `"cod"` should still find `"VS Code"`. Implement using `difflib.SequenceMatcher` — **no new dependency required**.
 
 > **Current state:** `_apply_filters()` uses plain substring match (`q in e.name.lower()`). No `difflib` usage found anywhere in the codebase.
@@ -414,11 +414,11 @@ Generate tab-completion for `linite --cli install <TAB>` using `argcomplete` or 
 | 🟠 5 | Add Terminal Emulators — Alacritty, Kitty, WezTerm | ✅ Done |
 | 🟠 6 | Add VPN Apps — ProtonVPN, WireGuard, Mullvad | ✅ Done |
 | 🟠 7 | **Feature:** Disk space pre-check before install | ✅ Done |
-| 🟠 8 | **Feature:** AUR helper auto-detection for Arch | ❌ Todo |
+| 🟠 8 | **Feature:** AUR helper auto-detection for Arch | ✅ Done |
 | 🟠 9 | Add Note-Taking Apps — Obsidian, Joplin | ✅ Done |
 | 🟠 10 | Add Gaming Extras — Heroic, Bottles, MangoHud | ✅ Done |
 | 🟡 11 | **Architecture:** Split catalog into per-category YAML files | ❌ Todo |
-| 🟡 12 | **Feature:** Fuzzy search in GUI | ❌ Todo |
+| 🟡 12 | **Feature:** Fuzzy search in GUI | ✅ Done |
 | 🟡 13 | **Feature:** AppImage support as install fallback | ❌ Todo |
 | 🟡 14 | **Feature:** Remote / SSH install mode | ❌ Todo |
 | 🟡 15 | **Feature:** Plugin / drop-in catalog from `~/.config/linite/catalog/` | ❌ Todo |

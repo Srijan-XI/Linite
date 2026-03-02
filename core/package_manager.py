@@ -256,6 +256,66 @@ class PacmanPackageManager(BasePackageManager):
 
 
 # ---------------------------------------------------------------------------
+# AUR Helper  (Arch-based: yay preferred, paru as fallback)
+# ---------------------------------------------------------------------------
+
+class AurHelperPackageManager(BasePackageManager):
+    """
+    Wraps the first available AUR helper on the system — yay is preferred,
+    paru is used as a fallback.  AUR helpers MUST NOT be run as root; this
+    class enforces that by passing ``sudo=False`` for every operation.
+    """
+
+    def __init__(self):
+        from shutil import which
+        if which("yay"):
+            self._helper = "yay"
+        elif which("paru"):
+            self._helper = "paru"
+        else:
+            self._helper = ""
+
+    @property
+    def name(self) -> str:  # type: ignore[override]
+        return self._helper or "aur"
+
+    def _aur_run(
+        self,
+        args: List[str],
+        progress_cb: Optional[Callable[[str], None]] = None,
+    ) -> tuple[int, str]:
+        if not self._helper:
+            return 127, "No AUR helper (yay / paru) found on PATH."
+        return self.run(args, sudo=False, progress_cb=progress_cb)
+
+    def install(self, packages: List[str], progress_cb=None) -> tuple[int, str]:
+        return self._aur_run(
+            [self._helper, "-S", "--noconfirm", "--needed"] + packages,
+            progress_cb=progress_cb,
+        )
+
+    def update_all(self, progress_cb=None) -> tuple[int, str]:
+        return self._aur_run(
+            [self._helper, "-Syu", "--noconfirm"],
+            progress_cb=progress_cb,
+        )
+
+    def update_package(
+        self, packages: List[str], progress_cb=None
+    ) -> tuple[int, str]:
+        return self._aur_run(
+            [self._helper, "-S", "--noconfirm"] + packages,
+            progress_cb=progress_cb,
+        )
+
+    def is_installed(self, package: str) -> bool:
+        if not self._helper:
+            return False
+        rc, _ = self.run([self._helper, "-Q", package], sudo=False)
+        return rc == 0
+
+
+# ---------------------------------------------------------------------------
 # Zypper  (openSUSE)
 # ---------------------------------------------------------------------------
 
@@ -366,6 +426,11 @@ _PM_MAP = {
     "zypper": ZypperPackageManager,
     "snap": SnapPackageManager,
     "flatpak": FlatpakPackageManager,
+    # AUR helpers — all three keys map to the same class which auto-detects
+    # whichever of yay / paru is actually installed.
+    "aur": AurHelperPackageManager,
+    "yay": AurHelperPackageManager,
+    "paru": AurHelperPackageManager,
 }
 
 

@@ -46,6 +46,8 @@ ProgressCallback = Callable[[str, str], None]
 # Package managers that can be resolved via get_package_manager().
 _SUPPORTED_PMS = frozenset({
     "apt", "dnf", "yum", "pacman", "zypper", "snap", "flatpak",
+    # AUR helpers — yay / paru on Arch-based distros
+    "aur", "yay", "paru",
 })
 
 

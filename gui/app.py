@@ -59,6 +59,8 @@ class LiniteApp(tk.Tk):
         # Load installed state from history in background
         self._refresh_installed_state()
         self._bind_shortcuts()
+        # Offer to install yay on Arch-based systems that lack an AUR helper
+        self.after(500, self._check_aur_helper)
 
     # ── UI construction ───────────────────────────────────────────────────
 
@@ -241,6 +243,7 @@ class LiniteApp(tk.Tk):
         self.bind("<Escape>",    lambda _e: (self._on_cancel() if self._busy else None))
         self.bind("<Control-q>", lambda _e: self._on_quick_start())
         self.bind("<Control-l>", lambda _e: self._on_view_log())
+        self.bind("<Control-f>", lambda _e: self._sw_panel.focus_search())
 
     def _set_busy(self, busy: bool):
         self._busy = busy
@@ -274,7 +277,64 @@ class LiniteApp(tk.Tk):
     def _on_view_log(self):
         """Open the Transaction Log viewer dialog."""
         LogViewerDialog(self)
+    # ── AUR helper detection / bootstrap (Arch-based distros) ────────────
 
+    def _check_aur_helper(self):
+        """Prompt to install yay when the distro is Arch-based but no AUR helper is found."""
+        if not self._distro.is_arch_based:
+            return
+        from core.detection import detect_aur_helper
+        if detect_aur_helper():
+            return
+        if messagebox.askyesno(
+            "AUR Helper Not Found",
+            "You\'re on an Arch-based distro but neither yay nor paru is installed.\n\n"
+            "Without an AUR helper, AUR-only packages cannot be installed.\n\n"
+            "Would you like Linite to install yay automatically?",
+            icon="warning",
+        ):
+            self._install_yay()
+
+    def _install_yay(self):
+        """Bootstrap yay from the AUR in a background thread, logging to the progress panel."""
+        def _run():
+            import subprocess, tempfile, os
+            log = self._prog_panel.log
+            log("[AUR] Installing yay from source — this may take a minute …")
+            with tempfile.TemporaryDirectory(prefix="linite_yay_") as tmpdir:
+                steps = [
+                    # Make sure base-devel and git are present
+                    ["sudo", "pacman", "-S", "--needed", "--noconfirm", "base-devel", "git"],
+                    # Clone yay-bin (pre-compiled, faster than building from source)
+                    ["git", "clone", "https://aur.archlinux.org/yay-bin.git",
+                     os.path.join(tmpdir, "yay-bin")],
+                ]
+                for cmd in steps:
+                    log(f"[AUR] $ {' '.join(cmd)}")
+                    proc = subprocess.run(
+                        cmd, capture_output=True, text=True, cwd=tmpdir
+                    )
+                    for line in (proc.stdout + proc.stderr).splitlines():
+                        log(f"[AUR] {line}")
+                    if proc.returncode != 0:
+                        log("[AUR] ✗ Failed — check the log for details.", tag="error")
+                        return
+
+                # makepkg must NOT be run as root; run as current user
+                srcdir = os.path.join(tmpdir, "yay-bin")
+                log("[AUR] $ makepkg -si --noconfirm")
+                proc = subprocess.run(
+                    ["makepkg", "-si", "--noconfirm"],
+                    capture_output=True, text=True, cwd=srcdir,
+                )
+                for line in (proc.stdout + proc.stderr).splitlines():
+                    log(f"[AUR] {line}")
+                if proc.returncode == 0:
+                    log("[AUR] ✓ yay installed successfully!", tag="success")
+                else:
+                    log("[AUR] ✗ makepkg failed — check the log for details.", tag="error")
+
+        threading.Thread(target=_run, daemon=True, name="linite-yay-bootstrap").start()
     # ── Quick-Start presets ────────────────────────────────────────────────
 
     def _on_quick_start(self):

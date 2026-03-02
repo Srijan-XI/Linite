@@ -74,6 +74,9 @@ class SystemInfo:
     # ── Available package managers (in detection-priority order) ──────────
     available_pms: List[str] = field(default_factory=list)
 
+    # ── AUR helper (Arch-based distros only) ─────────────────────────────
+    aur_helper: str = ""  # "yay" | "paru" | ""
+
     # ── Environment flags ─────────────────────────────────────────────────
     is_linux:     bool = False
     is_server:    bool = False   # no DE detected
@@ -326,8 +329,22 @@ def _detect_container() -> bool:
 def _detect_available_pms() -> List[str]:
     """Return list of package managers actually present on this system."""
     candidates = ["apt", "dnf", "yum", "pacman", "zypper",
-                  "flatpak", "snap", "apk", "emerge"]
+                  "flatpak", "snap", "apk", "emerge",
+                  "yay", "paru"]
     return [pm for pm in candidates if _cmd(pm)]
+
+
+def detect_aur_helper() -> str:
+    """
+    Detect the installed AUR helper on an Arch-based system.
+    yay is preferred over paru.  Returns an empty string when neither is
+    found or when not running on an Arch-based distro.
+    """
+    if _cmd("yay"):
+        return "yay"
+    if _cmd("paru"):
+        return "paru"
+    return ""
 
 
 # ---------------------------------------------------------------------------
@@ -359,6 +376,8 @@ def detect_system() -> SystemInfo:
     info.desktop_env   = _detect_desktop_env()
     info.display_server = _detect_display_server()
     info.available_pms = _detect_available_pms()
+    if info.distro.is_arch_based:
+        info.aur_helper = detect_aur_helper()
     info.is_server     = (info.desktop_env == "unknown")
     info.is_vm         = _detect_vm()
     info.is_container  = _detect_container()

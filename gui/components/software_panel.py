@@ -15,6 +15,7 @@ Performance notes
 * Search changes are debounced 200 ms to avoid re-renders on every key.
 """
 
+import difflib
 import tkinter as tk
 from tkinter import ttk
 from typing import Callable, Dict, List, Optional, Set
@@ -23,6 +24,47 @@ from data.software_catalog import SoftwareEntry
 from gui import styles as st
 
 _SEARCH_DEBOUNCE_MS = 200
+
+# Minimum fuzzy-match ratio to include an entry.  Exact substring matches
+# always score 1.0 and are never excluded by this threshold.
+_FUZZY_THRESHOLD = 0.45
+
+
+def _fuzzy_score(query: str, entry: SoftwareEntry) -> float:
+    """
+    Return a relevance score in [0.0, 1.0] for *query* against *entry*.
+
+    Strategy (in priority order):
+    1. Exact substring match in any field  → 1.0   (fast path; ranks first)
+    2. Best SequenceMatcher ratio over all fields and their individual words
+
+    Scores below *_FUZZY_THRESHOLD* mean the entry should be hidden.
+    """
+    q = query.lower()
+    fields = [
+        entry.name.lower(),
+        entry.id.lower(),
+        entry.category.lower(),
+        entry.description.lower(),
+    ]
+
+    # Fast path ─ plain substring
+    for f in fields:
+        if q in f:
+            return 1.0
+
+    # Fuzzy path ─ SequenceMatcher over whole field and per-word
+    best = 0.0
+    for f in fields:
+        ratio = difflib.SequenceMatcher(None, q, f, autojunk=False).ratio()
+        best = max(best, ratio)
+        for word in f.split():
+            word_ratio = difflib.SequenceMatcher(
+                None, q, word, autojunk=False
+            ).ratio()
+            best = max(best, word_ratio)
+
+    return best
 
 
 class SoftwarePanel(tk.Frame):
@@ -299,6 +341,12 @@ class SoftwarePanel(tk.Frame):
         self._search_text = self._search_var.get().lower().strip()
         self._apply_filters()
 
+    # ── Public helper ─────────────────────────────────────────────────────
+
+    def focus_search(self):
+        """Move keyboard focus to the search entry (e.g. for Ctrl+F)."""
+        self._search_entry.focus_set()
+
     def _apply_filters(self):
         """Show/hide pre-built card frames — no widget creation."""
         entries = self._all_entries
@@ -307,14 +355,15 @@ class SoftwarePanel(tk.Frame):
             entries = [e for e in entries if e.category == self._current_category]
 
         if self._search_text:
-            q = self._search_text
-            entries = [
-                e for e in entries
-                if q in e.name.lower()
-                or q in e.description.lower()
-                or q in e.category.lower()
-                or q in e.id.lower()
+            # Score every entry; keep those above the threshold and rank by
+            # relevance so the best matches bubble to the top.
+            scored = [
+                (e, _fuzzy_score(self._search_text, e))
+                for e in entries
             ]
+            scored = [(e, s) for e, s in scored if s >= _FUZZY_THRESHOLD]
+            scored.sort(key=lambda x: x[1], reverse=True)
+            entries = [e for e, _ in scored]
 
         self._visible_entries = entries
         visible_ids = {e.id for e in entries}
