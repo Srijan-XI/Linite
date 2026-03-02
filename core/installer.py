@@ -179,6 +179,12 @@ def install_app(
 
     if pm_name == "snap" and spec.snap_classic:
         rc, out = pm.install_classic(spec.packages, progress_cb=line_cb)  # type: ignore[attr-defined]
+    elif pm_name == "flatpak" and spec.flatpak_remote:
+        # Prepend the remote (e.g. 'flathub') so the command becomes:
+        #   flatpak install -y --noninteractive flathub <app_id>
+        # Without this, flatpak errors with "No remote refs found" or
+        # "Multiple refs found" when more than one remote is configured.
+        rc, out = pm.install([spec.flatpak_remote] + spec.packages, progress_cb=line_cb)
     else:
         rc, out = pm.install(spec.packages, progress_cb=line_cb)
 

@@ -358,7 +358,7 @@ class ExecutionEngine:
             result = install_app(entry, self._distro, progress_cb=progress_cb)
             duration = time.monotonic() - t0
 
-            if result.status == _InstallStatus.OK:
+            if result.status == _InstallStatus.SUCCESS:
                 status = ExecStatus.RETRIED if attempt > 1 else ExecStatus.SUCCESS
                 if progress_cb:
                     progress_cb(app_id, f"✓ {entry.name} installed successfully")
@@ -398,7 +398,7 @@ class ExecutionEngine:
                 if hasattr(entry_copy, "__dataclass_fields__") else None
 
             fb_result = install_app(entry_copy, self._distro, progress_cb=progress_cb)
-            if fb_result.status == _InstallStatus.OK:
+            if fb_result.status == _InstallStatus.SUCCESS:
                 if progress_cb:
                     progress_cb(app_id, f"✓ {entry.name} installed via fallback ({fb_pm})")
                 return ExecutionResult(
