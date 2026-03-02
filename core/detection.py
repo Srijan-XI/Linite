@@ -61,7 +61,8 @@ class SystemInfo:
     # ── Hardware ──────────────────────────────────────────────────────────
     cpu_arch:  str = "unknown"   # x86_64 | aarch64 | armv7l | i686
     cpu_cores: int = 1
-    ram_mb:    int = 0           # total physical RAM in MB
+    ram_mb:       int = 0           # total physical RAM in MB
+    free_disk_mb: int = 0           # free disk space on / in MB
 
     # ── GPU ───────────────────────────────────────────────────────────────
     gpu: GPUInfo = field(default_factory=GPUInfo)
@@ -153,6 +154,15 @@ def _detect_ram_mb() -> int:
     except Exception:
         pass
     return 0
+
+
+def _detect_free_disk_mb() -> int:
+    """Return free disk space on / in MB (Linux only)."""
+    try:
+        import shutil
+        return shutil.disk_usage("/").free // (1024 * 1024)
+    except Exception:
+        return 0
 
 
 def _detect_cpu_cores() -> int:
@@ -344,6 +354,7 @@ def detect_system() -> SystemInfo:
         return info   # remaining fields irrelevant on non-Linux
 
     info.ram_mb        = _detect_ram_mb()
+    info.free_disk_mb  = _detect_free_disk_mb()
     info.gpu           = _detect_gpu()
     info.desktop_env   = _detect_desktop_env()
     info.display_server = _detect_display_server()

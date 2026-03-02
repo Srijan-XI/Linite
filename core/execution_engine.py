@@ -239,6 +239,41 @@ class ExecutionEngine:
             if progress_cb:
                 progress_cb(aid, f"⚠ Skipping {name}: no suitable PM found")
 
+        # ── Disk space pre-check ───────────────────────────────────────────
+        _free_mb = 0
+        try:
+            import shutil as _shutil
+            _free_mb = _shutil.disk_usage("/").free // (1024 * 1024)
+        except Exception:
+            _free_mb = 0
+        if _free_mb > 0:
+            if _free_mb < 500:
+                _msg = (
+                    f"✗ Insufficient disk space: only {_free_mb} MB free "
+                    f"(minimum 500 MB required). Installation blocked."
+                )
+                logger.error(_msg)
+                if progress_cb:
+                    progress_cb("__engine__", _msg)
+                for _wave in plan.waves:
+                    for _aid in _wave:
+                        _entry = plan.entry_map.get(_aid)
+                        results.append(ExecutionResult(
+                            app_id=_aid,
+                            app_name=_entry.name if _entry else _aid,
+                            status=ExecStatus.SKIPPED,
+                            error="Insufficient disk space",
+                        ))
+                return results
+            elif _free_mb < 2048:
+                _msg = (
+                    f"⚠ Low disk space: {_free_mb} MB free. "
+                    f"Installation may fail if packages are large."
+                )
+                logger.warning(_msg)
+                if progress_cb:
+                    progress_cb("__engine__", _msg)
+
         # Execute waves sequentially; apps within a wave run in parallel
         for wave_idx, wave in enumerate(plan.waves):
             if self._cancel.is_set():
