@@ -1,39 +1,85 @@
 """
 Linite - Install History
-Records every install/uninstall attempt to ~/.config/linite/history.json
+Records every install/uninstall attempt to ~/.config/linite/history.yaml
+
+File format (YAML list of mappings):
+  - app_id:   vlc
+    app_name: VLC Media Player
+    pm_used:  apt
+    action:   install        # "install" | "uninstall"
+    success:  true
+    timestamp: 2024-07-01T12:34:56.789012
+
+Legacy JSON files (history.json) are transparently migrated on first read.
 """
 
 import json
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import List, Set
 
-HISTORY_FILE = Path.home() / ".config" / "linite" / "history.json"
+import yaml
 
+logger = logging.getLogger(__name__)
+
+_CONFIG_DIR   = Path.home() / ".config" / "linite"
+HISTORY_FILE  = _CONFIG_DIR / "history.yaml"
+_LEGACY_FILE  = _CONFIG_DIR / "history.json"   # auto-migrated on read
+
+
+# ---------------------------------------------------------------------------
+# Internal helpers
+# ---------------------------------------------------------------------------
 
 def _load() -> List[dict]:
+    """Load history from YAML, auto-migrating from JSON if needed."""
+
+    # Migrate legacy JSON → YAML once
+    if _LEGACY_FILE.exists() and not HISTORY_FILE.exists():
+        try:
+            data = json.loads(_LEGACY_FILE.read_text(encoding="utf-8"))
+            _save(data)
+            _LEGACY_FILE.rename(_LEGACY_FILE.with_suffix(".json.bak"))
+            logger.info("Migrated history from JSON to YAML (%d entries).", len(data))
+        except Exception as exc:
+            logger.warning("Could not migrate history.json: %s", exc)
+            return []
+
     if HISTORY_FILE.exists():
         try:
-            return json.loads(HISTORY_FILE.read_text(encoding="utf-8"))
-        except Exception:
+            raw = yaml.safe_load(HISTORY_FILE.read_text(encoding="utf-8"))
+            # safe_load returns None for an empty file
+            return raw if isinstance(raw, list) else []
+        except Exception as exc:
+            logger.error("Failed to load history.yaml: %s", exc)
             return []
     return []
 
 
-def _save(data: List[dict]):
+def _save(data: List[dict]) -> None:
+    """Persist the history list to YAML."""
     HISTORY_FILE.parent.mkdir(parents=True, exist_ok=True)
-    HISTORY_FILE.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    HISTORY_FILE.write_text(
+        yaml.dump(data, default_flow_style=False, allow_unicode=True, sort_keys=False),
+        encoding="utf-8",
+    )
 
 
-def record(app_id: str, app_name: str, pm_used: str, success: bool, action: str = "install"):
-    """Record an install or uninstall event."""
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
+
+def record(app_id: str, app_name: str, pm_used: str, success: bool,
+           action: str = "install") -> None:
+    """Append one install/uninstall event to history.yaml."""
     data = _load()
     data.append({
-        "app_id":   app_id,
-        "app_name": app_name,
-        "pm_used":  pm_used,
-        "action":   action,          # "install" | "uninstall"
-        "success":  success,
+        "app_id":    app_id,
+        "app_name":  app_name,
+        "pm_used":   pm_used,
+        "action":    action,        # "install" | "uninstall"
+        "success":   success,
         "timestamp": datetime.now().isoformat(),
     })
     _save(data)
@@ -56,9 +102,10 @@ def get_installed_ids() -> Set[str]:
 
 
 def get_all() -> List[dict]:
-    """Return the full history list, newest first."""
+    """Return the full history list, newest-first."""
     return list(reversed(_load()))
 
 
-def clear():
+def clear() -> None:
+    """Wipe all recorded history."""
     _save([])

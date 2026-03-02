@@ -2,7 +2,7 @@
 Linite - Main Application Window
 Assembles all panels into the final Tkinter app.
 Features: parallel installs, search, installed-state, detail popup,
-          uninstall, export/import profiles.
+          uninstall, export/import profiles, quick-start presets.
 """
 
 import logging
@@ -23,6 +23,7 @@ from data.software_catalog import CATALOG, CATALOG_MAP, CATEGORIES, SoftwareEntr
 from gui import styles as st
 from gui.components.app_detail import AppDetailWindow
 from gui.components.category_panel import CategoryPanel
+from gui.components.preset_panel import PresetPickerDialog
 from gui.components.progress_panel import ProgressPanel
 from gui.components.software_panel import SoftwarePanel
 
@@ -78,6 +79,19 @@ class LiniteApp(tk.Tk):
             bg=st.BG_MEDIUM, fg=st.TEXT_SECONDARY, font=st.FONT_SMALL, padx=st.PADDING,
         )
         self._distro_label.pack(side="right")
+
+        # Quick-Start preset button  (right side of title bar)
+        qs_btn = tk.Button(
+            title_bar, text="⚡  Quick Start",
+            bg=st.ACCENT_DIM, fg="#c8bfff", font=st.FONT_SMALL,
+            relief="flat", bd=0, padx=14, pady=6,
+            cursor="hand2",
+            activebackground=st.ACCENT, activeforeground="#ffffff",
+            command=self._on_quick_start,
+        )
+        qs_btn.pack(side="right", padx=(0, 4), pady=10)
+        qs_btn.bind("<Enter>", lambda _e: qs_btn.config(bg=st.ACCENT))
+        qs_btn.bind("<Leave>", lambda _e: qs_btn.config(bg=st.ACCENT_DIM))
 
         # ── Main body ──────────────────────────────────────────────────────
         body = tk.Frame(self, bg=st.BG_DARK)
@@ -208,6 +222,7 @@ class LiniteApp(tk.Tk):
         self.bind("<Return>",   lambda _e: self._on_install())
         self.bind("<Control-a>", lambda _e: self._sw_panel._select_all(True))
         self.bind("<Escape>",   lambda _e: (self._on_cancel() if self._busy else None))
+        self.bind("<Control-q>", lambda _e: self._on_quick_start())
 
     def _set_busy(self, busy: bool):
         self._busy = busy
@@ -236,7 +251,29 @@ class LiniteApp(tk.Tk):
             self.after(0, lambda: self._sw_panel.set_installed_ids(ids))
         threading.Thread(target=_load, daemon=True).start()
 
-    # ── Actions ────────────────────────────────────────────────────────────
+    # ── Quick-Start presets ────────────────────────────────────────────────
+
+    def _on_quick_start(self):
+        """Open the Quick-Start preset picker dialog."""
+        PresetPickerDialog(self, on_apply=self._apply_preset)
+
+    def _apply_preset(self, app_ids: set):
+        """
+        Called when the user clicks 'Apply' in the preset dialog.
+        Merges the preset app IDs with whatever is already checked,
+        then logs a summary to the progress panel.
+        """
+        current = self._sw_panel.get_selected_ids()
+        merged  = current | app_ids
+        self._sw_panel.set_selected_ids(merged)
+        n_new = len(app_ids - current)
+        self._prog_panel.log(
+            f"\u26a1 Quick Start applied: {len(app_ids)} apps selected "
+            f"({n_new} newly added).",
+            tag="info",
+        )
+
+    # ── Install ────────────────────────────────────────────────────────────
 
     def _on_install(self):
         if self._busy:
@@ -373,8 +410,8 @@ class LiniteApp(tk.Tk):
             return
         path = filedialog.asksaveasfilename(
             title="Save profile",
-            defaultextension=".json",
-            filetypes=[("Linite profile", "*.json"), ("All files", "*.*")],
+            defaultextension=".yaml",
+            filetypes=[("Linite profile", "*.yaml *.yml"), ("All files", "*.*")],
         )
         if not path:
             return
@@ -387,7 +424,10 @@ class LiniteApp(tk.Tk):
     def _on_import_profile(self):
         path = filedialog.askopenfilename(
             title="Open profile",
-            filetypes=[("Linite profile", "*.json"), ("All files", "*.*")],
+            filetypes=[
+                ("Linite profile", "*.yaml *.yml *.json"),
+                ("All files", "*.*"),
+            ],
         )
         if not path:
             return

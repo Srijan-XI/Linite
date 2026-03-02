@@ -5,6 +5,7 @@ Supports parallel installation, SHA-256 checksum verification, and history recor
 """
 
 import hashlib
+import tempfile as _tempfile
 import logging
 import subprocess
 import urllib.request
@@ -42,23 +43,34 @@ class InstallResult:
 ProgressCallback = Callable[[str, str], None]
 
 
+# Package managers that can be resolved via get_package_manager().
+_SUPPORTED_PMS = frozenset({
+    "apt", "dnf", "yum", "pacman", "zypper", "snap", "flatpak",
+})
+
+
 def _pick_pm(entry: SoftwareEntry, distro: DistroInfo) -> Optional[str]:
     """
     Choose the best package manager to install *entry* given the current distro.
     Priority:
-      1. entry.preferred_pm  (if spec exists)
+      1. entry.preferred_pm  (if spec exists and is a real supported PM)
       2. distro native pm    (if spec exists)
       3. flatpak             (if available and spec exists)
       4. snap                (if available and spec exists)
+
+    NOTE: 'script' is intentionally excluded; it is not a real package manager
+    and get_package_manager('script') would raise ValueError.
     """
     native_pm  = distro.package_manager
     flatpak_ok = check_flatpak_available()
     snap_ok    = check_snap_available()
 
     candidates: List[str] = []
-    if entry.preferred_pm:
+    # Only add preferred_pm if it's a real, supported package manager
+    if entry.preferred_pm and entry.preferred_pm in _SUPPORTED_PMS:
         candidates.append(entry.preferred_pm)
-    candidates.append(native_pm)
+    if native_pm in _SUPPORTED_PMS:
+        candidates.append(native_pm)
     if flatpak_ok:
         candidates.append("flatpak")
     if snap_ok:
@@ -136,11 +148,14 @@ def install_app(
 
     # Checksum verification for direct-download files
     if spec.script_url and spec.sha256:
-        import tempfile
-        tmp = tempfile.mktemp(suffix="_linite_dl")
         if progress_cb:
             progress_cb(entry.id, f"[download] {spec.script_url}")
         try:
+            # Use NamedTemporaryFile instead of the deprecated+insecure mktemp()
+            with _tempfile.NamedTemporaryFile(
+                suffix="_linite_dl", delete=False
+            ) as _tf:
+                tmp = _tf.name
             urllib.request.urlretrieve(spec.script_url, tmp)
         except Exception as exc:
             return InstallResult(app_id=entry.id, app_name=entry.name,

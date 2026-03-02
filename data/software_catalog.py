@@ -765,15 +765,9 @@ CATALOG: List[SoftwareEntry] = [
         icon="📄",
         website="https://www.openoffice.org",
         install_specs={
-            "apt": PackageSpec(
-                packages=[],
-                pre_commands=[
-                    "curl -fsSL https://sourceforge.net/projects/openofficeorg.mirror/files/latest/download -o /tmp/openoffice.tar.gz",
-                    "tar -xzf /tmp/openoffice.tar.gz -C /tmp/",
-                    "dpkg -i /tmp/en-US/DEBS/*.deb",
-                    "dpkg -i /tmp/en-US/DEBS/desktop-integration/*.deb",
-                ],
-            ),
+            # APT: OpenOffice is not in standard repos; only Flatpak is reliable.
+            # The manual .deb extraction path is omitted because an empty
+            # packages list would cause a no-op install and silent uninstall failure.
             "flatpak": _s("org.openoffice.OpenOffice"),
         },
         preferred_pm="flatpak",
@@ -1166,12 +1160,15 @@ CATALOG: List[SoftwareEntry] = [
             "apt":    _s("sqlmap"),
             "dnf":    _s("sqlmap"),
             "pacman": _s("sqlmap"),
+            # 'universal' fallback: git-clone install.  The 'packages' field must
+            # be non-empty so that the uninstaller can reference it; we use the
+            # known binary name as the logical package identifier.
             "universal": PackageSpec(
                 pre_commands=[
                     "git clone --depth 1 https://github.com/sqlmapproject/sqlmap.git /opt/sqlmap",
                     "ln -sf /opt/sqlmap/sqlmap.py /usr/local/bin/sqlmap",
                 ],
-                packages=[],
+                packages=["sqlmap"],
             ),
         },
     ),
