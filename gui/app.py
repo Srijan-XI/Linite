@@ -50,6 +50,7 @@ class LiniteApp(tk.Tk):
 
         # Detect distro
         self._distro: DistroInfo = distro_mod.detect()
+        tx_log.set_distro(self._distro.display_name)   # stamp log records
         self._busy = False
         self._busy_dot = None   # created inside _build_ui; guard before it exists
 
@@ -434,8 +435,19 @@ class LiniteApp(tk.Tk):
             try:
                 results = update_system(self._distro, progress_cb=progress)
                 all_ok = all(rc == 0 for rc, _ in results.values())
-                status_text = "Update complete ✓" if all_ok else "Update finished with errors"
-                msg = "System updated successfully!" if all_ok else "Update finished with some errors. Check the log."
+                status_text = "Update complete \u2713" if all_ok else "Update finished with errors"
+                msg = "System updated successfully!" if all_ok \
+                      else "Update finished with some errors. Check the log."
+                # ── Transaction log (one record per PM updated) ────────────
+                for pm_name, (rc, out) in results.items():
+                    tx_log.log(
+                        action   = "system_update",
+                        status   = "success" if rc == 0 else "failed",
+                        pm_used  = pm_name,
+                        app_name = f"System update ({pm_name})",
+                        output   = out,
+                        error    = "" if rc == 0 else out,
+                    )
             except Exception as exc:
                 logger.exception("Unexpected error during system update")
                 all_ok = False
