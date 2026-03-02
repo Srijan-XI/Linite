@@ -205,21 +205,26 @@ class TransactionLogEngine:
             if not isinstance(raw, dict):
                 raw = {}
 
-            raw["total"]   = raw.get("total", 0) + 1
-            raw.setdefault("by_action", {})[rec.action] = \
-                raw["by_action"].get(rec.action, 0) + 1
-            raw.setdefault("by_status", {})[rec.status] = \
-                raw["by_status"].get(rec.status, 0) + 1
+            raw["total"] = raw.get("total", 0) + 1
+
+            # Use stable local refs so chained .get() always works
+            by_action = raw.setdefault("by_action", {})
+            by_action[rec.action] = by_action.get(rec.action, 0) + 1
+
+            by_status = raw.setdefault("by_status", {})
+            by_status[rec.status] = by_status.get(rec.status, 0) + 1
+
             if rec.pm_used:
-                raw.setdefault("by_pm", {})[rec.pm_used] = \
-                    raw["by_pm"].get(rec.pm_used, 0) + 1
+                by_pm = raw.setdefault("by_pm", {})
+                by_pm[rec.pm_used] = by_pm.get(rec.pm_used, 0) + 1
+
             raw["total_duration"] = \
                 round(raw.get("total_duration", 0.0) + rec.duration, 3)
 
-            # Track how often each app_id has been installed
+            # Track install counts per app_id
             if rec.action == "install" and rec.is_success and rec.app_id:
-                raw.setdefault("install_counts", {})[rec.app_id] = \
-                    raw["install_counts"].get(rec.app_id, 0) + 1
+                ic = raw.setdefault("install_counts", {})
+                ic[rec.app_id] = ic.get(rec.app_id, 0) + 1
             if rec.action == "uninstall" and rec.is_success and rec.app_id:
                 ic = raw.get("install_counts", {})
                 ic[rec.app_id] = max(ic.get(rec.app_id, 1) - 1, 0)
@@ -247,7 +252,10 @@ class TransactionLogEngine:
         if not self._dir.exists():
             return []
 
-        daily_files = sorted(self._dir.glob("????.*.yaml"))
+        daily_files = sorted(
+            p for p in self._dir.glob("*.yaml")
+            if p.name != "summary.yaml"
+        )
         records: List[TransactionRecord] = []
         for path in daily_files:
             if path.name == "summary.yaml":
