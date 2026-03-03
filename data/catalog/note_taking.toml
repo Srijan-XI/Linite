@@ -1,0 +1,63 @@
+[[apps]]
+id          = "obsidian"
+name        = "Obsidian"
+description = "A powerful knowledge base on top of a local folder of plain text Markdown files."
+category    = "Note Taking"
+icon        = "🔮"
+website     = "https://obsidian.md"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["md.obsidian.Obsidian"]
+
+[apps.install_specs.snap]
+packages = ["obsidian"]
+
+[[apps]]
+id          = "joplin"
+name        = "Joplin"
+description = "Open-source note-taking and to-do app with synchronisation capabilities."
+category    = "Note Taking"
+icon        = "📓"
+website     = "https://joplinapp.org"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["net.cozic.joplin_desktop"]
+
+[apps.install_specs.snap]
+packages = ["joplin-desktop"]
+
+[[apps]]
+id          = "logseq"
+name        = "Logseq"
+description = "Privacy-first, open-source knowledge management platform."
+category    = "Note Taking"
+icon        = "📋"
+website     = "https://logseq.com"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["com.logseq.Logseq"]
+
+[[apps]]
+id          = "cherrytree"
+name        = "CherryTree"
+description = "Hierarchical note-taking application with rich text and syntax highlighting."
+category    = "Note Taking"
+icon        = "🍒"
+website     = "https://www.giuspen.net/cherrytree"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["cherrytree"]
+
+[apps.install_specs.dnf]
+packages = ["cherrytree"]
+
+[apps.install_specs.pacman]
+packages = ["cherrytree"]
+
+[apps.install_specs.flatpak]
+packages = ["com.giuspen.cherrytree"]
+

@@ -1,0 +1,113 @@
+[[apps]]
+id          = "libreoffice"
+name        = "LibreOffice"
+description = "Free and powerful office suite."
+category    = "Office"
+icon        = "📄"
+website     = "https://www.libreoffice.org"
+
+[apps.install_specs.apt]
+packages = ["libreoffice"]
+
+[apps.install_specs.dnf]
+packages = ["libreoffice"]
+
+[apps.install_specs.pacman]
+packages = ["libreoffice-fresh"]
+
+[apps.install_specs.zypper]
+packages = ["libreoffice"]
+
+[apps.install_specs.flatpak]
+packages = ["org.libreoffice.LibreOffice"]
+
+[[apps]]
+id          = "okular"
+name        = "Okular"
+description = "Universal document viewer."
+category    = "Office"
+icon        = "📖"
+
+[apps.install_specs.apt]
+packages = ["okular"]
+
+[apps.install_specs.dnf]
+packages = ["okular"]
+
+[apps.install_specs.pacman]
+packages = ["okular"]
+
+[apps.install_specs.flatpak]
+packages = ["org.kde.okular"]
+
+[[apps]]
+id          = "thunderbird"
+name        = "Thunderbird"
+description = "Free email client from Mozilla."
+category    = "Office"
+icon        = "📧"
+website     = "https://www.thunderbird.net"
+
+[apps.install_specs.apt]
+packages = ["thunderbird"]
+
+[apps.install_specs.dnf]
+packages = ["thunderbird"]
+
+[apps.install_specs.pacman]
+packages = ["thunderbird"]
+
+[apps.install_specs.flatpak]
+packages = ["org.mozilla.Thunderbird"]
+
+[[apps]]
+id          = "openoffice"
+name        = "Apache OpenOffice"
+description = "Leading open-source office software suite."
+category    = "Office"
+icon        = "📄"
+website     = "https://www.openoffice.org"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["org.openoffice.OpenOffice"]
+
+[[apps]]
+id          = "evince"
+name        = "Evince"
+description = "Simple and clean document viewer (PDF, DJVU, XPS, etc.)."
+category    = "Office"
+icon        = "📖"
+website     = "https://wiki.gnome.org/Apps/Evince"
+
+[apps.install_specs.apt]
+packages = ["evince"]
+
+[apps.install_specs.dnf]
+packages = ["evince"]
+
+[apps.install_specs.pacman]
+packages = ["evince"]
+
+[apps.install_specs.zypper]
+packages = ["evince"]
+
+[apps.install_specs.flatpak]
+packages = ["org.gnome.Evince"]
+
+[[apps]]
+id          = "foxitreader"
+name        = "Foxit PDF Reader"
+description = "Fast, lightweight and feature-rich PDF reader."
+category    = "Office"
+icon        = "📕"
+website     = "https://www.foxit.com/pdf-reader"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["com.foxit.Reader"]
+
+[apps.install_specs.script]
+packages = []
+script_url = "https://www.foxit.com/downloads/latest.html#Foxit-Reader"
+

@@ -1,0 +1,80 @@
+[[apps]]
+id          = "alacritty"
+name        = "Alacritty"
+description = "Fast, cross-platform, OpenGL terminal emulator."
+category    = "Terminal Emulators"
+icon        = "💻"
+website     = "https://alacritty.org"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["alacritty"]
+
+[apps.install_specs.dnf]
+packages = ["alacritty"]
+
+[apps.install_specs.pacman]
+packages = ["alacritty"]
+
+[apps.install_specs.flatpak]
+packages = ["org.alacritty.Alacritty"]
+
+[[apps]]
+id          = "kitty"
+name        = "kitty"
+description = "The fast, feature-rich, GPU-based terminal emulator."
+category    = "Terminal Emulators"
+icon        = "🐱"
+website     = "https://sw.kovidgoyal.net/kitty"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["kitty"]
+
+[apps.install_specs.dnf]
+packages = ["kitty"]
+
+[apps.install_specs.pacman]
+packages = ["kitty"]
+
+[apps.install_specs.flatpak]
+packages = ["net.kovidgoyal.kitty"]
+
+[[apps]]
+id          = "wezterm"
+name        = "WezTerm"
+description = "GPU-accelerated cross-platform terminal emulator and multiplexer."
+category    = "Terminal Emulators"
+icon        = "🖥️"
+website     = "https://wezfurlong.org/wezterm"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["wezterm"]
+pre_commands = [
+  "curl -fsSL https://apt.fury.io/wez/gpg.key | gpg --dearmor | tee /usr/share/keyrings/wezterm.gpg > /dev/null",
+  "echo \"deb [signed-by=/usr/share/keyrings/wezterm.gpg] https://apt.fury.io/wez/ * *\" | tee /etc/apt/sources.list.d/wezterm.list",
+  "apt-get update",
+]
+
+[apps.install_specs.flatpak]
+packages = ["org.wezfurlong.wezterm"]
+
+[[apps]]
+id          = "tilix"
+name        = "Tilix"
+description = "Tiling terminal emulator for GNOME using GTK+ 3."
+category    = "Terminal Emulators"
+icon        = "🪟"
+website     = "https://gnunn1.github.io/tilix-web"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["tilix"]
+
+[apps.install_specs.dnf]
+packages = ["tilix"]
+
+[apps.install_specs.flatpak]
+packages = ["com.gexperts.Tilix"]
+

@@ -1,0 +1,113 @@
+[[apps]]
+id          = "steam"
+name        = "Steam"
+description = "Valve's gaming platform."
+category    = "Gaming"
+icon        = "🎮"
+website     = "https://store.steampowered.com"
+
+[apps.install_specs.apt]
+packages = ["steam"]
+
+[apps.install_specs.dnf]
+packages = ["steam"]
+
+[apps.install_specs.pacman]
+packages = ["steam"]
+
+[apps.install_specs.flatpak]
+packages = ["com.valvesoftware.Steam"]
+
+[[apps]]
+id          = "lutris"
+name        = "Lutris"
+description = "Open gaming platform for Linux."
+category    = "Gaming"
+icon        = "🕹️"
+website     = "https://lutris.net"
+
+[apps.install_specs.apt]
+packages = ["lutris"]
+
+[apps.install_specs.dnf]
+packages = ["lutris"]
+
+[apps.install_specs.pacman]
+packages = ["lutris"]
+
+[apps.install_specs.flatpak]
+packages = ["net.lutris.Lutris"]
+
+[[apps]]
+id          = "heroic"
+name        = "Heroic Games Launcher"
+description = "Open-source GOG, Amazon and Epic Games launcher for Linux."
+category    = "Gaming"
+icon        = "⚔️"
+website     = "https://heroicgameslauncher.com"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["com.heroicgameslauncher.hgl"]
+
+[[apps]]
+id          = "bottles"
+name        = "Bottles"
+description = "Run Windows software and games on Linux with ease."
+category    = "Gaming"
+icon        = "🍷"
+website     = "https://usebottles.com"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["com.usebottles.bottles"]
+
+[[apps]]
+id          = "gamemode"
+name        = "GameMode"
+description = "Daemon/lib combo that optimises Linux system performance on demand."
+category    = "Gaming"
+icon        = "⚡"
+website     = "https://github.com/FeralInteractive/gamemode"
+
+[apps.install_specs.apt]
+packages = ["gamemode"]
+
+[apps.install_specs.dnf]
+packages = ["gamemode"]
+
+[apps.install_specs.pacman]
+packages = ["gamemode"]
+
+[apps.install_specs.zypper]
+packages = ["gamemoded"]
+
+[[apps]]
+id          = "mangohud"
+name        = "MangoHud"
+description = "Vulkan and OpenGL overlay for monitoring FPS, temps, and more."
+category    = "Gaming"
+icon        = "📊"
+website     = "https://github.com/flightlessmango/MangoHud"
+
+[apps.install_specs.apt]
+packages = ["mangohud"]
+
+[apps.install_specs.dnf]
+packages = ["mangohud"]
+
+[apps.install_specs.pacman]
+packages = ["mangohud"]
+
+[[apps]]
+id          = "protonup-qt"
+name        = "ProtonUp-Qt"
+description = "Install and manage Proton-GE and other compatibility tools."
+category    = "Gaming"
+icon        = "🧪"
+website     = "https://davidotek.github.io/protonup-qt"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["net.davidotek.pupgui2"]
+

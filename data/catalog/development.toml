@@ -1,0 +1,190 @@
+[[apps]]
+id          = "vscode"
+name        = "Visual Studio Code"
+description = "Lightweight but powerful source-code editor by Microsoft."
+category    = "Development"
+icon        = "💻"
+website     = "https://code.visualstudio.com"
+preferred_pm = "snap"
+
+[apps.install_specs.snap]
+packages = ["code"]
+snap_classic = true
+
+[apps.install_specs.flatpak]
+packages = ["com.visualstudio.code"]
+
+[apps.install_specs.apt]
+packages = ["code"]
+pre_commands = [
+  "wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /tmp/packages.microsoft.gpg",
+  "install -o root -g root -m 644 /tmp/packages.microsoft.gpg /etc/apt/trusted.gpg.d/",
+  "echo \"deb [arch=amd64,arm64,armhf signed-by=/etc/apt/trusted.gpg.d/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main\" > /etc/apt/sources.list.d/vscode.list",
+  "apt-get update",
+]
+
+[[apps]]
+id          = "git"
+name        = "Git"
+description = "Distributed version control system."
+category    = "Development"
+icon        = "🔧"
+website     = "https://git-scm.com"
+
+[apps.install_specs.apt]
+packages = ["git"]
+
+[apps.install_specs.dnf]
+packages = ["git"]
+
+[apps.install_specs.pacman]
+packages = ["git"]
+
+[apps.install_specs.zypper]
+packages = ["git"]
+
+[[apps]]
+id          = "python3"
+name        = "Python 3"
+description = "High-level, versatile programming language."
+category    = "Development"
+icon        = "🐍"
+website     = "https://www.python.org"
+
+[apps.install_specs.apt]
+packages = ["python3", "python3-pip", "python3-venv"]
+
+[apps.install_specs.dnf]
+packages = ["python3", "python3-pip"]
+
+[apps.install_specs.pacman]
+packages = ["python", "python-pip"]
+
+[apps.install_specs.zypper]
+packages = ["python3", "python3-pip"]
+
+[[apps]]
+id          = "nodejs"
+name        = "Node.js"
+description = "JavaScript runtime built on Chrome's V8 engine."
+category    = "Development"
+icon        = "🟩"
+website     = "https://nodejs.org"
+
+[apps.install_specs.apt]
+packages = ["nodejs", "npm"]
+
+[apps.install_specs.dnf]
+packages = ["nodejs", "npm"]
+
+[apps.install_specs.pacman]
+packages = ["nodejs", "npm"]
+
+[apps.install_specs.zypper]
+packages = ["nodejs", "npm"]
+
+[apps.install_specs.snap]
+packages = ["node"]
+snap_classic = true
+
+[[apps]]
+id          = "docker"
+name        = "Docker"
+description = "Platform for containerized applications."
+category    = "Development"
+icon        = "🐳"
+website     = "https://www.docker.com"
+
+[apps.install_specs.apt]
+packages = ["docker-ce", "docker-ce-cli", "containerd.io"]
+pre_commands = [
+  "apt-get install -y ca-certificates curl gnupg",
+  "install -m 0755 -d /etc/apt/keyrings",
+  "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg",
+  "chmod a+r /etc/apt/keyrings/docker.gpg",
+  "echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable\" | tee /etc/apt/sources.list.d/docker.list > /dev/null",
+  "apt-get update",
+]
+post_commands = ["systemctl enable --now docker"]
+
+[apps.install_specs.dnf]
+packages = ["docker-ce", "docker-ce-cli", "containerd.io"]
+pre_commands = [
+  "dnf -y install dnf-plugins-core",
+  "dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo",
+]
+post_commands = ["systemctl enable --now docker"]
+
+[apps.install_specs.pacman]
+packages = ["docker"]
+post_commands = ["systemctl enable --now docker"]
+
+[[apps]]
+id          = "vim"
+name        = "Vim"
+description = "Highly configurable terminal text editor."
+category    = "Development"
+icon        = "📝"
+website     = "https://www.vim.org"
+
+[apps.install_specs.apt]
+packages = ["vim"]
+
+[apps.install_specs.dnf]
+packages = ["vim-enhanced"]
+
+[apps.install_specs.pacman]
+packages = ["vim"]
+
+[apps.install_specs.zypper]
+packages = ["vim"]
+
+[[apps]]
+id          = "neovim"
+name        = "Neovim"
+description = "Hyperextensible Vim-based text editor."
+category    = "Development"
+icon        = "📝"
+website     = "https://neovim.io"
+
+[apps.install_specs.apt]
+packages = ["neovim"]
+
+[apps.install_specs.dnf]
+packages = ["neovim"]
+
+[apps.install_specs.pacman]
+packages = ["neovim"]
+
+[apps.install_specs.zypper]
+packages = ["neovim"]
+
+[apps.install_specs.snap]
+packages = ["nvim"]
+snap_classic = true
+
+[apps.install_specs.flatpak]
+packages = ["io.neovim.nvim"]
+
+[[apps]]
+id          = "gh"
+name        = "GitHub CLI"
+description = "Official GitHub command-line tool."
+category    = "Development"
+icon        = "🐙"
+website     = "https://cli.github.com"
+
+[apps.install_specs.apt]
+packages = ["gh"]
+pre_commands = [
+  "curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg",
+  "echo \"deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main\" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null",
+  "apt update",
+]
+
+[apps.install_specs.dnf]
+packages = ["gh"]
+
+[apps.install_specs.pacman]
+packages = ["github-cli"]
+

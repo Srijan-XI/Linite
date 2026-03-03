@@ -1,0 +1,86 @@
+[[apps]]
+id          = "qbittorrent"
+name        = "qBittorrent"
+description = "Free and open-source BitTorrent client."
+category    = "Torrents"
+icon        = "🌊"
+website     = "https://www.qbittorrent.org"
+
+[apps.install_specs.apt]
+packages = ["qbittorrent"]
+
+[apps.install_specs.dnf]
+packages = ["qbittorrent"]
+
+[apps.install_specs.pacman]
+packages = ["qbittorrent"]
+
+[apps.install_specs.zypper]
+packages = ["qbittorrent"]
+
+[apps.install_specs.flatpak]
+packages = ["org.qbittorrent.qBittorrent"]
+
+[[apps]]
+id          = "qbittorrent-nox"
+name        = "qBittorrent-nox"
+description = "Headless qBittorrent for server/terminal use with Web UI."
+category    = "Torrents"
+icon        = "🌊"
+website     = "https://www.qbittorrent.org"
+
+[apps.install_specs.apt]
+packages = ["qbittorrent-nox"]
+
+[apps.install_specs.dnf]
+packages = ["qbittorrent-nox"]
+
+[apps.install_specs.pacman]
+packages = ["qbittorrent-nox"]
+
+[[apps]]
+id          = "deluge"
+name        = "Deluge"
+description = "Lightweight, free BitTorrent client."
+category    = "Torrents"
+icon        = "💧"
+website     = "https://deluge-torrent.org"
+
+[apps.install_specs.apt]
+packages = ["deluge"]
+
+[apps.install_specs.dnf]
+packages = ["deluge"]
+
+[apps.install_specs.pacman]
+packages = ["deluge"]
+
+[apps.install_specs.zypper]
+packages = ["deluge"]
+
+[apps.install_specs.flatpak]
+packages = ["org.deluge_torrent.deluge"]
+
+[[apps]]
+id          = "transmission"
+name        = "Transmission"
+description = "Fast, easy and free BitTorrent client."
+category    = "Torrents"
+icon        = "📡"
+website     = "https://transmissionbt.com"
+
+[apps.install_specs.apt]
+packages = ["transmission"]
+
+[apps.install_specs.dnf]
+packages = ["transmission"]
+
+[apps.install_specs.pacman]
+packages = ["transmission-gtk"]
+
+[apps.install_specs.zypper]
+packages = ["transmission"]
+
+[apps.install_specs.flatpak]
+packages = ["com.transmissionbt.Transmission"]
+
