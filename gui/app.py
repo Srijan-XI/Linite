@@ -19,6 +19,7 @@ from core.log_engine import tx_log
 from core.installer import install_apps, Status as InstallStatus
 from core.package_manager import clear_cancel, request_cancel
 from core.profiles import load_profile, save_profile
+from core.script_exporter import export_to_file as export_script_to_file
 from core.uninstaller import uninstall_apps
 from core.updater import update_system
 from data.software_catalog import CATALOG, CATALOG_MAP, CATEGORIES, SoftwareEntry
@@ -206,6 +207,22 @@ class LiniteApp(tk.Tk):
         )
         self._import_btn.pack(side="right", padx=(0, 4), pady=10)
 
+        # Export as Shell Script
+        self._export_script_btn = tk.Button(
+            action_bar, text="📜  Export Script",
+            bg=st.BG_LIGHT, fg="#a8d8a8", font=st.FONT_SMALL,
+            relief="flat", bd=0, padx=12, pady=st.BTN_PADY,
+            cursor="hand2", activebackground=st.BG_MEDIUM,
+            command=self._on_export_script,
+        )
+        self._export_script_btn.pack(side="right", padx=(0, 4), pady=10)
+        self._export_script_btn.bind(
+            "<Enter>", lambda _e: self._export_script_btn.config(bg=st.BG_MEDIUM)
+        )
+        self._export_script_btn.bind(
+            "<Leave>", lambda _e: self._export_script_btn.config(bg=st.BG_LIGHT)
+        )
+
         # Selection info (left side)
         self._sel_label = tk.Label(
             action_bar, text="No apps selected",
@@ -249,7 +266,8 @@ class LiniteApp(tk.Tk):
         self._busy = busy
         state = "disabled" if busy else "normal"
         for btn in (self._install_btn, self._uninstall_btn,
-                    self._update_btn, self._export_btn, self._import_btn):
+                    self._update_btn, self._export_btn, self._import_btn,
+                    self._export_script_btn):
             btn.config(state=state)
         # Busy dot in title bar: green when active
         if self._busy_dot is not None:
@@ -521,6 +539,34 @@ class LiniteApp(tk.Tk):
             self.after(0, lambda m=msg: messagebox.showinfo("Update complete", m))
 
         threading.Thread(target=worker, daemon=True).start()
+
+    def _on_export_script(self):
+        """Export the current selection as a reproducible bash install script."""
+        selected = self._sw_panel.get_selected()
+        if not selected:
+            messagebox.showinfo(
+                "Nothing to export",
+                "Select at least one app first."
+            )
+            return
+        path = filedialog.asksaveasfilename(
+            title="Save install script",
+            defaultextension=".sh",
+            filetypes=[("Bash script", "*.sh"), ("All files", "*.*")],
+            initialfile="linite-setup.sh",
+        )
+        if not path:
+            return
+        try:
+            saved = export_script_to_file(selected, path)
+            n = len(selected)
+            messagebox.showinfo(
+                "Script exported",
+                f"Install script for {n} app{'s' if n != 1 else ''} saved to:\n{saved}\n\n"
+                f"Run it on any compatible Linux machine with:\n  bash {saved.name}",
+            )
+        except Exception as exc:
+            messagebox.showerror("Export failed", str(exc))
 
     def _on_export_profile(self):
         selected_ids = self._sw_panel.get_selected_ids()

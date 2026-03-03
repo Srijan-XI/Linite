@@ -8,6 +8,8 @@ Usage:
   python main.py --cli install vlc git    # CLI install
   python main.py --cli update             # CLI update all
   python main.py --list                   # Print software catalog
+  python main.py --export mysetup.sh      # Export a shell install script
+  python main.py --export mysetup.sh --pm apt --cli install vlc git  # filtered export
   python main.py --verbose                # Enable debug logging
 """
 
@@ -34,11 +36,49 @@ def parse_args():
         help="List all available software and exit.",
     )
     parser.add_argument(
+        "--export",
+        metavar="FILE",
+        help="Export a reproducible bash install script and exit.  "
+             "If --cli install <ids> is also given, only those apps are included; "
+             "otherwise the full catalog is exported.",
+    )
+    parser.add_argument(
+        "--pm",
+        metavar="PM",
+        choices=["apt", "dnf", "pacman", "zypper", "snap", "flatpak"],
+        help="Preferred package manager to use when exporting a script (optional).",
+    )
+    parser.add_argument(
         "--verbose", "-v",
         action="store_true",
         help="Enable verbose/debug output.",
     )
     return parser.parse_args()
+
+
+def cmd_export(output_file: str, ids: list, pm_hint: str | None):
+    """Generate and save a reproducible bash install script."""
+    from data.software_catalog import CATALOG, CATALOG_MAP
+    from core.script_exporter import export_to_file
+
+    if ids:
+        entries = []
+        for app_id in ids:
+            entry = CATALOG_MAP.get(app_id)
+            if entry is None:
+                print(f"  [!] Unknown app id: '{app_id}' — skipped")
+            else:
+                entries.append(entry)
+    else:
+        entries = list(CATALOG)
+
+    if not entries:
+        print("No valid apps to export.")
+        sys.exit(1)
+
+    path = export_to_file(entries, output_file, pm_hint=pm_hint)
+    print(f"✓ Script exported to: {path}  ({len(entries)} app(s))")
+    print(f"  Run with:  bash {path.name}")
 
 
 def cmd_list():
@@ -137,6 +177,12 @@ def main():
 
     if args.list:
         cmd_list()
+        return
+
+    if args.export:
+        # If --cli install <ids> is also provided, use those IDs; else full catalog
+        ids = args.cli[1:] if (args.cli and args.cli[0].lower() == "install") else []
+        cmd_export(args.export, ids, pm_hint=getattr(args, "pm", None))
         return
 
     if args.cli:
