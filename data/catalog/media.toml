@@ -1,0 +1,130 @@
+[[apps]]
+id          = "vlc"
+name        = "VLC Media Player"
+description = "Free and open-source cross-platform multimedia player."
+category    = "Media"
+icon        = "🎬"
+website     = "https://www.videolan.org/vlc/"
+
+[apps.install_specs.apt]
+packages = ["vlc"]
+
+[apps.install_specs.dnf]
+packages = ["vlc"]
+
+[apps.install_specs.pacman]
+packages = ["vlc"]
+
+[apps.install_specs.zypper]
+packages = ["vlc"]
+
+[apps.install_specs.snap]
+packages = ["vlc"]
+
+[apps.install_specs.flatpak]
+packages = ["org.videolan.VLC"]
+
+[[apps]]
+id          = "spotify"
+name        = "Spotify"
+description = "Music streaming service."
+category    = "Media"
+icon        = "🎵"
+website     = "https://www.spotify.com"
+preferred_pm = "snap"
+
+[apps.install_specs.snap]
+packages = ["spotify"]
+
+[apps.install_specs.flatpak]
+packages = ["com.spotify.Client"]
+
+[[apps]]
+id          = "mpv"
+name        = "mpv"
+description = "Free, open-source and cross-platform media player."
+category    = "Media"
+icon        = "▶️"
+website     = "https://mpv.io"
+
+[apps.install_specs.apt]
+packages = ["mpv"]
+
+[apps.install_specs.dnf]
+packages = ["mpv"]
+
+[apps.install_specs.pacman]
+packages = ["mpv"]
+
+[apps.install_specs.zypper]
+packages = ["mpv"]
+
+[apps.install_specs.flatpak]
+packages = ["io.mpv.Mpv"]
+
+[[apps]]
+id          = "obs"
+name        = "OBS Studio"
+description = "Free and open source software for video recording and live streaming."
+category    = "Media"
+icon        = "🎙️"
+website     = "https://obsproject.com"
+
+[apps.install_specs.apt]
+packages = ["obs-studio"]
+
+[apps.install_specs.dnf]
+packages = ["obs-studio"]
+
+[apps.install_specs.pacman]
+packages = ["obs-studio"]
+
+[apps.install_specs.zypper]
+packages = ["obs-studio"]
+
+[apps.install_specs.flatpak]
+packages = ["com.obsproject.Studio"]
+
+[[apps]]
+id          = "audacity"
+name        = "Audacity"
+description = "Free, open-source, cross-platform audio editor."
+category    = "Media"
+icon        = "🎤"
+website     = "https://www.audacityteam.org"
+
+[apps.install_specs.apt]
+packages = ["audacity"]
+
+[apps.install_specs.dnf]
+packages = ["audacity"]
+
+[apps.install_specs.pacman]
+packages = ["audacity"]
+
+[apps.install_specs.zypper]
+packages = ["audacity"]
+
+[apps.install_specs.flatpak]
+packages = ["org.audacityteam.Audacity"]
+
+[[apps]]
+id          = "handbrake"
+name        = "HandBrake"
+description = "Open-source video transcoder."
+category    = "Media"
+icon        = "🎞️"
+website     = "https://handbrake.fr"
+
+[apps.install_specs.apt]
+packages = ["handbrake"]
+
+[apps.install_specs.dnf]
+packages = ["HandBrake-gui"]
+
+[apps.install_specs.pacman]
+packages = ["handbrake"]
+
+[apps.install_specs.flatpak]
+packages = ["fr.handbrake.ghb"]
+

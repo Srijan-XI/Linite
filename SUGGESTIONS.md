@@ -354,15 +354,15 @@ PyYAML is the **only** 3rd-party dependency. Python 3.11+ ships `tomllib` in the
 
 ## 4. Architecture Improvements
 
-### ❌ A. Split `software_catalog.py` into Per-Category YAML / TOML Files
-At 1,594 lines, `software_catalog.py` is becoming a maintenance bottleneck. Move app definitions to `data/catalog/<category>.yaml` and load dynamically at startup. New apps get added without touching Python.
+### ✅ A. Split `software_catalog.py` into Per-Category TOML Files
+At 1,594 lines, `software_catalog.py` was a maintenance bottleneck. All 92 app definitions have been moved to 17 per-category TOML files under `data/catalog/`, loaded at startup via `data/catalog_loader.py` using stdlib `tomllib`. New apps can be added without touching Python.
 
 ```
-data/catalog/browsers.yaml
-data/catalog/development.yaml
-data/catalog/gaming.yaml
-data/catalog/security.yaml
-...
+data/catalog/web_browsers.toml
+data/catalog/development.toml
+data/catalog/gaming.toml
+data/catalog/security.toml
+... (17 files total)
 ```
 
 ---
@@ -426,7 +426,7 @@ Generate tab-completion for `linite --cli install <TAB>` using `argcomplete` or 
 | 🟠 8 | **Feature:** AUR helper auto-detection for Arch | ✅ Done |
 | 🟠 9 | Add Note-Taking Apps — Obsidian, Joplin | ✅ Done |
 | 🟠 10 | Add Gaming Extras — Heroic, Bottles, MangoHud | ✅ Done |
-| 🟡 11 | **Architecture:** Split catalog into per-category YAML files | ❌ Todo |
+| � 11 | **Architecture:** Split catalog into per-category TOML files | ✅ Done |
 | 🟡 12 | **Feature:** Fuzzy search in GUI | ✅ Done |
 | 🟡 13 | **Feature:** AppImage support as install fallback | ❌ Todo |
 | 🟡 14 | **Feature:** Remote / SSH install mode | ❌ Todo |

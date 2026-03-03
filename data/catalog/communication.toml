@@ -1,0 +1,80 @@
+[[apps]]
+id          = "discord"
+name        = "Discord"
+description = "Voice, video and text communication platform."
+category    = "Communication"
+icon        = "💬"
+website     = "https://discord.com"
+preferred_pm = "flatpak"
+
+[apps.install_specs.snap]
+packages = ["discord"]
+
+[apps.install_specs.flatpak]
+packages = ["com.discordapp.Discord"]
+
+[[apps]]
+id          = "telegram"
+name        = "Telegram"
+description = "Fast and secure messaging app."
+category    = "Communication"
+icon        = "✈️"
+website     = "https://telegram.org"
+preferred_pm = "flatpak"
+
+[apps.install_specs.snap]
+packages = ["telegram-desktop"]
+
+[apps.install_specs.flatpak]
+packages = ["org.telegram.desktop"]
+
+[[apps]]
+id          = "slack"
+name        = "Slack"
+description = "Business messaging platform."
+category    = "Communication"
+icon        = "💼"
+website     = "https://slack.com"
+preferred_pm = "snap"
+
+[apps.install_specs.snap]
+packages = ["slack"]
+snap_classic = true
+
+[apps.install_specs.flatpak]
+packages = ["com.slack.Slack"]
+
+[[apps]]
+id          = "zoom"
+name        = "Zoom"
+description = "Video conferencing and meetings platform."
+category    = "Communication"
+icon        = "📹"
+website     = "https://zoom.us"
+preferred_pm = "flatpak"
+
+[apps.install_specs.snap]
+packages = ["zoom-client"]
+
+[apps.install_specs.flatpak]
+packages = ["us.zoom.Zoom"]
+
+[[apps]]
+id          = "dropbox"
+name        = "Dropbox"
+description = "Cloud storage and file synchronisation service."
+category    = "Communication"
+icon        = "📦"
+website     = "https://www.dropbox.com"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["dropbox"]
+pre_commands = [
+  "curl -fsSL https://linux.dropbox.com/packages/ubuntu/dropbox_2024.04.17_amd64.deb -o /tmp/dropbox.deb",
+  "apt-get install -y /tmp/dropbox.deb",
+]
+
+[apps.install_specs.flatpak]
+packages = ["com.dropbox.Client"]
+
