@@ -9,14 +9,14 @@
 ### Core
 - 🖥️ **Full system detection** — distro, version, desktop environment, display server (X11/Wayland), CPU arch, RAM, GPU vendor & driver, VM/container awareness
 - 📦 **Smart package selection** — native PMs (`apt`, `dnf`, `pacman`, `zypper`) with automatic fallback to `flatpak` → `snap`
-- 🗺️ **YAML-driven package maps** — per-PM YAML files are the source of truth; the Python catalog is the fallback
+- 🗺️ **TOML-driven package maps** — per-PM TOML files are the source of truth; the Python catalog is the fallback
 - 🔄 **One-click system update** — upgrades all packages including Flatpak and Snap
-- 📜 **YAML history & profiles** — install history and saved profiles stored as human-readable YAML
+- 📜 **TOML profiles & YAML history** — profiles stored as TOML; install history stored as human-readable YAML
 
 ### Quick-Start Profiles
 - ⚡ **6 pre-built presets** — Developer, Student, Gamer, Content Creator, Daily User, Security/Pentester
 - 🛠️ **System tweaks** — each profile runs post-install commands (enable Docker, add user to groups, set defaults…)
-- 🧩 **User-defined profiles** — save, load, export and import custom selections as YAML
+- 🧩 **User-defined profiles** — save, load, export and import custom selections as TOML
 
 ### Smart Execution
 - 🔗 **Dependency ordering** — topological sort ensures curl installs before Docker, not after
@@ -42,7 +42,7 @@
 - 🔍 **Debounced search** and category sidebar with app counts
 - 📋 **App detail modal** — full description, website, install method per PM
 - 🖱️ **Keyboard shortcuts** — `Ctrl+Q` Quick Start, `Ctrl+A` select all, `Enter` install, `Esc` cancel
-- ⌨️ **CLI mode** — headless installs for scripts and servers
+- ⌨️ **CLI mode** — headless installs; export reproducible bash scripts with `--export`
 
 ---
 
@@ -51,41 +51,50 @@
 ```
 linite/
 │
-├── main.py                        # Entry point (GUI + CLI)
-├── requirements.txt               # PyYAML (only third-party dep)
+├── main.py                        # Entry point (GUI + CLI + --export)
+├── requirements.txt               # No required third-party deps (Python 3.11+ stdlib only)
 │
 ├── core/                          # Business logic
 │   ├── distro.py                  # Basic Linux distro detection (DistroInfo)
 │   ├── detection.py               # ★ Full system profiler (SystemInfo)
 │   │                              #   GPU, RAM, DE, display server, VM/container
 │   ├── package_manager.py         # Low-level PM abstraction (apt-get, dnf…)
-│   ├── package_map.py             # ★ YAML package mapping layer
+│   ├── package_map.py             # ★ TOML package mapping layer
 │   ├── installer.py               # Single-app install orchestrator
 │   ├── execution_engine.py        # ★ Dep-ordering, parallel, retry, fallback
 │   ├── uninstaller.py             # App uninstall logic
 │   ├── updater.py                 # System-wide update logic
-│   ├── profile_engine.py          # ★ YAML profile load / save / apply tweaks
+│   ├── profile_engine.py          # ★ TOML profile load / save / apply tweaks
 │   ├── intelligence.py            # ★ Contextual suggestion engine
+│   ├── script_exporter.py         # ★ Export reproducible bash install scripts
 │   ├── history.py                 # Install history (YAML)
-│   └── profiles.py                # User profile save/load (YAML)
+│   └── profiles.py                # User profile save/load (TOML)
 │
 ├── data/
-│   ├── software_catalog.py        # 69 app definitions (Python, fallback)
+│   ├── software_catalog.py        # Re-exports catalog; TOML is authoritative
+│   ├── catalog_loader.py          # ★ Loads 92 apps from per-category TOML files
 │   ├── presets.py                 # Quick-Start preset definitions
-│   ├── package_maps/              # ★ Per-PM YAML package maps
-│   │   ├── apt.yaml               #   Debian / Ubuntu / Mint
-│   │   ├── dnf.yaml               #   Fedora / RHEL / AlmaLinux
-│   │   ├── pacman.yaml            #   Arch / Manjaro / EndeavourOS
-│   │   ├── zypper.yaml            #   openSUSE Leap / Tumbleweed
-│   │   ├── snap.yaml              #   Snap (distro-agnostic)
-│   │   └── flatpak.yaml           #   Flatpak / Flathub
-│   └── profiles/                  # ★ Built-in profile YAML files
-│       ├── developer.yaml
-│       ├── student.yaml
-│       ├── gamer.yaml
-│       ├── content_creator.yaml
-│       ├── daily_user.yaml
-│       └── security.yaml
+│   ├── catalog/                   # ★ Per-category TOML app definitions (17 files)
+│   │   ├── web_browsers.toml      #   7 browsers
+│   │   ├── development.toml       #   8 dev tools
+│   │   ├── gaming.toml            #   7 gaming tools
+│   │   ├── security.toml          #   10 security tools
+│   │   ├── utilities.toml         #   10 utilities
+│   │   └── … 12 more .toml files
+│   ├── package_maps/              # ★ Per-PM TOML package maps
+│   │   ├── apt.toml               #   Debian / Ubuntu / Mint
+│   │   ├── dnf.toml               #   Fedora / RHEL / AlmaLinux
+│   │   ├── pacman.toml            #   Arch / Manjaro / EndeavourOS
+│   │   ├── zypper.toml            #   openSUSE Leap / Tumbleweed
+│   │   ├── snap.toml              #   Snap (distro-agnostic)
+│   │   └── flatpak.toml           #   Flatpak / Flathub
+│   └── profiles/                  # ★ Built-in profile TOML files
+│       ├── developer.toml
+│       ├── student.toml
+│       ├── gamer.toml
+│       ├── content_creator.toml
+│       ├── daily_user.toml
+│       └── security.toml
 │
 ├── gui/
 │   ├── app.py                     # Main Tkinter window + action handlers
@@ -118,7 +127,7 @@ linite/
 │     └─ 10 checks → prioritised Suggestion list shown in GUI            │
 │                                                                         │
 │  3. PackageMapLoader.get_spec(app_id, pm)                              │
-│     └─ YAML map (data/package_maps/<pm>.yaml)                          │
+│     └─ TOML map (data/package_maps/<pm>.toml)                          │
 │        └─ fallback: Python software_catalog.py                         │
 │                                                                         │
 │  4. ExecutionEngine.build_plan(app_ids, available_pms)                 │
@@ -141,7 +150,7 @@ linite/
 
 ---
 
-## 📦 Software Catalog  (69 apps · 12 categories)
+## 📦 Software Catalog  (92 apps · 17 categories)
 
 | Category | Count | Notable Apps |
 |----------|------:|--------------|
@@ -151,12 +160,17 @@ linite/
 | Communication | 5 | Discord, Telegram, Slack, Zoom, Dropbox |
 | Utilities | 10 | htop, curl, wget, 7-Zip, Timeshift, Flatpak, Neofetch, Flameshot, Wireshark, Notepad++ |
 | Office | 6 | LibreOffice, Thunderbird, Okular, Evince, Foxit Reader, OpenOffice |
-| Gaming | 2 | Steam, Lutris |
+| Gaming | 7 | Steam, Lutris, Heroic Games Launcher, Bottles, GameMode, MangoHud, ProtonUp-Qt |
 | Graphics | 3 | GIMP, Inkscape, Blender |
 | Torrents | 4 | qBittorrent, qBittorrent-nox, Deluge, Transmission |
 | Virtualization | 3 | VirtualBox, VMware Workstation Player, QEMU |
 | Java | 5 | OpenJDK, Eclipse Temurin, Amazon Corretto, Zulu JDK, Oracle JDK |
-| Security | 10 | Nmap, Metasploit, Burp Suite, SQLMap, Hydra, John, Aircrack-ng, Hashcat |
+| Security | 10 | Nmap, Zenmap, Angry IP Scanner, Metasploit, Burp Suite, SQLMap, Hydra, John, Aircrack-ng, Hashcat |
+| Note Taking | 4 | Obsidian, Joplin, Logseq, CherryTree |
+| Password Managers | 3 | Bitwarden, KeePassXC, 1Password |
+| Terminal Emulators | 4 | Alacritty, kitty, WezTerm, Tilix |
+| VPN | 4 | ProtonVPN, WireGuard, Mullvad VPN, OpenVPN |
+| Video Editors | 3 | Kdenlive, Shotcut, OpenShot |
 
 ---
 
@@ -171,7 +185,7 @@ linite/
 | Daily User | 🏠 | 11 | Set Firefox as default browser, Thunderbird as default email client |
 | Security / Pentester | 🔐 | 12 | Add user to wireshark group, msfdb init, monitor-mode advisory |
 
-> Custom profiles are saved to `~/.config/linite/profiles/*.yaml` and persist across sessions.
+> Custom profiles are saved to `~/.config/linite/profiles/*.toml` and persist across sessions. Legacy `.yaml` profiles are auto-migrated to TOML on first load.
 
 ---
 
@@ -180,7 +194,7 @@ linite/
 ### Install dependencies
 
 ```bash
-pip install pyyaml        # only required third-party package
+# No required third-party packages — Linite uses Python 3.11+ stdlib only.
 # tkinter is bundled with Python on most distros, but may need:
 sudo apt install python3-tk       # Debian / Ubuntu / Mint
 sudo dnf install python3-tkinter  # Fedora / RHEL
@@ -212,6 +226,14 @@ python main.py --cli update
 python main.py --list
 ```
 
+### Export a reproducible bash script
+
+```bash
+python main.py --export mysetup.sh                                         # full catalog
+python main.py --export mysetup.sh --pm apt --cli install vlc git discord  # filtered
+bash mysetup.sh                                                            # run on target machine
+```
+
 ### Verbose / debug output
 
 ```bash
@@ -224,12 +246,13 @@ python main.py --verbose
 
 | File / Location | Format | Purpose |
 |-----------------|--------|---------|
-| `data/package_maps/<pm>.yaml` | YAML | Authoritative per-PM package names & install commands |
-| `data/profiles/<id>.yaml` | YAML | Built-in Quick-Start profiles with system tweaks |
+| `data/catalog/<category>.toml` | TOML | App definitions (92 apps across 17 categories) |
+| `data/package_maps/<pm>.toml` | TOML | Authoritative per-PM package names & install commands |
+| `data/profiles/<id>.toml` | TOML | Built-in Quick-Start profiles with system tweaks |
 | `~/.config/linite/history.yaml` | YAML | Install / uninstall event log |
-| `~/.config/linite/profiles/*.yaml` | YAML | User-saved custom profiles |
+| `~/.config/linite/profiles/*.toml` | TOML | User-saved custom profiles |
 
-> Legacy `history.json` files from older versions are auto-migrated to YAML on first launch.
+> Legacy `.yaml` profile files are auto-migrated to TOML on first load. Legacy `history.json` files from older versions are auto-migrated to YAML.
 
 ---
 
@@ -250,9 +273,10 @@ python main.py --verbose
 
 | Layer | Technology |
 |-------|-----------|
-| Language | Python 3.10+ |
+| Language | Python 3.11+ |
 | GUI toolkit | Tkinter (stdlib) |
-| Data storage | PyYAML — history, profiles, and package maps |
+| Catalog & config | TOML (`tomllib`, stdlib) — catalog, package maps, profiles |
+| History | PyYAML — install/uninstall event log |
 | Threading | `threading` + `concurrent.futures.ThreadPoolExecutor` |
 | Package managers | apt · dnf · yum · pacman · zypper · flatpak · snap |
 | Algorithms | Kahn's topological sort for dependency ordering |
@@ -261,14 +285,17 @@ python main.py --verbose
 
 ## 📋 Requirements
 
-- **Python 3.10+**
-- **PyYAML** — `pip install pyyaml`
+- **Python 3.11+** — uses `tomllib` from the standard library
 - **tkinter** — see distro-specific install above (GUI mode only)
+- **PyYAML** (optional) — `pip install pyyaml` — only needed for legacy YAML history files
 
-No other third-party packages are required.
+No required third-party packages.
 
 ---
 
 ## 📄 License
 
 MIT — see [LICENSE](LICENSE) for details.
+
+
+[Linite](https://srijan-xi.github.io/Linite/) © 2026 Srijan Kumar | Srijan-XI · [GitHub](https://github.com/Srijan-XI/Linite) · [Changelog](https://srijan-xi.github.io/Linite/changelog) · [Contributing](https://srijan-xi.github.io/Linite/contributing) · [Git Clone](https://github.com/Srijan-XI/Linite.git)
