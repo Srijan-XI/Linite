@@ -46,68 +46,29 @@
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ [Architecture](ARCHITECTURE.md)
 
 ```
-linite/
-│
-├── main.py                        # Entry point (GUI + CLI + --export)
-├── requirements.txt               # No required third-party deps (Python 3.11+ stdlib only)
-│
-├── core/                          # Business logic
-│   ├── distro.py                  # Basic Linux distro detection (DistroInfo)
-│   ├── detection.py               # ★ Full system profiler (SystemInfo)
-│   │                              #   GPU, RAM, DE, display server, VM/container
-│   ├── package_manager.py         # Low-level PM abstraction (apt-get, dnf…)
-│   ├── package_map.py             # ★ TOML package mapping layer
-│   ├── installer.py               # Single-app install orchestrator
-│   ├── execution_engine.py        # ★ Dep-ordering, parallel, retry, fallback
-│   ├── uninstaller.py             # App uninstall logic
-│   ├── updater.py                 # System-wide update logic
-│   ├── profile_engine.py          # ★ TOML profile load / save / apply tweaks
-│   ├── intelligence.py            # ★ Contextual suggestion engine
-│   ├── script_exporter.py         # ★ Export reproducible bash install scripts
-│   ├── history.py                 # Install history (YAML)
-│   └── profiles.py                # User profile save/load (TOML)
-│
-├── data/
-│   ├── software_catalog.py        # Re-exports catalog; TOML is authoritative
-│   ├── catalog_loader.py          # ★ Loads 92 apps from per-category TOML files
-│   ├── presets.py                 # Quick-Start preset definitions
-│   ├── catalog/                   # ★ Per-category TOML app definitions (17 files)
-│   │   ├── web_browsers.toml      #   7 browsers
-│   │   ├── development.toml       #   8 dev tools
-│   │   ├── gaming.toml            #   7 gaming tools
-│   │   ├── security.toml          #   10 security tools
-│   │   ├── utilities.toml         #   10 utilities
-│   │   └── … 12 more .toml files
-│   ├── package_maps/              # ★ Per-PM TOML package maps
-│   │   ├── apt.toml               #   Debian / Ubuntu / Mint
-│   │   ├── dnf.toml               #   Fedora / RHEL / AlmaLinux
-│   │   ├── pacman.toml            #   Arch / Manjaro / EndeavourOS
-│   │   ├── zypper.toml            #   openSUSE Leap / Tumbleweed
-│   │   ├── snap.toml              #   Snap (distro-agnostic)
-│   │   └── flatpak.toml           #   Flatpak / Flathub
-│   └── profiles/                  # ★ Built-in profile TOML files
-│       ├── developer.toml
-│       ├── student.toml
-│       ├── gamer.toml
-│       ├── content_creator.toml
-│       ├── daily_user.toml
-│       └── security.toml
-│
-├── gui/
-│   ├── app.py                     # Main Tkinter window + action handlers
-│   ├── styles.py                  # Dark-mode colour palette & fonts
-│   └── components/
-│       ├── category_panel.py      # Left category sidebar
-│       ├── software_panel.py      # Scrollable app grid with search
-│       ├── progress_panel.py      # Progress bar + live log
-│       ├── preset_panel.py        # ★ Quick-Start profile picker dialog
-│       └── app_detail.py          # App detail modal
-│
-└── utils/
-    └── helpers.py                 # Logging, root-check, path helpers
+┌───────────────────────────────────────────────────────────┐
+│                        main.py                            │
+│              Entry point · GUI or CLI dispatch            │
+└────────────────────┬─────────────────────┬────────────────┘
+                     │                     │
+          ┌──────────▼──────┐   ┌──────────▼──────────┐
+          │    gui/app.py   │   │   CLI (argparse)     │
+          │  Tkinter Window │   │  install / update    │
+          └──────────┬──────┘   └──────────┬───────────┘
+                     │                     │
+          ┌──────────▼─────────────────────▼───────────┐
+          │                  core/                      │
+          │  distro · package_manager · installer       │
+          │  uninstaller · updater · history · profiles │
+          └──────────┬──────────────────────────────────┘
+                     │
+          ┌──────────▼──────────┐
+          │       data/         │
+          │  software_catalog   │
+          └─────────────────────┘
 ```
 
 > ★ = added or significantly enhanced in the latest update.
