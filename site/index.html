@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Linite — Linux Software Installer</title>
+    <meta name="description"
+        content="Linite is the Linux equivalent of Ninite. Pick your apps, click Install, and Linite silently sets up your entire system using the right package manager for your distro." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="app.css" />
+</head>
+
+<body>
+
+    <!-- ─── SCROLL PROGRESS BAR ──────────────────────────────────────────── -->
+    <div id="scroll-progress" aria-hidden="true"></div>
+
+    <!-- ─── NAV ─────────────────────────────────────────────────────────── -->
+    <nav id="navbar">
+        <div class="nav-inner">
+            <a class="nav-logo" href="#hero">
+                <span class="logo-icon">🐧</span>
+                <span class="logo-text">Linite</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#profiles">Profiles</a></li>
+                <li><a href="#catalog">Catalog</a></li>
+                <li><a href="#gallery">Gallery</a></li>
+                <li><a href="#install">Get Started</a></li>
+            </ul>
+            <a href="https://github.com/Srijan-XI/Linite" target="_blank" class="nav-cta" id="nav-github-btn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                </svg>
+                GitHub
+            </a>
+        </div>
+    </nav>
+
+    <!-- ─── HERO ──────────────────────────────────────────────────────────── -->
+    <section id="hero">
+        <div class="hero-bg-grid"></div>
+        <div class="hero-glow hero-glow-1"></div>
+        <div class="hero-glow hero-glow-2"></div>
+        <div class="hero-inner">
+            <!-- ── LEFT: copy ── -->
+            <div class="hero-content">
+                <div class="hero-badge" id="hero-badge">
+                    <span class="badge-dot"></span>
+                    Open Source · Zero Dependencies
+                </div>
+                <h1 class="hero-title">
+                    The <span class="gradient-text">Ninite</span> for<br />Linux 🐧
+                </h1>
+                <p class="hero-subtitle">
+                    Pick your apps, click <strong>Install</strong>, and Linite silently sets up your entire
+                    system — using the <em>right</em> package manager for your distro.
+                </p>
+                <div class="hero-actions">
+                    <a href="#install" class="btn btn-primary" id="hero-get-started-btn">
+                        ⚡ Get Started
+                    </a>
+                    <a href="#gallery" class="btn btn-ghost" id="hero-gallery-btn">
+                        👁 See Screenshots
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-card">
+                        <span class="stat-num">90+</span>
+                        <span class="stat-label">Apps</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-card">
+                        <span class="stat-num">17</span>
+                        <span class="stat-label">Categories</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-card">
+                        <span class="stat-num">6</span>
+                        <span class="stat-label">Package Managers</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-card">
+                        <span class="stat-num">0</span>
+                        <span class="stat-label">3rd-party Deps</span>
+                    </div>
+                </div>
+
+                <!-- ── INTERACTIVE TERMINAL ── -->
+                <div class="iterm-wrap" id="iterm-wrap">
+                    <div class="iterm-bar">
+                        <div class="window-controls">
+                            <div class="control-dot dot-close"></div>
+                            <div class="control-dot dot-min"></div>
+                            <div class="control-dot dot-max"></div>
+                        </div>
+                        <span class="iterm-title">user@linite:~$</span>
+                        <span class="iterm-try-badge">⌨ Try it live</span>
+                    </div>
+                    <div class="iterm-output" id="iterm-output" aria-live="polite"></div>
+                    <div class="iterm-input-row">
+                        <span class="iterm-prompt">❯</span>
+                        <input id="iterm-input" class="iterm-input" type="text" autocomplete="off" autocorrect="off"
+                            autocapitalize="off" spellcheck="false" placeholder="type help to see commands…"
+                            aria-label="Interactive terminal input" />
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ── RIGHT: terminal + interactive mock ── -->
+            <div class="hero-right">
+                <div class="hero-terminal" id="hero-terminal">
+                    <div class="terminal-bar">
+                        <span class="t-dot t-red"></span>
+                        <span class="t-dot t-yellow"></span>
+                        <span class="t-dot t-green"></span>
+                        <span class="t-title">Linite — Linux Software Installer</span>
+                    </div>
+                    <div class="terminal-body">
+                        <pre class="terminal-code" id="terminal-code"></pre>
+                    </div>
+                </div>
+
+                <!-- INTERACTIVE MOCK WINDOW -->
+                <div class="hero-mockui" id="hero-mockui">
+                    <div class="mock-window" id="mock-window">
+                        <div class="mock-header">
+                            <div class="window-controls">
+                                <div class="control-dot dot-close"></div>
+                                <div class="control-dot dot-min"></div>
+                                <div class="control-dot dot-max"></div>
+                            </div>
+                            <div class="mock-title">Linite — Pick &amp; Install Apps</div>
+                            <div style="width:42px"></div>
+                        </div>
+                        <div class="mock-body">
+                            <div class="mock-sidebar">
+                                <ul id="mock-sidebar-list">
+                                    <li class="mock-cat active" data-cat="all">All Apps</li>
+                                    <li class="mock-cat" data-cat="dev">Development</li>
+                                    <li class="mock-cat" data-cat="media">Media</li>
+                                    <li class="mock-cat" data-cat="util">Utilities</li>
+                                    <li class="mock-cat" data-cat="gaming">Gaming</li>
+                                    <li class="mock-cat" data-cat="sec">Security</li>
+                                </ul>
+                            </div>
+                            <!-- JS renders app items here -->
+                            <div class="mock-content" id="mock-content"></div>
+                        </div>
+                        <div class="mock-footer">
+                            <span class="mock-distro" id="mock-distro">Kali Linux 2025.4 detected · apt</span>
+                            <button class="mock-install-btn" id="mock-install-btn" onclick="mockInstall()">Install 3
+                                Apps</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="scroll-indicator">
+            <div class="scroll-arrow"></div>
+        </div>
+    </section>
+
+    <!-- ─── FEATURES ──────────────────────────────────────────────────────── -->
+    <section id="features">
+        <div class="container">
+            <div class="section-label">Why Linite?</div>
+            <h2 class="section-title">Everything your Linux setup needs</h2>
+            <p class="section-subtitle">From distro detection to parallel installs — Linite handles the hard parts so
+                you don't have to.</p>
+
+            <div class="features-grid">
+
+                <div class="feature-card feature-card--large" data-animate>
+                    <div class="feature-icon">🔍</div>
+                    <h3>Smart System Detection</h3>
+                    <p>Auto-detects your distro, desktop environment, display server (X11/Wayland), CPU arch, RAM, GPU
+                        vendor & driver, and VM/container awareness. 10 contextual checks run before any installation
+                        begins.</p>
+                    <div class="feature-tags">
+                        <span class="tag">Distro</span><span class="tag">GPU</span><span class="tag">RAM</span><span
+                            class="tag">VM</span>
+                    </div>
+                </div>
+
+                <div class="feature-card" data-animate>
+                    <div class="feature-icon">📦</div>
+                    <h3>6 Package Managers</h3>
+                    <p>Native PMs first — <code>apt</code>, <code>dnf</code>, <code>pacman</code>, <code>zypper</code> —
+                        with automatic fallback to <code>flatpak</code> → <code>snap</code>.</p>
+                </div>
+
+                <div class="feature-card" data-animate>
+                    <div class="feature-icon">⚡</div>
+                    <h3>Parallel Installs</h3>
+                    <p>Configurable thread pool installs independent apps simultaneously. Topological sort ensures
+                        proper dependency ordering.</p>
+                </div>
+
+                <div class="feature-card" data-animate>
+                    <div class="feature-icon">🔁</div>
+                    <h3>Retry with Back-off</h3>
+                    <p>Up to 3 attempts with exponential delay (2s → 4s → 8s). If native PM fails, automatically falls
+                        back to Flatpak then Snap.</p>
+                </div>
+
+                <div class="feature-card" data-animate>
+                    <div class="feature-icon">📜</div>
+                    <h3>Export as Shell Script</h3>
+                    <p>Generate a reproducible <code>.sh</code> from any selection. Version-control your machine setup
+                        and share with teammates.</p>
+                </div>
+
+                <div class="feature-card feature-card--large" data-animate>
+                    <div class="feature-icon">💡</div>
+                    <h3>Intelligence Engine</h3>
+                    <p>10 smart checks before installation — warns about low RAM, NVIDIA + Wayland conflicts, container
+                        limitations, non-x86 arch compatibility, proprietary licensing, and more. Suggests lighter
+                        alternatives automatically.</p>
+                    <div class="intel-examples">
+                        <div class="intel-row"><span class="intel-trigger">RAM &lt; 2 GB + Blender</span><span
+                                class="intel-arrow">→</span><span class="intel-result">Suggests Inkscape + MPV</span>
+                        </div>
+                        <div class="intel-row"><span class="intel-trigger">NVIDIA + Wayland</span><span
+                                class="intel-arrow">→</span><span class="intel-result">Compatibility warning</span>
+                        </div>
+                        <div class="intel-row"><span class="intel-trigger">Inside Docker</span><span
+                                class="intel-arrow">→</span><span class="intel-result">Blocks GUI apps</span></div>
+                    </div>
+                </div>
+
+                <div class="feature-card" data-animate>
+                    <div class="feature-icon">🎨</div>
+                    <h3>Dark-mode GUI</h3>
+                    <p>Beautiful Tkinter GUI with categorised, searchable, filterable software grid and app detail
+                        modals. Keyboard shortcuts included.</p>
+                </div>
+
+                <div class="feature-card" data-animate>
+                    <div class="feature-icon">⌨️</div>
+                    <h3>CLI Headless Mode</h3>
+                    <p>Full CLI support for scripts and servers. Install, update, list, or export — no display required.
+                    </p>
+                    <code class="snippet">python main.py --cli install vlc git docker</code>
+                </div>
+
+                <div class="feature-card" data-animate>
+                    <div class="feature-icon">📋</div>
+                    <h3>Transaction Log</h3>
+                    <p>Complete audit trail of every install, update, and uninstall — with stats, filtering, and
+                        YAML/text export.</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── PROFILES ─────────────────────────────────────────────────────── -->
+    <section id="profiles">
+        <div class="container">
+            <div class="section-label">Quick-Start Profiles</div>
+            <h2 class="section-title">Ready in one click</h2>
+            <p class="section-subtitle">Choose a curated bundle, apply system tweaks automatically, and get back to
+                building.</p>
+        </div>
+
+        <div class="profiles-wrapper">
+            <!-- Profile overview cards (quick at-a-glance grid) -->
+            <div class="profile-overview-grid" id="profile-overview-grid">
+                <div class="profile-ov-card">
+                    <div class="profile-ov-emoji">💻</div>
+                    <div class="profile-ov-info">
+                        <h4>Developer</h4>
+                        <p>12 apps · VS Code, Docker, Git, Node.js</p>
+                        <div class="profile-ov-badges">
+                            <span class="ov-badge">Enable Docker daemon</span>
+                            <span class="ov-badge">Add to docker group</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="profile-ov-card">
+                    <div class="profile-ov-emoji">🎬</div>
+                    <div class="profile-ov-info">
+                        <h4>Content Creator</h4>
+                        <p>10 apps · OBS, Blender, GIMP, Audacity</p>
+                        <div class="profile-ov-badges">
+                            <span class="ov-badge">v4l2loopback</span>
+                            <span class="ov-badge">Realtime audio group</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="profile-ov-card">
+                    <div class="profile-ov-emoji">🔐</div>
+                    <div class="profile-ov-info">
+                        <h4>Security / Pentester</h4>
+                        <p>12 apps · Nmap, Metasploit, Wireshark, Hashcat</p>
+                        <div class="profile-ov-badges">
+                            <span class="ov-badge">msfdb init</span>
+                            <span class="ov-badge">wireshark group</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="profile-ov-card">
+                    <div class="profile-ov-emoji">🎮</div>
+                    <div class="profile-ov-info">
+                        <h4>Gamer</h4>
+                        <p>9 apps · Steam, Lutris, Discord, Bottles</p>
+                        <div class="profile-ov-badges">
+                            <span class="ov-badge">Steam multilib (Arch)</span>
+                            <span class="ov-badge">GameMode hint</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="profile-ov-card">
+                    <div class="profile-ov-emoji">🎓</div>
+                    <div class="profile-ov-info">
+                        <h4>Student</h4>
+                        <p>11 apps · LibreOffice, Obsidian, Zoom, Thunderbird</p>
+                        <div class="profile-ov-badges">
+                            <span class="ov-badge">Enable Flatpak</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="profile-ov-card">
+                    <div class="profile-ov-emoji">🏠</div>
+                    <div class="profile-ov-info">
+                        <h4>Daily User</h4>
+                        <p>11 apps · Firefox, Spotify, Timeshift, Telegram</p>
+                        <div class="profile-ov-badges">
+                            <span class="ov-badge">Timeshift cron</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profiles-tabs" id="profiles-tabs">
+                <button class="profile-tab active" data-profile="developer" id="tab-developer">💻 Developer</button>
+                <button class="profile-tab" data-profile="student" id="tab-student">🎓 Student</button>
+                <button class="profile-tab" data-profile="gamer" id="tab-gamer">🎮 Gamer</button>
+                <button class="profile-tab" data-profile="creator" id="tab-creator">🎬 Content Creator</button>
+                <button class="profile-tab" data-profile="daily" id="tab-daily">🏠 Daily User</button>
+                <button class="profile-tab" data-profile="security" id="tab-security">🔐 Security</button>
+            </div>
+
+            <div class="profiles-content" id="profiles-content">
+                <!-- Developer -->
+                <div class="profile-pane active" id="pane-developer">
+                    <div class="pane-meta">
+                        <div class="pane-screenshot">
+                            <img src="img/devprofile.png" alt="Developer profile screenshot" loading="lazy" />
+                        </div>
+                        <div class="pane-info">
+                            <h3>💻 Developer</h3>
+                            <p class="pane-tagline">Full-stack &amp; DevOps toolbox</p>
+                            <p class="pane-desc">Everything a software developer needs: version control, runtimes,
+                                containers, a powerful editor, and the GitHub CLI. Covers web, backend, and
+                                infrastructure work.</p>
+                            <div class="pane-tweaks">
+                                <div class="tweak-label">System Tweaks</div>
+                                <ul>
+                                    <li>Enable Docker daemon</li>
+                                    <li>Add user to docker group</li>
+                                    <li>Set git rebase as default</li>
+                                    <li>Add Flathub remote</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pane-apps">
+                        <div class="app-pill">Git</div>
+                        <div class="app-pill">VS Code</div>
+                        <div class="app-pill">Python 3</div>
+                        <div class="app-pill">Node.js</div>
+                        <div class="app-pill">Docker</div>
+                        <div class="app-pill">GitHub CLI</div>
+                        <div class="app-pill">Neovim</div>
+                        <div class="app-pill">curl</div>
+                        <div class="app-pill">wget</div>
+                        <div class="app-pill">htop</div>
+                        <div class="app-pill">Flatpak</div>
+                        <div class="app-pill">Brave</div>
+                    </div>
+                </div>
+
+                <!-- Student -->
+                <div class="profile-pane" id="pane-student">
+                    <div class="pane-meta">
+                        <div class="pane-screenshot">
+                            <img src="img/studentprofileui.png" alt="Student profile screenshot" loading="lazy" />
+                        </div>
+                        <div class="pane-info">
+                            <h3>🎓 Student</h3>
+                            <p class="pane-tagline">Study, research &amp; light coding</p>
+                            <p class="pane-desc">The essential toolkit for students — a great browser, note-taking,
+                                office suite, and lightweight development tools to get homework and projects done.</p>
+                            <div class="pane-tweaks">
+                                <div class="tweak-label">System Tweaks</div>
+                                <ul>
+                                    <li>Set git default branch to <code>main</code></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pane-apps">
+                        <div class="app-pill">Firefox</div>
+                        <div class="app-pill">LibreOffice</div>
+                        <div class="app-pill">Thunderbird</div>
+                        <div class="app-pill">Git</div>
+                        <div class="app-pill">Python 3</div>
+                        <div class="app-pill">VS Code</div>
+                        <div class="app-pill">VLC</div>
+                        <div class="app-pill">Obsidian</div>
+                        <div class="app-pill">Joplin</div>
+                        <div class="app-pill">Okular</div>
+                        <div class="app-pill">Zoom</div>
+                    </div>
+                </div>
+
+                <!-- Gamer -->
+                <div class="profile-pane" id="pane-gamer">
+                    <div class="pane-meta">
+                        <div class="pane-screenshot">
+                            <img src="img/gamerprofileui.png" alt="Gamer profile screenshot" loading="lazy" />
+                        </div>
+                        <div class="pane-info">
+                            <h3>🎮 Gamer</h3>
+                            <p class="pane-tagline">Maximum frames, zero limits</p>
+                            <p class="pane-desc">The complete Linux gaming stack: Steam for your library, Lutris for
+                                legacy and Windows titles via Wine/Proton, Discord for party chat, and OBS for streaming
+                                or recording.</p>
+                            <div class="pane-tweaks">
+                                <div class="tweak-label">System Tweaks</div>
+                                <ul>
+                                    <li>Enable Steam multilib (Arch)</li>
+                                    <li>Add Flathub remote</li>
+                                    <li>GameMode performance hint</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pane-apps">
+                        <div class="app-pill">Steam</div>
+                        <div class="app-pill">Lutris</div>
+                        <div class="app-pill">Discord</div>
+                        <div class="app-pill">OBS Studio</div>
+                        <div class="app-pill">VLC</div>
+                        <div class="app-pill">Spotify</div>
+                        <div class="app-pill">htop</div>
+                        <div class="app-pill">Firefox</div>
+                        <div class="app-pill">Flatpak</div>
+                    </div>
+                </div>
+
+                <!-- Creator -->
+                <div class="profile-pane" id="pane-creator">
+                    <div class="pane-meta">
+                        <div class="pane-screenshot">
+                            <img src="img/content-creatorprofileui.png" alt="Content Creator profile screenshot"
+                                loading="lazy" />
+                        </div>
+                        <div class="pane-info">
+                            <h3>🎬 Content Creator</h3>
+                            <p class="pane-tagline">Create, edit &amp; stream anything</p>
+                            <p class="pane-desc">Full creative suite for video, audio, graphics, and streaming.
+                                Everything from recording your screen to editing a podcast or designing a thumbnail.</p>
+                            <div class="pane-tweaks">
+                                <div class="tweak-label">System Tweaks</div>
+                                <ul>
+                                    <li>Load v4l2loopback for OBS virtual camera</li>
+                                    <li>Add user to realtime audio group</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pane-apps">
+                        <div class="app-pill">OBS Studio</div>
+                        <div class="app-pill">GIMP</div>
+                        <div class="app-pill">Inkscape</div>
+                        <div class="app-pill">Kdenlive</div>
+                        <div class="app-pill">Audacity</div>
+                        <div class="app-pill">HandBrake</div>
+                        <div class="app-pill">VLC</div>
+                        <div class="app-pill">Blender</div>
+                        <div class="app-pill">Spotify</div>
+                        <div class="app-pill">Discord</div>
+                    </div>
+                </div>
+
+                <!-- Daily -->
+                <div class="profile-pane" id="pane-daily">
+                    <div class="pane-meta">
+                        <div class="pane-screenshot">
+                            <img src="img/dailyUserprofileui.png" alt="Daily User profile screenshot" loading="lazy" />
+                        </div>
+                        <div class="pane-info">
+                            <h3>🏠 Daily User</h3>
+                            <p class="pane-tagline">Everyday essentials, nothing more</p>
+                            <p class="pane-desc">The perfect set of apps for everyday computing — browsing, email,
+                                office, media, and communication. Clean, simple, and immediately productive.</p>
+                            <div class="pane-tweaks">
+                                <div class="tweak-label">System Tweaks</div>
+                                <ul>
+                                    <li>Set Firefox as default browser</li>
+                                    <li>Set Thunderbird as default email client</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pane-apps">
+                        <div class="app-pill">Firefox</div>
+                        <div class="app-pill">Thunderbird</div>
+                        <div class="app-pill">LibreOffice</div>
+                        <div class="app-pill">VLC</div>
+                        <div class="app-pill">Telegram</div>
+                        <div class="app-pill">Dropbox</div>
+                        <div class="app-pill">Flameshot</div>
+                        <div class="app-pill">Timeshift</div>
+                        <div class="app-pill">7-Zip</div>
+                        <div class="app-pill">Neofetch</div>
+                        <div class="app-pill">htop</div>
+                    </div>
+                </div>
+
+                <!-- Security -->
+                <div class="profile-pane" id="pane-security">
+                    <div class="pane-meta">
+                        <div class="pane-screenshot">
+                            <img src="img/security-pen-profileui.png" alt="Security profile screenshot"
+                                loading="lazy" />
+                        </div>
+                        <div class="pane-info">
+                            <h3>🔐 Security / Pentester</h3>
+                            <p class="pane-tagline">Recon, scanning &amp; analysis tools</p>
+                            <p class="pane-desc">Full penetration testing toolkit: network scanning, exploitation, web
+                                app testing, password cracking, and wireless auditing. For ethical hackers and security
+                                researchers.</p>
+                            <div class="pane-tweaks">
+                                <div class="tweak-label">System Tweaks</div>
+                                <ul>
+                                    <li>Add user to wireshark group</li>
+                                    <li>Run msfdb init</li>
+                                    <li>Monitor-mode advisory shown</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pane-apps">
+                        <div class="app-pill">Nmap</div>
+                        <div class="app-pill">Metasploit</div>
+                        <div class="app-pill">Burp Suite</div>
+                        <div class="app-pill">SQLMap</div>
+                        <div class="app-pill">Hydra</div>
+                        <div class="app-pill">John</div>
+                        <div class="app-pill">Aircrack-ng</div>
+                        <div class="app-pill">Hashcat</div>
+                        <div class="app-pill">Wireshark</div>
+                        <div class="app-pill">curl</div>
+                        <div class="app-pill">Git</div>
+                        <div class="app-pill">Firefox</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── CATALOG OVERVIEW ──────────────────────────────────────────────── -->
+    <section id="catalog">
+        <div class="container">
+            <div class="section-label">Software Catalog</div>
+            <h2 class="section-title">90+ apps across 17 categories</h2>
+            <p class="section-subtitle">Every popular Linux application, organized and ready to install.</p>
+
+            <div class="catalog-grid" id="catalog-grid">
+                <!-- filled by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── HOW IT WORKS ─────────────────────────────────────────────────── -->
+    <section id="how-it-works">
+        <div class="container">
+            <div class="section-label">Pipeline</div>
+            <h2 class="section-title">How Linite works</h2>
+            <p class="section-subtitle">Seven steps from detection to a fully configured system.</p>
+            <div class="steps-grid">
+                <div class="step-card" data-animate>
+                    <div class="step-card-num">01</div>
+                    <div class="step-card-icon">🔍</div>
+                    <h4 class="step-card-fn">detect_system()</h4>
+                    <p class="step-card-desc">Identifies distro, DE, RAM, GPU, architecture, VM/container status, and
+                        all available package managers.</p>
+                </div>
+                <div class="step-card" data-animate>
+                    <div class="step-card-num">02</div>
+                    <div class="step-card-icon">🧠</div>
+                    <h4 class="step-card-fn">IntelligenceEngine.analyze()</h4>
+                    <p class="step-card-desc">Runs 10 system checks and builds a prioritised suggestion list displayed
+                        live in the GUI.</p>
+                </div>
+                <div class="step-card" data-animate>
+                    <div class="step-card-num">03</div>
+                    <div class="step-card-icon">📦</div>
+                    <h4 class="step-card-fn">PackageMapLoader.get_spec()</h4>
+                    <p class="step-card-desc">Loads the TOML software map; falls back to the embedded Python catalog if
+                        the file is missing.</p>
+                </div>
+                <div class="step-card" data-animate>
+                    <div class="step-card-num">04</div>
+                    <div class="step-card-icon">📐</div>
+                    <h4 class="step-card-fn">ExecutionEngine.build_plan()</h4>
+                    <p class="step-card-desc">Topologically sorts selected apps into installation waves using Kahn's
+                        algorithm to resolve dependencies.</p>
+                </div>
+                <div class="step-card" data-animate>
+                    <div class="step-card-num">05</div>
+                    <div class="step-card-icon">⚡</div>
+                    <h4 class="step-card-fn">ExecutionEngine.execute()</h4>
+                    <p class="step-card-desc">Parallel threads per wave · retry × 3 · exponential back-off · automatic
+                        package-manager fallback.</p>
+                </div>
+                <div class="step-card" data-animate>
+                    <div class="step-card-num">06</div>
+                    <div class="step-card-icon">🔧</div>
+                    <h4 class="step-card-fn">ProfileEngine.apply_tweaks()</h4>
+                    <p class="step-card-desc">Runs post-install system commands — enables services, adds user groups,
+                        configures dotfiles.</p>
+                </div>
+                <div class="step-card step-card--wide" data-animate>
+                    <div class="step-card-num">07</div>
+                    <div class="step-card-icon">📜</div>
+                    <h4 class="step-card-fn">history.record()</h4>
+                    <p class="step-card-desc">Writes a full audit trail with timestamps, durations, and results to
+                        <code>~/.config/linite/history.json</code> and the Transaction Log viewer.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── GALLERY ───────────────────────────────────────────────────────── -->
+    <section id="gallery">
+        <div class="container">
+            <div class="section-label">Screenshots</div>
+            <h2 class="section-title">See it in action</h2>
+            <p class="section-subtitle">Real screenshots from Linite running on Kali GNU/Linux.</p>
+        </div>
+        <div class="gallery-track-wrapper">
+            <div class="gallery-track" id="gallery-track">
+                <div class="gallery-slide">
+                    <img src="img/mainui.png" alt="Linite main interface — all apps list" loading="lazy" />
+                    <div class="slide-caption">Main Interface — 92 apps, categorized &amp; searchable</div>
+                </div>
+                <div class="gallery-slide">
+                    <img src="img/Screenshot_2026-03-03_10_35_24.png" alt="Linite — web browsers category selected"
+                        loading="lazy" />
+                    <div class="slide-caption">Category Filter — Web Browsers (7 apps)</div>
+                </div>
+                <div class="gallery-slide">
+                    <img src="img/devprofile.png" alt="Quick-Start — Developer profile" loading="lazy" />
+                    <div class="slide-caption">Quick-Start Profile — Developer (12 apps)</div>
+                </div>
+                <div class="gallery-slide">
+                    <img src="img/gamerprofileui.png" alt="Quick-Start — Gamer profile" loading="lazy" />
+                    <div class="slide-caption">Quick-Start Profile — Gamer (9 apps + tweaks)</div>
+                </div>
+                <div class="gallery-slide">
+                    <img src="img/studentprofileui.png" alt="Quick-Start — Student profile" loading="lazy" />
+                    <div class="slide-caption">Quick-Start Profile — Student (11 apps)</div>
+                </div>
+                <div class="gallery-slide">
+                    <img src="img/content-creatorprofileui.png" alt="Quick-Start — Content Creator profile"
+                        loading="lazy" />
+                    <div class="slide-caption">Quick-Start Profile — Content Creator (10 apps)</div>
+                </div>
+                <div class="gallery-slide">
+                    <img src="img/security-pen-profileui.png" alt="Quick-Start — Security / Pentester profile"
+                        loading="lazy" />
+                    <div class="slide-caption">Quick-Start Profile — Security / Pentester (12 apps)</div>
+                </div>
+                <div class="gallery-slide">
+                    <img src="img/dailyUserprofileui.png" alt="Quick-Start — Daily User profile" loading="lazy" />
+                    <div class="slide-caption">Quick-Start Profile — Daily User (11 apps)</div>
+                </div>
+                <div class="gallery-slide">
+                    <img src="img/TransactionLog.png" alt="Transaction Log viewer" loading="lazy" />
+                    <div class="slide-caption">Transaction Log — full audit trail with stats</div>
+                </div>
+            </div>
+            <div class="gallery-controls">
+                <button class="gallery-btn" id="gallery-prev" aria-label="Previous">‹</button>
+                <div class="gallery-dots" id="gallery-dots"></div>
+                <button class="gallery-btn" id="gallery-next" aria-label="Next">›</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── TECH STACK ──────────────────────────────────────────────────── -->
+    <section id="tech">
+        <div class="container">
+            <div class="section-label">Tech Stack</div>
+            <h2 class="section-title">Built on solid foundations</h2>
+            <div class="tech-grid">
+                <div class="tech-card" data-animate>
+                    <div class="tech-icon">🐍</div>
+                    <div class="tech-name">Python 3.10+</div>
+                    <div class="tech-role">Core language</div>
+                </div>
+                <div class="tech-card" data-animate>
+                    <div class="tech-icon">🖼️</div>
+                    <div class="tech-name">Tkinter</div>
+                    <div class="tech-role">GUI toolkit (stdlib)</div>
+                </div>
+                <div class="tech-card" data-animate>
+                    <div class="tech-icon">📄</div>
+                    <div class="tech-name">tomllib / JSON</div>
+                    <div class="tech-role">Data storage (stdlib)</div>
+                </div>
+                <div class="tech-card" data-animate>
+                    <div class="tech-icon">🧵</div>
+                    <div class="tech-name">ThreadPoolExecutor</div>
+                    <div class="tech-role">Parallel installs</div>
+                </div>
+                <div class="tech-card" data-animate>
+                    <div class="tech-icon">🔗</div>
+                    <div class="tech-name">Kahn's Algorithm</div>
+                    <div class="tech-role">Dependency ordering</div>
+                </div>
+                <div class="tech-card" data-animate>
+                    <div class="tech-icon">📦</div>
+                    <div class="tech-name">apt · dnf · pacman · zypper · flatpak · snap</div>
+                    <div class="tech-role">Package managers</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── INSTALL / GET STARTED ─────────────────────────────────────────── -->
+    <section id="install">
+        <div class="container">
+            <div class="section-label">Get Started</div>
+            <h2 class="section-title">Up and running in seconds</h2>
+            <p class="section-subtitle">One dependency, four commands.</p>
+
+            <div class="install-steps">
+                <div class="install-step" data-animate>
+                    <div class="install-num">01</div>
+                    <div class="install-body">
+                        <h4>Install tkinter (if needed)</h4>
+                        <div class="code-tabs">
+                            <button class="code-tab active" data-distro="apt" id="install-apt-tab">Debian /
+                                Ubuntu</button>
+                            <button class="code-tab" data-distro="dnf" id="install-dnf-tab">Fedora / RHEL</button>
+                            <button class="code-tab" data-distro="pacman" id="install-pacman-tab">Arch</button>
+                            <button class="code-tab" data-distro="zypper" id="install-zypper-tab">openSUSE</button>
+                        </div>
+                        <div class="code-panels">
+                            <div class="code-panel active" id="panel-apt">
+                                <pre><code>sudo apt install python3-tk</code></pre>
+                            </div>
+                            <div class="code-panel" id="panel-dnf">
+                                <pre><code>sudo dnf install python3-tkinter</code></pre>
+                            </div>
+                            <div class="code-panel" id="panel-pacman">
+                                <pre><code>sudo pacman -S tk</code></pre>
+                            </div>
+                            <div class="code-panel" id="panel-zypper">
+                                <pre><code>sudo zypper install python3-tk</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="install-step" data-animate>
+                    <div class="install-num">02</div>
+                    <div class="install-body">
+                        <h4>Clone the repository</h4>
+                        <div class="code-block">
+                            <pre><code>git clone https://github.com/Srijan-XI/Linite.git
+cd Linite</code></pre>
+                            <button class="copy-btn"
+                                data-copy="git clone https://github.com/Srijan-XI/Linite.git&#10;cd Linite"
+                                id="copy-clone-btn" title="Copy">⎘</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="install-step" data-animate>
+                    <div class="install-num">03</div>
+                    <div class="install-body">
+                        <h4>Launch the GUI</h4>
+                        <div class="code-block">
+                            <pre><code>python main.py</code></pre>
+                            <button class="copy-btn" data-copy="python main.py" id="copy-gui-btn"
+                                title="Copy">⎘</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="install-step" data-animate>
+                    <div class="install-num">04</div>
+                    <div class="install-body">
+                        <h4>Or use CLI mode</h4>
+                        <div class="code-block">
+                            <pre><code>python main.py --cli install vlc git docker discord
+python main.py --list
+python main.py --cli update</code></pre>
+                            <button class="copy-btn" data-copy="python main.py --cli install vlc git docker discord"
+                                id="copy-cli-btn" title="Copy">⎘</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ─── CLI MODE ─────────────────────────────────────────────────────── -->
+    <section id="cli" style="padding: 100px 0; background: var(--bg-2);">
+        <div class="container">
+            <div class="section-label">Headless Mode</div>
+            <h2 class="section-title">CLI Mode</h2>
+            <p class="section-subtitle">No GUI required. Perfect for server provisioning, bash scripts, and remote
+                setups. Bypasses Tkinter entirely.</p>
+
+            <div class="cli-terminals">
+                <div class="cli-terminal-block" data-animate>
+                    <div class="cli-term-header">
+                        <div class="cli-term-dots">
+                            <span class="t-dot t-red"></span>
+                            <span class="t-dot t-yellow"></span>
+                            <span class="t-dot t-green"></span>
+                        </div>
+                        <span class="cli-term-title">bash — install apps</span>
+                        <button class="copy-btn" data-copy="python main.py --cli install vlc git docker discord"
+                            title="Copy">⎘ Copy</button>
+                    </div>
+                    <div class="cli-term-body">
+                        <span class="cli-prompt">$</span> <span class="cli-cmd">python main.py --cli install vlc git
+                            docker discord</span>
+                        <span class="cli-out">[INFO] Detected OS: Kali Linux 2025.4 (apt)
+                            [INFO] Building execution plan...
+                            [OK] Wave 1: Installing git... <span class="cli-ok">[SUCCESS]</span>
+                            [OK] Wave 1: Installing vlc... <span class="cli-ok">[SUCCESS]</span>
+                            [OK] Wave 2: Installing docker... <span class="cli-ok">[SUCCESS]</span>
+                            [INFO] Applied post-install tweaks for Docker.</span>
+                    </div>
+                </div>
+
+                <div class="cli-terminal-block" data-animate>
+                    <div class="cli-term-header">
+                        <div class="cli-term-dots">
+                            <span class="t-dot t-red"></span>
+                            <span class="t-dot t-yellow"></span>
+                            <span class="t-dot t-green"></span>
+                        </div>
+                        <span class="cli-term-title">bash — one-click system update</span>
+                        <button class="copy-btn" data-copy="python main.py --cli update" title="Copy">⎘ Copy</button>
+                    </div>
+                    <div class="cli-term-body">
+                        <span class="cli-prompt">$</span> <span class="cli-cmd">python main.py --cli update</span>
+                        <span class="cli-out">[INFO] Running native PM update (apt upgrade)... <span
+                                class="cli-ok">[DONE]</span>
+                            [INFO] Running flatpak update... <span class="cli-ok">[DONE]</span>
+                            [INFO] Running snap refresh... <span class="cli-ok">[DONE]</span>
+                            [INFO] System is fully up to date.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── FOOTER ────────────────────────────────────────────────────────── -->
+    <footer id="footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <span class="logo-icon">🐧</span>
+                    <span class="logo-text">Linite</span>
+                    <p class="footer-tagline">The Linux equivalent of Ninite.</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-col">
+                        <div class="footer-col-title">Project</div>
+                        <a href="https://github.com/Srijan-XI/Linite" target="_blank">GitHub</a>
+                        <a href="https://github.com/Srijan-XI/Linite/issues" target="_blank">Issues</a>
+                        <a href="https://github.com/Srijan-XI/Linite/blob/main/CONTRIBUTING.md"
+                            target="_blank">Contribute</a>
+                    </div>
+                    <div class="footer-col">
+                        <div class="footer-col-title">Docs</div>
+                        <a href="#features">Features</a>
+                        <a href="#install">Get Started</a>
+                        <a href="#catalog">App Catalog</a>
+                    </div>
+                    <div class="footer-col">
+                        <div class="footer-col-title">Legal</div>
+                        <a href="https://github.com/Srijan-XI/Linite/blob/main/LICENSE" target="_blank">MIT License</a>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <span>© 2026 Linite · MIT License</span>
+                    <span style="opacity: 0.65; margin: 0 16px;"><strong>Disclaimer:</strong> This application interacts
+                        deeply with system package managers and has been tested exclusively on <strong>Kali
+                            Linux</strong>.</span>
+                    <span>Made with ❤️ for the Linux community</span>
+                </div>
+            </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
