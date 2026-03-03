@@ -183,7 +183,7 @@
 
 ### 🔴 High Priority
 
-#### ❌ A. Export as Shell Script
+#### ✅ A. Export as Shell Script
 Generate a reproducible `.sh` from any selection. One of the most requested features on Ninite-style tools. Users can version-control their machine setup.
 
 ```python
@@ -194,7 +194,20 @@ def export_as_script(selected_ids: list[str], path: str) -> None:
 CLI usage:
 ```bash
 linite --export mysetup.sh
+linite --export mysetup.sh --pm apt
+linite --export mysetup.sh --cli install vlc git docker
 ```
+
+> **Implemented** in `core/script_exporter.py` — `export_as_script()` and `export_to_file()`.  
+> CLI flag `--export <FILE>` added to `main.py` (optionally combined with `--pm` and `--cli install <ids>`).  
+> GUI button **"📜 Export Script"** added to the action bar in `gui/app.py` — opens a save-file dialog, writes the script, and shows a success message.
+
+Generated scripts:
+- Start with `#!/usr/bin/env bash` + `set -euo pipefail`
+- Auto-detect the host distro's package manager at runtime
+- Emit `pre_commands`, install command, and `post_commands` per app
+- Support all six PMs: apt, dnf, pacman, zypper, snap, flatpak
+- Are chmod +x'd automatically on POSIX systems
 
 ---
 
@@ -405,8 +418,8 @@ Generate tab-completion for `linite --cli install <TAB>` using `argcomplete` or 
 |---|---|---|
 | 🔴 1 | Add Password Managers — Bitwarden, KeePassXC | ✅ Done |
 | 🔴 2 | Add Video Editors — Kdenlive, Shotcut | ✅ Done |
-| 🔴 3 | **Feature:** Export as Shell Script | ❌ Todo |
-| 🔴 4 | **Dependency:** Eliminate PyYAML → stdlib TOML | ❌ Todo |
+| 🔴 3 | **Feature:** Export as Shell Script | ✅ Done |
+| 🔴 4 | **Dependency:** Eliminate PyYAML → stdlib TOML | ✅ Done |
 | 🟠 5 | Add Terminal Emulators — Alacritty, Kitty, WezTerm | ✅ Done |
 | 🟠 6 | Add VPN Apps — ProtonVPN, WireGuard, Mullvad | ✅ Done |
 | 🟠 7 | **Feature:** Disk space pre-check before install | ✅ Done |
