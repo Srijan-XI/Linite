@@ -305,8 +305,10 @@ Pre-download `.deb` / `.rpm` packages to a local cache directory before presenti
 
 ---
 
-#### ❌ O. Plugin / Drop-In Catalog
-Load any `*.yaml` files from `~/.config/linite/catalog/` at startup and merge them into `CATALOG`. Lets teams distribute custom app definitions without forking the project.
+#### ✅ O. Plugin / Drop-In Catalog
+Load any `*.toml` files from `~/.config/linite/catalog/` at startup and merge them into `CATALOG`. Lets teams distribute custom app definitions without forking the project.
+
+> **Implemented** in `data/catalog_loader.py` — `load_catalog()` now loads from both built-in (`data/catalog/`) and user directories (`~/.config/linite/catalog/`). User-defined apps with duplicate IDs override built-in definitions. Full documentation available in `docs/PLUGIN_CATALOG.md` with examples in `docs/USER_CATALOG_EXAMPLE.toml`.
 
 ---
 
@@ -430,7 +432,7 @@ Generate tab-completion for `linite --cli install <TAB>` using `argcomplete` or 
 | 🟡 12 | **Feature:** Fuzzy search in GUI | ✅ Done |
 | 🟡 13 | **Feature:** AppImage support as install fallback | ❌ Todo |
 | 🟡 14 | **Feature:** Remote / SSH install mode | ❌ Todo |
-| 🟡 15 | **Feature:** Plugin / drop-in catalog from `~/.config/linite/catalog/` | ❌ Todo |
+| 🟡 15 | **Feature:** Plugin / drop-in catalog from `~/.config/linite/catalog/` | ✅ Done |
 
 ---
 

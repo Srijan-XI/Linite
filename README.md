@@ -12,6 +12,7 @@
 - 🗺️ **TOML-driven package maps** — per-PM TOML files are the source of truth; the Python catalog is the fallback
 - 🔄 **One-click system update** — upgrades all packages including Flatpak and Snap
 - 📜 **TOML profiles & YAML history** — profiles stored as TOML; install history stored as human-readable YAML
+- 🧩 **Plugin catalog system** — drop custom app definitions into `~/.config/linite/catalog/` to extend or override the built-in catalog ([docs](docs/PLUGIN_CATALOG.md))
 
 ### Quick-Start Profiles
 - ⚡ **6 pre-built presets** — Developer, Student, Gamer, Content Creator, Daily User, Security/Pentester
