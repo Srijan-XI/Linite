@@ -37,7 +37,6 @@
 |---|---|---|
 | **Kdenlive** | Best free NLE on Linux; apt / Flatpak | ✅ Done |
 | **Shotcut** | Cross-platform, beginner-friendly; Flatpak | ✅ Done |
-| **DaVinci Resolve** | Industry standard; script-based install only | ❌ Todo |
 | **OpenShot** | Lightweight alternative; Flatpak | ✅ Done |
 
 ---
