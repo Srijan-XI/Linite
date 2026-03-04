@@ -188,3 +188,146 @@ packages = ["gh"]
 [apps.install_specs.pacman]
 packages = ["github-cli"]
 
+[[apps]]
+id          = "postman"
+name        = "Postman"
+description = "API platform for building, testing and documenting APIs."
+category    = "Development"
+icon        = "📮"
+website     = "https://www.postman.com"
+preferred_pm = "flatpak"
+
+[apps.install_specs.snap]
+packages = ["postman"]
+
+[apps.install_specs.flatpak]
+packages = ["com.getpostman.Postman"]
+
+[[apps]]
+id          = "insomnia"
+name        = "Insomnia"
+description = "API design and testing client for REST and GraphQL."
+category    = "Development"
+icon        = "🌙"
+website     = "https://insomnia.rest"
+preferred_pm = "flatpak"
+
+[apps.install_specs.snap]
+packages = ["insomnia"]
+
+[apps.install_specs.flatpak]
+packages = ["rest.insomnia.Insomnia"]
+
+[[apps]]
+id          = "dbeaver"
+name        = "DBeaver"
+description = "Universal database tool for developers and analysts."
+category    = "Development"
+icon        = "🦫"
+website     = "https://dbeaver.io"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["dbeaver"]
+
+[apps.install_specs.dnf]
+packages = ["dbeaver"]
+
+[apps.install_specs.pacman]
+packages = ["dbeaver"]
+
+[apps.install_specs.zypper]
+packages = ["dbeaver"]
+
+[apps.install_specs.flatpak]
+packages = ["io.dbeaver.DBeaverCommunity"]
+
+[[apps]]
+id          = "android-studio"
+name        = "Android Studio"
+description = "Official IDE for Android app development."
+category    = "Development"
+icon        = "🤖"
+website     = "https://developer.android.com/studio"
+preferred_pm = "snap"
+
+[apps.install_specs.snap]
+packages = ["android-studio"]
+snap_classic = true
+
+[apps.install_specs.flatpak]
+packages = ["com.google.AndroidStudio"]
+
+[[apps]]
+id          = "jetbrains-toolbox"
+name        = "JetBrains Toolbox"
+description = "Toolbox app to manage all JetBrains IDEs."
+category    = "Development"
+icon        = "🧠"
+website     = "https://www.jetbrains.com/toolbox-app/"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["com.jetbrains.Toolbox"]
+
+[[apps]]
+id          = "podman"
+name        = "Podman"
+description = "Daemonless container engine with Docker-compatible CLI."
+category    = "Development"
+icon        = "🦭"
+website     = "https://podman.io"
+
+[apps.install_specs.apt]
+packages = ["podman"]
+
+[apps.install_specs.dnf]
+packages = ["podman"]
+
+[apps.install_specs.pacman]
+packages = ["podman"]
+
+[apps.install_specs.zypper]
+packages = ["podman"]
+
+[[apps]]
+id          = "kubectl"
+name        = "kubectl"
+description = "Kubernetes command-line tool."
+category    = "Development"
+icon        = "☸️"
+website     = "https://kubernetes.io/docs/reference/kubectl/"
+
+[apps.install_specs.snap]
+packages = ["kubectl"]
+snap_classic = true
+
+[apps.install_specs.dnf]
+packages = ["kubectl"]
+
+[apps.install_specs.pacman]
+packages = ["kubectl"]
+
+[apps.install_specs.zypper]
+packages = ["kubectl"]
+
+[[apps]]
+id          = "helm"
+name        = "Helm"
+description = "Kubernetes package manager for deploying and managing charts."
+category    = "Development"
+icon        = "⎈"
+website     = "https://helm.sh"
+
+[apps.install_specs.apt]
+packages = ["helm"]
+
+[apps.install_specs.dnf]
+packages = ["helm"]
+
+[apps.install_specs.pacman]
+packages = ["helm"]
+
+[apps.install_specs.zypper]
+packages = ["helm"]
+

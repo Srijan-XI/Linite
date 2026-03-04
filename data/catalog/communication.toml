@@ -78,3 +78,107 @@ pre_commands = [
 [apps.install_specs.flatpak]
 packages = ["com.dropbox.Client"]
 
+[[apps]]
+id          = "remmina"
+name        = "Remmina"
+description = "Remote desktop client supporting RDP, VNC, SSH and more."
+category    = "Communication"
+icon        = "🖥️"
+website     = "https://remmina.org"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["remmina"]
+
+[apps.install_specs.dnf]
+packages = ["remmina"]
+
+[apps.install_specs.pacman]
+packages = ["remmina"]
+
+[apps.install_specs.zypper]
+packages = ["remmina"]
+
+[apps.install_specs.flatpak]
+packages = ["org.remmina.Remmina"]
+
+[[apps]]
+id          = "rustdesk"
+name        = "RustDesk"
+description = "Open-source remote desktop software and AnyDesk alternative."
+category    = "Communication"
+icon        = "🦀"
+website     = "https://rustdesk.com"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["com.rustdesk.RustDesk"]
+
+[[apps]]
+id          = "anydesk"
+name        = "AnyDesk"
+description = "Popular remote desktop application for personal and business use."
+category    = "Communication"
+icon        = "🧩"
+website     = "https://anydesk.com"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["com.anydesk.Anydesk"]
+
+[[apps]]
+id          = "nextcloud-desktop"
+name        = "Nextcloud Desktop"
+description = "Sync client for self-hosted Nextcloud storage."
+category    = "Communication"
+icon        = "☁️"
+website     = "https://nextcloud.com/install/#install-clients"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["nextcloud-desktop"]
+
+[apps.install_specs.dnf]
+packages = ["nextcloud-client"]
+
+[apps.install_specs.pacman]
+packages = ["nextcloud-client"]
+
+[apps.install_specs.zypper]
+packages = ["nextcloud-desktop"]
+
+[apps.install_specs.flatpak]
+packages = ["com.nextcloud.desktopclient.nextcloud"]
+
+[[apps]]
+id          = "rclone"
+name        = "rclone"
+description = "Command-line program to manage files on cloud storage."
+category    = "Communication"
+icon        = "🔁"
+website     = "https://rclone.org"
+
+[apps.install_specs.apt]
+packages = ["rclone"]
+
+[apps.install_specs.dnf]
+packages = ["rclone"]
+
+[apps.install_specs.pacman]
+packages = ["rclone"]
+
+[apps.install_specs.zypper]
+packages = ["rclone"]
+
+[[apps]]
+id          = "insync"
+name        = "Insync"
+description = "Google Drive and OneDrive sync client for Linux."
+category    = "Communication"
+icon        = "🔄"
+website     = "https://www.insynchq.com"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["com.insynchq.insync"]
+

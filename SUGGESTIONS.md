@@ -11,7 +11,7 @@
 
 | Metric | Value |
 |---|---|
-| Total apps in catalog | ~90+ across 17 categories |
+| Total apps in catalog | 130 across 17 categories |
 | 3rd-party dependencies | 0 |
 | Supported package managers | 6 (apt, dnf, pacman, zypper, flatpak, snap) |
 | Profiles / presets | 6 (developer, student, gamer, content\_creator, daily\_user, security) |
@@ -37,6 +37,7 @@
 |---|---|---|
 | **Kdenlive** | Best free NLE on Linux; apt / Flatpak | ✅ Done |
 | **Shotcut** | Cross-platform, beginner-friendly; Flatpak | ✅ Done |
+| **DaVinci Resolve** | Industry standard; script-based install only | ✅ Done |
 | **OpenShot** | Lightweight alternative; Flatpak | ✅ Done |
 
 ---
@@ -67,10 +68,10 @@
 
 | App | Notes | Status |
 |---|---|---|
-| **btop++** | Modern, beautiful TUI resource monitor | ❌ Todo |
-| **Glances** | Web-UI capable system monitor; pip-installable | ❌ Todo |
-| **Stacer** | GUI system optimizer + monitor | ❌ Todo |
-| **Mission Center** | GNOME-native task manager; Flatpak | ❌ Todo |
+| **btop++** | Modern, beautiful TUI resource monitor | ✅ Done |
+| **Glances** | Web-UI capable system monitor; pip-installable | ✅ Done |
+| **Stacer** | GUI system optimizer + monitor | ✅ Done |
+| **Mission Center** | GNOME-native task manager; Flatpak | ✅ Done |
 
 ---
 
@@ -89,10 +90,10 @@
 
 | App | Notes | Status |
 |---|---|---|
-| **Nautilus** | GNOME default file manager | ❌ Todo |
-| **Thunar** | Lightweight XFCE file manager | ❌ Todo |
-| **Nemo** | Cinnamon / Linux Mint file manager | ❌ Todo |
-| **Dolphin** | KDE file manager | ❌ Todo |
+| **Nautilus** | GNOME default file manager | ✅ Done |
+| **Thunar** | Lightweight XFCE file manager | ✅ Done |
+| **Nemo** | Cinnamon / Linux Mint file manager | ✅ Done |
+| **Dolphin** | KDE file manager | ✅ Done |
 
 ---
 
@@ -100,9 +101,9 @@
 
 | App | Notes | Status |
 |---|---|---|
-| **Remmina** | Best multi-protocol remote desktop client; apt / Flatpak | ❌ Todo |
-| **RustDesk** | Open-source AnyDesk alternative; self-hostable | ❌ Todo |
-| **AnyDesk** | Popular commercial option; official `.deb` | ❌ Todo |
+| **Remmina** | Best multi-protocol remote desktop client; apt / Flatpak | ✅ Done |
+| **RustDesk** | Open-source AnyDesk alternative; self-hostable | ✅ Done |
+| **AnyDesk** | Popular commercial option; official `.deb` | ✅ Done |
 
 ---
 
@@ -110,9 +111,9 @@
 
 | App | Notes | Status |
 |---|---|---|
-| **Nextcloud Desktop** | Open-source self-hosted cloud; Flatpak | ❌ Todo |
-| **rclone** | CLI for all cloud providers (OneDrive, GDrive, S3 …) | ❌ Todo |
-| **Insync** | Google Drive + OneDrive sync client for Linux | ❌ Todo |
+| **Nextcloud Desktop** | Open-source self-hosted cloud; Flatpak | ✅ Done |
+| **rclone** | CLI for all cloud providers (OneDrive, GDrive, S3 …) | ✅ Done |
+| **Insync** | Google Drive + OneDrive sync client for Linux | ✅ Done |
 
 ---
 
@@ -120,14 +121,14 @@
 
 | App | Notes | Status |
 |---|---|---|
-| **Postman** | API testing; Flatpak available | ❌ Todo |
-| **Insomnia** | Open-source API client; Flatpak | ❌ Todo |
-| **DBeaver** | Universal database GUI; Flatpak | ❌ Todo |
-| **Android Studio** | Mobile development; script-based install | ❌ Todo |
-| **JetBrains Toolbox** | Manages all JetBrains IDEs; script-based install | ❌ Todo |
-| **Podman** | Docker-compatible rootless containers | ❌ Todo |
-| **kubectl** | Kubernetes CLI | ❌ Todo |
-| **Helm** | Kubernetes package manager | ❌ Todo |
+| **Postman** | API testing; Flatpak available | ✅ Done |
+| **Insomnia** | Open-source API client; Flatpak | ✅ Done |
+| **DBeaver** | Universal database GUI; Flatpak | ✅ Done |
+| **Android Studio** | Mobile development; script-based install | ✅ Done |
+| **JetBrains Toolbox** | Manages all JetBrains IDEs; script-based install | ✅ Done |
+| **Podman** | Docker-compatible rootless containers | ✅ Done |
+| **kubectl** | Kubernetes CLI | ✅ Done |
+| **Helm** | Kubernetes package manager | ✅ Done |
 
 ---
 
@@ -135,9 +136,9 @@
 
 | App | Notes | Status |
 |---|---|---|
-| **LibreWolf** | Privacy-hardened Firefox fork | ❌ Todo |
-| **Floorp** | Firefox-based; gaining popularity | ❌ Todo |
-| **Microsoft Edge** | Required by many corporate / WSL users; official `.deb` | ❌ Todo |
+| **LibreWolf** | Privacy-hardened Firefox fork | ✅ Done |
+| **Floorp** | Firefox-based; gaining popularity | ✅ Done |
+| **Microsoft Edge** | Required by many corporate / WSL users; official `.deb` | ✅ Done |
 
 ---
 
@@ -157,12 +158,12 @@
 
 | App | Notes | Status |
 |---|---|---|
-| **Kooha** | Wayland screen recorder; Flatpak | ❌ Todo |
-| **Pitivi** | GNOME video editor | ❌ Todo |
-| **LMMS** | Free music production | ❌ Todo |
-| **Ardour** | Professional DAW | ❌ Todo |
-| **Rhythmbox** | GNOME music player | ❌ Todo |
-| **Strawberry** | Modern music player with Last.fm scrobbling | ❌ Todo |
+| **Kooha** | Wayland screen recorder; Flatpak | ✅ Done |
+| **Pitivi** | GNOME video editor | ✅ Done |
+| **LMMS** | Free music production | ✅ Done |
+| **Ardour** | Professional DAW | ✅ Done |
+| **Rhythmbox** | GNOME music player | ✅ Done |
+| **Strawberry** | Modern music player with Last.fm scrobbling | ✅ Done |
 
 ---
 
@@ -170,11 +171,11 @@
 
 | App | Notes | Status |
 |---|---|---|
-| **ClamAV** | Open-source antivirus; apt / dnf / pacman | ❌ Todo |
-| **UFW / Gufw** | Uncomplicated Firewall + GUI frontend | ❌ Todo |
-| **Fail2ban** | Brute-force login protection | ❌ Todo |
-| **Nikto** | Web server vulnerability scanner | ❌ Todo |
-| **Gobuster** | Directory / DNS brute-forcer | ❌ Todo |
+| **ClamAV** | Open-source antivirus; apt / dnf / pacman | ✅ Done |
+| **UFW / Gufw** | Uncomplicated Firewall + GUI frontend | ✅ Done |
+| **Fail2ban** | Brute-force login protection | ✅ Done |
+| **Nikto** | Web server vulnerability scanner | ✅ Done |
+| **Gobuster** | Directory / DNS brute-forcer | ✅ Done |
 
 ---
 

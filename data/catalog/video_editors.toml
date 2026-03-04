@@ -61,3 +61,14 @@ packages = ["openshot"]
 [apps.install_specs.flatpak]
 packages = ["org.openshot.OpenShot"]
 
+[[apps]]
+id          = "davinci-resolve"
+name        = "DaVinci Resolve"
+description = "Professional-grade video editing, color grading and post-production suite."
+category    = "Video Editors"
+icon        = "🎛️"
+website     = "https://www.blackmagicdesign.com/products/davinciresolve"
+
+[apps.install_specs.aur]
+packages = ["davinci-resolve"]
+

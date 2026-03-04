@@ -128,3 +128,131 @@ packages = ["handbrake"]
 [apps.install_specs.flatpak]
 packages = ["fr.handbrake.ghb"]
 
+[[apps]]
+id          = "kooha"
+name        = "Kooha"
+description = "Simple and modern screen recorder with Wayland support."
+category    = "Media"
+icon        = "📹"
+website     = "https://github.com/SeaDve/Kooha"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["io.github.seadve.Kooha"]
+
+[[apps]]
+id          = "pitivi"
+name        = "Pitivi"
+description = "Open-source non-linear video editor for GNOME."
+category    = "Media"
+icon        = "🎞️"
+website     = "https://www.pitivi.org"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["pitivi"]
+
+[apps.install_specs.dnf]
+packages = ["pitivi"]
+
+[apps.install_specs.pacman]
+packages = ["pitivi"]
+
+[apps.install_specs.zypper]
+packages = ["pitivi"]
+
+[apps.install_specs.flatpak]
+packages = ["org.pitivi.Pitivi"]
+
+[[apps]]
+id          = "lmms"
+name        = "LMMS"
+description = "Digital audio workstation for music production."
+category    = "Media"
+icon        = "🎼"
+website     = "https://lmms.io"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["lmms"]
+
+[apps.install_specs.dnf]
+packages = ["lmms"]
+
+[apps.install_specs.pacman]
+packages = ["lmms"]
+
+[apps.install_specs.zypper]
+packages = ["lmms"]
+
+[apps.install_specs.flatpak]
+packages = ["io.lmms.LMMS"]
+
+[[apps]]
+id          = "ardour"
+name        = "Ardour"
+description = "Professional-grade digital audio workstation."
+category    = "Media"
+icon        = "🎛️"
+website     = "https://ardour.org"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["ardour"]
+
+[apps.install_specs.dnf]
+packages = ["ardour"]
+
+[apps.install_specs.pacman]
+packages = ["ardour"]
+
+[apps.install_specs.zypper]
+packages = ["ardour"]
+
+[apps.install_specs.flatpak]
+packages = ["org.ardour.Ardour"]
+
+[[apps]]
+id          = "rhythmbox"
+name        = "Rhythmbox"
+description = "GNOME music player and media management app."
+category    = "Media"
+icon        = "🎵"
+website     = "https://wiki.gnome.org/Apps/Rhythmbox"
+
+[apps.install_specs.apt]
+packages = ["rhythmbox"]
+
+[apps.install_specs.dnf]
+packages = ["rhythmbox"]
+
+[apps.install_specs.pacman]
+packages = ["rhythmbox"]
+
+[apps.install_specs.zypper]
+packages = ["rhythmbox"]
+
+[[apps]]
+id          = "strawberry"
+name        = "Strawberry"
+description = "Modern music player and collection organizer."
+category    = "Media"
+icon        = "🍓"
+website     = "https://www.strawberrymusicplayer.org"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["strawberry"]
+
+[apps.install_specs.dnf]
+packages = ["strawberry"]
+
+[apps.install_specs.pacman]
+packages = ["strawberry"]
+
+[apps.install_specs.zypper]
+packages = ["strawberry"]
+
+[apps.install_specs.flatpak]
+packages = ["org.strawberrymusicplayer.strawberry"]
+

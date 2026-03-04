@@ -215,3 +215,123 @@ packages = ["hashcat"]
 [apps.install_specs.zypper]
 packages = ["hashcat"]
 
+[[apps]]
+id          = "clamav"
+name        = "ClamAV"
+description = "Open-source antivirus engine and utilities."
+category    = "Security"
+icon        = "🛡️"
+website     = "https://www.clamav.net"
+
+[apps.install_specs.apt]
+packages = ["clamav"]
+
+[apps.install_specs.dnf]
+packages = ["clamav"]
+
+[apps.install_specs.pacman]
+packages = ["clamav"]
+
+[apps.install_specs.zypper]
+packages = ["clamav"]
+
+[[apps]]
+id          = "ufw"
+name        = "UFW"
+description = "Uncomplicated Firewall command-line frontend."
+category    = "Security"
+icon        = "🔥"
+website     = "https://wiki.ubuntu.com/UncomplicatedFirewall"
+
+[apps.install_specs.apt]
+packages = ["ufw"]
+
+[apps.install_specs.dnf]
+packages = ["ufw"]
+
+[apps.install_specs.pacman]
+packages = ["ufw"]
+
+[apps.install_specs.zypper]
+packages = ["ufw"]
+
+[[apps]]
+id          = "gufw"
+name        = "Gufw"
+description = "Graphical firewall manager for UFW."
+category    = "Security"
+icon        = "🧱"
+website     = "https://github.com/costales/gufw"
+
+[apps.install_specs.apt]
+packages = ["gufw"]
+
+[apps.install_specs.dnf]
+packages = ["gufw"]
+
+[apps.install_specs.pacman]
+packages = ["gufw"]
+
+[apps.install_specs.zypper]
+packages = ["gufw"]
+
+[[apps]]
+id          = "fail2ban"
+name        = "Fail2ban"
+description = "Intrusion prevention by banning repeated failed login attempts."
+category    = "Security"
+icon        = "🚫"
+website     = "https://github.com/fail2ban/fail2ban"
+
+[apps.install_specs.apt]
+packages = ["fail2ban"]
+
+[apps.install_specs.dnf]
+packages = ["fail2ban"]
+
+[apps.install_specs.pacman]
+packages = ["fail2ban"]
+
+[apps.install_specs.zypper]
+packages = ["fail2ban"]
+
+[[apps]]
+id          = "nikto"
+name        = "Nikto"
+description = "Web server vulnerability scanner."
+category    = "Security"
+icon        = "🕵️"
+website     = "https://github.com/sullo/nikto"
+
+[apps.install_specs.apt]
+packages = ["nikto"]
+
+[apps.install_specs.dnf]
+packages = ["nikto"]
+
+[apps.install_specs.pacman]
+packages = ["nikto"]
+
+[apps.install_specs.zypper]
+packages = ["nikto"]
+
+[[apps]]
+id          = "gobuster"
+name        = "Gobuster"
+description = "Directory, DNS and virtual host brute-forcing tool."
+category    = "Security"
+icon        = "🧪"
+website     = "https://github.com/OJ/gobuster"
+
+[apps.install_specs.apt]
+packages = ["gobuster"]
+
+[apps.install_specs.dnf]
+packages = ["gobuster"]
+
+[apps.install_specs.pacman]
+packages = ["gobuster"]
+
+[apps.install_specs.zypper]
+packages = ["gobuster"]
+

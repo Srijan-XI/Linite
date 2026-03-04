@@ -146,3 +146,51 @@ pre_commands = [
 [apps.install_specs.flatpak]
 packages = ["com.vivaldi.Vivaldi"]
 
+[[apps]]
+id          = "librewolf"
+name        = "LibreWolf"
+description = "Privacy-focused Firefox fork with hardened defaults."
+category    = "Web Browsers"
+icon        = "🛡️"
+website     = "https://librewolf.net"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["io.gitlab.librewolf-community"]
+
+[[apps]]
+id          = "floorp"
+name        = "Floorp"
+description = "Firefox-based browser focused on customization and privacy."
+category    = "Web Browsers"
+icon        = "🦊"
+website     = "https://floorp.app"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["one.ablaze.floorp"]
+
+[[apps]]
+id          = "microsoft-edge"
+name        = "Microsoft Edge"
+description = "Chromium-based browser by Microsoft."
+category    = "Web Browsers"
+icon        = "🌊"
+website     = "https://www.microsoft.com/edge"
+
+[apps.install_specs.apt]
+packages = ["microsoft-edge-stable"]
+pre_commands = [
+  "wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /tmp/microsoft-edge.gpg",
+  "install -o root -g root -m 644 /tmp/microsoft-edge.gpg /etc/apt/trusted.gpg.d/",
+  "echo \"deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/microsoft-edge.gpg] https://packages.microsoft.com/repos/edge stable main\" > /etc/apt/sources.list.d/microsoft-edge.list",
+  "apt-get update",
+]
+
+[apps.install_specs.dnf]
+packages = ["microsoft-edge-stable"]
+pre_commands = [
+  "rpm --import https://packages.microsoft.com/keys/microsoft.asc",
+  "dnf config-manager --add-repo https://packages.microsoft.com/yumrepos/edge",
+]
+

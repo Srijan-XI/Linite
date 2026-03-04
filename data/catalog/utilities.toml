@@ -194,3 +194,147 @@ packages = ["notepad-plus-plus"]
 [apps.install_specs.flatpak]
 packages = ["io.github.mmtrt.Notepad_npp"]
 
+[[apps]]
+id          = "btop"
+name        = "btop"
+description = "Modern resource monitor with an interactive terminal UI."
+category    = "Utilities"
+icon        = "📈"
+website     = "https://github.com/aristocratos/btop"
+
+[apps.install_specs.apt]
+packages = ["btop"]
+
+[apps.install_specs.dnf]
+packages = ["btop"]
+
+[apps.install_specs.pacman]
+packages = ["btop"]
+
+[apps.install_specs.zypper]
+packages = ["btop"]
+
+[[apps]]
+id          = "glances"
+name        = "Glances"
+description = "Cross-platform system monitoring tool with optional web UI."
+category    = "Utilities"
+icon        = "🧭"
+website     = "https://nicolargo.github.io/glances/"
+
+[apps.install_specs.apt]
+packages = ["glances"]
+
+[apps.install_specs.dnf]
+packages = ["glances"]
+
+[apps.install_specs.pacman]
+packages = ["glances"]
+
+[apps.install_specs.zypper]
+packages = ["glances"]
+
+[[apps]]
+id          = "stacer"
+name        = "Stacer"
+description = "System optimizer and resource monitor for Linux."
+category    = "Utilities"
+icon        = "🧰"
+website     = "https://github.com/oguzhaninan/Stacer"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["com.github.oguzhaninan.Stacer"]
+
+[[apps]]
+id          = "mission-center"
+name        = "Mission Center"
+description = "Modern GTK task manager and system monitor."
+category    = "Utilities"
+icon        = "🛰️"
+website     = "https://missioncenter.io"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["io.missioncenter.MissionCenter"]
+
+[[apps]]
+id          = "nautilus"
+name        = "Nautilus"
+description = "GNOME Files, the default file manager for GNOME desktops."
+category    = "Utilities"
+icon        = "📁"
+website     = "https://apps.gnome.org/Nautilus/"
+
+[apps.install_specs.apt]
+packages = ["nautilus"]
+
+[apps.install_specs.dnf]
+packages = ["nautilus"]
+
+[apps.install_specs.pacman]
+packages = ["nautilus"]
+
+[apps.install_specs.zypper]
+packages = ["nautilus"]
+
+[[apps]]
+id          = "thunar"
+name        = "Thunar"
+description = "Lightweight and fast file manager from the XFCE project."
+category    = "Utilities"
+icon        = "📂"
+website     = "https://docs.xfce.org/xfce/thunar/start"
+
+[apps.install_specs.apt]
+packages = ["thunar"]
+
+[apps.install_specs.dnf]
+packages = ["thunar"]
+
+[apps.install_specs.pacman]
+packages = ["thunar"]
+
+[apps.install_specs.zypper]
+packages = ["thunar"]
+
+[[apps]]
+id          = "nemo"
+name        = "Nemo"
+description = "Feature-rich file manager from the Cinnamon desktop."
+category    = "Utilities"
+icon        = "🗂️"
+website     = "https://github.com/linuxmint/nemo"
+
+[apps.install_specs.apt]
+packages = ["nemo"]
+
+[apps.install_specs.dnf]
+packages = ["nemo"]
+
+[apps.install_specs.pacman]
+packages = ["nemo"]
+
+[apps.install_specs.zypper]
+packages = ["nemo"]
+
+[[apps]]
+id          = "dolphin"
+name        = "Dolphin"
+description = "KDE's powerful file manager."
+category    = "Utilities"
+icon        = "🐬"
+website     = "https://apps.kde.org/dolphin/"
+
+[apps.install_specs.apt]
+packages = ["dolphin"]
+
+[apps.install_specs.dnf]
+packages = ["dolphin"]
+
+[apps.install_specs.pacman]
+packages = ["dolphin"]
+
+[apps.install_specs.zypper]
+packages = ["dolphin"]
+
