@@ -1,0 +1,18 @@
+# This is a typical CODEOWNERS file for a GitHub repository.
+# Lines starting with '#' are comments.
+# Each line is a file pattern followed by one or more owners.
+
+# Default owners for everything in the repository.
+# Unless a later match takes precedence, @Srijan-XI and @AmanKumar-St will be
+# requested for a review when someone opens a pull request.
+* @Srijan-XI @AmanKumar-St
+
+# Example of more specific rules (can be uncommented and modified):
+
+# To assign a specific person or team to a specific file or directory:
+# docs/      @docs-team
+# *.py       @python-expert
+# /scripts/  @scripts-team
+
+# To explicitly require no reviewers for certain files:
+# /site/docs/ *
