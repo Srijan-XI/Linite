@@ -1,0 +1,58 @@
+# Example User Catalog for Linite
+# Place this file in: ~/.config/linite/catalog/my_apps.toml
+# You can create multiple .toml files in that directory.
+#
+# Each file should contain an [[apps]] array with your custom app definitions.
+# Apps with duplicate IDs will override built-in definitions.
+
+[[apps]]
+id          = "my-custom-app"
+name        = "My Custom Application"
+description = "A custom application I want to install via Linite."
+category    = "Custom"
+icon        = "🚀"
+website     = "https://example.com/my-app"
+preferred_pm = "snap"
+
+# Define how to install via different package managers
+[apps.install_specs.snap]
+packages = ["my-custom-app"]
+snap_classic = false
+
+[apps.install_specs.flatpak]
+packages = ["com.example.MyCustomApp"]
+
+[apps.install_specs.apt]
+packages = ["my-custom-app"]
+# Optional: add pre-install commands (e.g., add repository)
+pre_commands = [
+  "wget -qO- https://example.com/repo.key | gpg --dearmor > /tmp/example.gpg",
+  "install -o root -g root -m 644 /tmp/example.gpg /etc/apt/trusted.gpg.d/",
+  "echo 'deb https://example.com/apt stable main' > /etc/apt/sources.list.d/example.list",
+  "apt-get update",
+]
+# Optional: add post-install commands
+post_commands = [
+  "echo 'Setup complete!'",
+]
+
+[[apps]]
+id          = "another-app"
+name        = "Another Custom Tool"
+description = "Another tool my team uses."
+category    = "Development"
+icon        = "🔧"
+website     = "https://example.com/tool"
+
+# Script-based installation example
+[apps.install_specs.script]
+script_url = "https://example.com/install.sh"
+sha256 = "abc123...your-sha256-hash-here"
+pre_commands = ["curl --version"]  # verify curl is available
+
+# You can also override built-in apps by using the same ID
+# For example, to change how 'git' is installed:
+# [[apps]]
+# id = "git"
+# name = "Git (Custom Build)"
+# ...

@@ -1,0 +1,233 @@
+# Linite Flatpak Package Map  (Flathub)
+# All packages installed from the 'flathub' remote unless noted.
+---
+
+firefox:
+  packages: [org.mozilla.firefox]
+  flatpak_remote: flathub
+
+chromium:
+  packages: [org.chromium.Chromium]
+  flatpak_remote: flathub
+
+brave:
+  packages: [com.brave.Browser]
+  flatpak_remote: flathub
+
+google-chrome:
+  packages: [com.google.Chrome]
+  flatpak_remote: flathub
+
+opera:
+  packages: [com.opera.Opera]
+  flatpak_remote: flathub
+
+tor-browser:
+  packages: [com.github.micahflee.torbrowser-launcher]
+  flatpak_remote: flathub
+
+vivaldi:
+  packages: [com.vivaldi.Vivaldi]
+  flatpak_remote: flathub
+
+vscode:
+  packages: [com.visualstudio.code]
+  flatpak_remote: flathub
+
+vlc:
+  packages: [org.videolan.VLC]
+  flatpak_remote: flathub
+
+mpv:
+  packages: [io.mpv.Mpv]
+  flatpak_remote: flathub
+
+obs:
+  packages: [com.obsproject.Studio]
+  flatpak_remote: flathub
+
+audacity:
+  packages: [org.audacityteam.Audacity]
+  flatpak_remote: flathub
+
+handbrake:
+  packages: [fr.handbrake.ghb]
+  flatpak_remote: flathub
+
+spotify:
+  packages: [com.spotify.Client]
+  flatpak_remote: flathub
+
+discord:
+  packages: [com.discordapp.Discord]
+  flatpak_remote: flathub
+
+telegram:
+  packages: [org.telegram.desktop]
+  flatpak_remote: flathub
+
+slack:
+  packages: [com.slack.Slack]
+  flatpak_remote: flathub
+
+zoom:
+  packages: [us.zoom.Zoom]
+  flatpak_remote: flathub
+
+dropbox:
+  packages: [com.dropbox.Client]
+  flatpak_remote: flathub
+
+gimp:
+  packages: [org.gimp.GIMP]
+  flatpak_remote: flathub
+
+inkscape:
+  packages: [org.inkscape.Inkscape]
+  flatpak_remote: flathub
+
+blender:
+  packages: [org.blender.Blender]
+  flatpak_remote: flathub
+
+libreoffice:
+  packages: [org.libreoffice.LibreOffice]
+  flatpak_remote: flathub
+
+thunderbird:
+  packages: [org.mozilla.Thunderbird]
+  flatpak_remote: flathub
+
+okular:
+  packages: [org.kde.okular]
+  flatpak_remote: flathub
+
+evince:
+  packages: [org.gnome.Evince]
+  flatpak_remote: flathub
+
+foxitreader:
+  packages: [com.foxit.Reader]
+  flatpak_remote: flathub
+
+openoffice:
+  packages: [org.openoffice.OpenOffice]
+  flatpak_remote: flathub
+
+steam:
+  packages: [com.valvesoftware.Steam]
+  flatpak_remote: flathub
+
+lutris:
+  packages: [net.lutris.Lutris]
+  flatpak_remote: flathub
+
+notepadplusplus:
+  packages: [io.github.mmtrt.Notepad_npp]
+  flatpak_remote: flathub
+
+flameshot:
+  packages: [org.flameshot.Flameshot]
+  flatpak_remote: flathub
+
+qbittorrent:
+  packages: [org.qbittorrent.qBittorrent]
+  flatpak_remote: flathub
+
+virtualbox:
+  packages: [org.virtualbox.VirtualBox]
+  flatpak_remote: flathub
+
+nmap:
+  packages: [org.nmap.Zenmap]
+  flatpak_remote: flathub
+
+zenmap:
+  packages: [org.nmap.Zenmap]
+  flatpak_remote: flathub
+
+burpsuite:
+  packages: [net.portswigger.BurpSuite]
+  flatpak_remote: flathub
+
+angryip:
+  packages: [com.angryip.ipscan]
+  flatpak_remote: flathub
+
+wireshark:
+  packages: [org.wireshark.Wireshark]
+  flatpak_remote: flathub
+
+# ── Password Managers ─────────────────────────────────────────────────────────
+bitwarden:
+  packages: [com.bitwarden.desktop]
+  flatpak_remote: flathub
+
+keepassxc:
+  packages: [org.keepassxc.KeePassXC]
+  flatpak_remote: flathub
+
+# ── Video Editors ─────────────────────────────────────────────────────────────
+kdenlive:
+  packages: [org.kde.kdenlive]
+  flatpak_remote: flathub
+
+shotcut:
+  packages: [org.shotcut.Shotcut]
+  flatpak_remote: flathub
+
+openshot:
+  packages: [org.openshot.OpenShot]
+  flatpak_remote: flathub
+
+# ── Terminal Emulators ────────────────────────────────────────────────────────
+alacritty:
+  packages: [org.alacritty.Alacritty]
+  flatpak_remote: flathub
+
+kitty:
+  packages: [net.kovidgoyal.kitty]
+  flatpak_remote: flathub
+
+wezterm:
+  packages: [org.wezfurlong.wezterm]
+  flatpak_remote: flathub
+
+tilix:
+  packages: [com.gexperts.Tilix]
+  flatpak_remote: flathub
+
+# ── VPN ───────────────────────────────────────────────────────────────────────
+protonvpn:
+  packages: [com.protonvpn.www]
+  flatpak_remote: flathub
+
+# ── Note Taking ───────────────────────────────────────────────────────────────
+obsidian:
+  packages: [md.obsidian.Obsidian]
+  flatpak_remote: flathub
+
+joplin:
+  packages: [net.cozic.joplin_desktop]
+  flatpak_remote: flathub
+
+logseq:
+  packages: [com.logseq.Logseq]
+  flatpak_remote: flathub
+
+cherrytree:
+  packages: [com.giuspen.cherrytree]
+  flatpak_remote: flathub
+
+# ── Gaming ────────────────────────────────────────────────────────────────────
+heroic:
+  packages: [com.heroicgameslauncher.hgl]
+  flatpak_remote: flathub
+
+bottles:
+  packages: [com.usebottles.bottles]
+  flatpak_remote: flathub
+
+protonup-qt:
+  packages: [net.davidotek.pupgui2]
+  flatpak_remote: flathub

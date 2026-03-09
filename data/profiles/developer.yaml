@@ -1,0 +1,49 @@
+id: developer
+name: Developer
+icon: "💻"
+color: "#7c6af7"
+tagline: Full-stack & DevOps toolbox
+description: |
+  Everything a software developer needs: version control, runtimes,
+  containers, a powerful editor, and the GitHub CLI. Covers web, backend,
+  and infrastructure work out of the box.
+
+packages:
+  - git
+  - vscode
+  - python3
+  - nodejs
+  - docker
+  - gh
+  - neovim
+  - alacritty
+  - curl
+  - wget
+  - htop
+  - firefox
+  - flatpak
+
+system_tweaks:
+  - id: enable_docker
+    description: "Enable Docker daemon on startup"
+    command: "systemctl enable --now docker"
+    requires_package: docker
+    run_as_root: true
+
+  - id: docker_group
+    description: "Add current user to the docker group (enables docker without sudo)"
+    command: "usermod -aG docker $SUDO_USER"
+    requires_package: docker
+    run_as_root: true
+
+  - id: git_global_config
+    description: "Set git pull to rebase by default"
+    command: "git config --global pull.rebase true"
+    requires_package: git
+    run_as_root: false
+
+  - id: flathub_remote
+    description: "Add Flathub remote for Flatpak"
+    command: "flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo"
+    requires_package: flatpak
+    run_as_root: true

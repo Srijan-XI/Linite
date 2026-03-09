@@ -1,0 +1,176 @@
+# Linite Pacman Package Map  (Arch Linux / Manjaro / EndeavourOS / Garuda)
+# AUR packages are noted with a comment; installation requires an AUR helper
+# (yay, paru) which Linite wraps if detected.
+---
+
+firefox:
+  packages: [firefox]
+
+chromium:
+  packages: [chromium]
+
+brave:
+  packages: [brave-bin]   # AUR
+
+git:
+  packages: [git]
+
+vscode:
+  packages: [code]         # community repo (open-vsx); use visual-studio-code-bin from AUR for MS build
+
+python3:
+  packages: [python, python-pip]
+
+nodejs:
+  packages: [nodejs, npm]
+
+docker:
+  packages: [docker, docker-compose]
+  post_commands:
+    - "systemctl enable --now docker"
+    - "usermod -aG docker $USER"
+
+vim:
+  packages: [vim]
+
+neovim:
+  packages: [neovim]
+
+gh:
+  packages: [github-cli]
+
+curl:
+  packages: [curl]
+
+wget:
+  packages: [wget]
+
+htop:
+  packages: [htop]
+
+vlc:
+  packages: [vlc]
+
+mpv:
+  packages: [mpv]
+
+obs:
+  packages: [obs-studio]
+
+audacity:
+  packages: [audacity]
+
+handbrake:
+  packages: [handbrake]
+
+spotify:
+  packages: [spotify]       # AUR
+
+discord:
+  packages: [discord]
+
+telegram:
+  packages: [telegram-desktop]
+
+slack:
+  packages: [slack-desktop]  # AUR
+
+thunderbird:
+  packages: [thunderbird]
+
+flameshot:
+  packages: [flameshot]
+
+wireshark:
+  packages: [wireshark-qt]
+
+7zip:
+  packages: [p7zip]
+
+timeshift:
+  packages: [timeshift]
+
+neofetch:
+  packages: [neofetch]
+
+flatpak:
+  packages: [flatpak]
+  post_commands:
+    - "flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo"
+
+steam:
+  packages: [steam]
+  pre_commands:
+    - "pacman -S --noconfirm --needed multilib-devel"
+
+lutris:
+  packages: [lutris]
+
+gimp:
+  packages: [gimp]
+
+inkscape:
+  packages: [inkscape]
+
+blender:
+  packages: [blender]
+
+libreoffice:
+  packages: [libreoffice-fresh]
+
+okular:
+  packages: [okular]
+
+evince:
+  packages: [evince]
+
+qbittorrent:
+  packages: [qbittorrent]
+
+qbittorrent-nox:
+  packages: [qbittorrent-nox]
+
+deluge:
+  packages: [deluge]
+
+transmission:
+  packages: [transmission-gtk]
+
+virtualbox:
+  packages: [virtualbox]
+
+qemu:
+  packages: [qemu-full, virt-manager, libvirt, dnsmasq]
+
+openjdk:
+  packages: [jdk-openjdk]
+
+eclipse-temurin:
+  packages: [jdk21-temurin]   # AUR
+
+zulu-jdk:
+  packages: [zulu21-bin]      # AUR
+
+nmap:
+  packages: [nmap]
+
+zenmap:
+  packages: [zenmap]
+
+hydra:
+  packages: [hydra]
+
+john:
+  packages: [john]
+
+aircrack-ng:
+  packages: [aircrack-ng]
+
+hashcat:
+  packages: [hashcat]
+
+sqlmap:
+  packages: [sqlmap]
+
+angryip:
+  packages: [angry-ip-scanner]  # AUR

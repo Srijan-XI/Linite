@@ -1,0 +1,33 @@
+# Linite Profile — Student
+# -------------------------
+# Lightweight academic setup: office suite, PDF reader, browser, and basic dev tools.
+
+id          = "student"
+name        = "Student"
+icon        = "📚"
+color       = "#5bc0de"
+tagline     = "Lightweight academic setup"
+description = """\
+Office suite, PDF reader, web browser, note-taking, and basic development \
+tools for students and academics — without the bulk of a full dev workstation.\
+"""
+
+packages = [
+  "libreoffice",
+  "okular",
+  "firefox",
+  "thunderbird",
+  "git",
+  "python3",
+  "cherrytree",
+  "vlc",
+  "gimp",
+  "flatpak",
+]
+
+[[system_tweaks]]
+id                = "git_student_config"
+description       = "Initialise sane Git global defaults for coursework"
+command           = "git config --global init.defaultBranch main && git config --global credential.helper store"
+requires_package  = "git"
+run_as_root       = false

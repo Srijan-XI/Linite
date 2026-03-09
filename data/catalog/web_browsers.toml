@@ -1,0 +1,196 @@
+[[apps]]
+id          = "firefox"
+name        = "Firefox"
+description = "Fast, private and free web browser by Mozilla."
+category    = "Web Browsers"
+icon        = "🦊"
+website     = "https://www.mozilla.org/firefox"
+
+[apps.install_specs.apt]
+packages = ["firefox"]
+
+[apps.install_specs.dnf]
+packages = ["firefox"]
+
+[apps.install_specs.pacman]
+packages = ["firefox"]
+
+[apps.install_specs.zypper]
+packages = ["MozillaFirefox"]
+
+[[apps]]
+id          = "chromium"
+name        = "Chromium"
+description = "Open-source browser project that powers Chrome."
+category    = "Web Browsers"
+icon        = "🔵"
+website     = "https://www.chromium.org"
+
+[apps.install_specs.apt]
+packages = ["chromium-browser"]
+
+[apps.install_specs.dnf]
+packages = ["chromium"]
+
+[apps.install_specs.pacman]
+packages = ["chromium"]
+
+[apps.install_specs.zypper]
+packages = ["chromium"]
+
+[apps.install_specs.snap]
+packages = ["chromium"]
+
+[apps.install_specs.flatpak]
+packages = ["org.chromium.Chromium"]
+
+[[apps]]
+id          = "brave"
+name        = "Brave Browser"
+description = "Privacy-focused browser with ad-blocking built in."
+category    = "Web Browsers"
+icon        = "🦁"
+website     = "https://brave.com"
+preferred_pm = "flatpak"
+
+[apps.install_specs.snap]
+packages = ["brave"]
+
+[apps.install_specs.flatpak]
+packages = ["com.brave.Browser"]
+
+[apps.install_specs.script]
+packages = []
+script_url = "https://brave.com/linux/#release-channel-installation"
+
+[[apps]]
+id          = "google-chrome"
+name        = "Google Chrome"
+description = "Google's popular web browser."
+category    = "Web Browsers"
+icon        = "🌐"
+website     = "https://www.google.com/chrome"
+preferred_pm = "flatpak"
+
+[apps.install_specs.script]
+packages = []
+script_url = "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
+
+[apps.install_specs.flatpak]
+packages = ["com.google.Chrome"]
+
+[[apps]]
+id          = "opera"
+name        = "Opera"
+description = "Fast and secure browser with built-in VPN and ad blocker."
+category    = "Web Browsers"
+icon        = "🔴"
+website     = "https://www.opera.com"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["opera-stable"]
+pre_commands = [
+  "curl -fsSL https://deb.opera.com/archive.key | gpg --dearmor | tee /usr/share/keyrings/opera.gpg > /dev/null",
+  "echo \"deb [signed-by=/usr/share/keyrings/opera.gpg] https://deb.opera.com/opera-stable/ stable non-free\" | tee /etc/apt/sources.list.d/opera.list",
+  "apt-get update",
+]
+
+[apps.install_specs.dnf]
+packages = ["opera-stable"]
+pre_commands = [
+  "rpm --import https://rpm.opera.com/rpmrepo.key",
+  "tee /etc/yum.repos.d/opera.repo <<'EOF'\n[opera]\nname=Opera packages\ntype=rpm-md\nbaseurl=https://rpm.opera.com/rpm\ngpgcheck=1\ngpgkey=https://rpm.opera.com/rpmrepo.key\nenabled=1\nEOF",
+]
+
+[apps.install_specs.flatpak]
+packages = ["com.opera.Opera"]
+
+[[apps]]
+id          = "tor-browser"
+name        = "Tor Browser"
+description = "Browse the web anonymously via the Tor network."
+category    = "Web Browsers"
+icon        = "🧅"
+website     = "https://www.torproject.org"
+
+[apps.install_specs.apt]
+packages = ["torbrowser-launcher"]
+
+[apps.install_specs.dnf]
+packages = ["torbrowser-launcher"]
+
+[apps.install_specs.pacman]
+packages = ["torbrowser-launcher"]
+
+[apps.install_specs.flatpak]
+packages = ["com.github.micahflee.torbrowser-launcher"]
+
+[[apps]]
+id          = "vivaldi"
+name        = "Vivaldi"
+description = "Feature-rich, highly customisable browser."
+category    = "Web Browsers"
+icon        = "🟠"
+website     = "https://vivaldi.com"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["vivaldi-stable"]
+pre_commands = [
+  "curl -fsSL https://repo.vivaldi.com/archive/linux_signing_key.pub | gpg --dearmor | tee /usr/share/keyrings/vivaldi.gpg > /dev/null",
+  "echo \"deb [signed-by=/usr/share/keyrings/vivaldi.gpg arch=$(dpkg --print-architecture)] https://repo.vivaldi.com/archive/deb/ stable main\" | tee /etc/apt/sources.list.d/vivaldi.list",
+  "apt-get update",
+]
+
+[apps.install_specs.flatpak]
+packages = ["com.vivaldi.Vivaldi"]
+
+[[apps]]
+id          = "librewolf"
+name        = "LibreWolf"
+description = "Privacy-focused Firefox fork with hardened defaults."
+category    = "Web Browsers"
+icon        = "🛡️"
+website     = "https://librewolf.net"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["io.gitlab.librewolf-community"]
+
+[[apps]]
+id          = "floorp"
+name        = "Floorp"
+description = "Firefox-based browser focused on customization and privacy."
+category    = "Web Browsers"
+icon        = "🦊"
+website     = "https://floorp.app"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["one.ablaze.floorp"]
+
+[[apps]]
+id          = "microsoft-edge"
+name        = "Microsoft Edge"
+description = "Chromium-based browser by Microsoft."
+category    = "Web Browsers"
+icon        = "🌊"
+website     = "https://www.microsoft.com/edge"
+
+[apps.install_specs.apt]
+packages = ["microsoft-edge-stable"]
+pre_commands = [
+  "wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /tmp/microsoft-edge.gpg",
+  "install -o root -g root -m 644 /tmp/microsoft-edge.gpg /etc/apt/trusted.gpg.d/",
+  "echo \"deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/microsoft-edge.gpg] https://packages.microsoft.com/repos/edge stable main\" > /etc/apt/sources.list.d/microsoft-edge.list",
+  "apt-get update",
+]
+
+[apps.install_specs.dnf]
+packages = ["microsoft-edge-stable"]
+pre_commands = [
+  "rpm --import https://packages.microsoft.com/keys/microsoft.asc",
+  "dnf config-manager --add-repo https://packages.microsoft.com/yumrepos/edge",
+]
+

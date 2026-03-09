@@ -1,0 +1,74 @@
+[[apps]]
+id          = "kdenlive"
+name        = "Kdenlive"
+description = "KDE's free and open-source video editor."
+category    = "Video Editors"
+icon        = "🎬"
+website     = "https://kdenlive.org"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["kdenlive"]
+
+[apps.install_specs.dnf]
+packages = ["kdenlive"]
+
+[apps.install_specs.pacman]
+packages = ["kdenlive"]
+
+[apps.install_specs.zypper]
+packages = ["kdenlive"]
+
+[apps.install_specs.flatpak]
+packages = ["org.kde.kdenlive"]
+
+[apps.install_specs.snap]
+packages = ["kdenlive"]
+
+[[apps]]
+id          = "shotcut"
+name        = "Shotcut"
+description = "Free, open-source, cross-platform video editor."
+category    = "Video Editors"
+icon        = "✂️"
+website     = "https://www.shotcut.org"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["org.shotcut.Shotcut"]
+
+[apps.install_specs.snap]
+packages = ["shotcut"]
+
+[[apps]]
+id          = "openshot"
+name        = "OpenShot"
+description = "Award-winning free and open-source video editor."
+category    = "Video Editors"
+icon        = "🎥"
+website     = "https://www.openshot.org"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["openshot-qt"]
+
+[apps.install_specs.dnf]
+packages = ["openshot"]
+
+[apps.install_specs.pacman]
+packages = ["openshot"]
+
+[apps.install_specs.flatpak]
+packages = ["org.openshot.OpenShot"]
+
+[[apps]]
+id          = "davinci-resolve"
+name        = "DaVinci Resolve"
+description = "Professional-grade video editing, color grading and post-production suite."
+category    = "Video Editors"
+icon        = "🎛️"
+website     = "https://www.blackmagicdesign.com/products/davinciresolve"
+
+[apps.install_specs.aur]
+packages = ["davinci-resolve"]
+

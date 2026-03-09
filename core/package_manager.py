@@ -1,0 +1,519 @@
+"""
+Linite - Package Manager Abstraction Layer
+Provides a unified interface for apt, dnf, pacman, zypper, snap, and flatpak.
+"""
+
+import subprocess
+import shlex
+import logging
+import os
+import time
+import threading
+from abc import ABC, abstractmethod
+from typing import List, Optional, Callable
+
+logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Global cancel event — call request_cancel() to abort any in-progress
+# lock-retry loop; call clear_cancel() before starting a new operation.
+# ---------------------------------------------------------------------------
+
+_CANCEL_EVENT = threading.Event()
+
+
+def request_cancel() -> None:
+    """Signal all apt lock-retry loops to abort immediately."""
+    _CANCEL_EVENT.set()
+
+
+def clear_cancel() -> None:
+    """Reset the cancel flag before starting a new operation."""
+    _CANCEL_EVENT.clear()
+
+
+# ---------------------------------------------------------------------------
+# Base class
+# ---------------------------------------------------------------------------
+
+class BasePackageManager(ABC):
+    name: str = "base"
+
+    def run(
+        self,
+        args: List[str],
+        sudo: bool = True,
+        env: Optional[dict] = None,
+        progress_cb: Optional[Callable[[str], None]] = None,
+    ) -> tuple[int, str]:
+        """
+        Execute a package-manager command.
+        Returns (returncode, combined_output).
+        """
+        cmd = (["sudo"] if sudo else []) + args
+        logger.debug("Running: %s", " ".join(cmd))
+
+        proc_env = None
+        if env:
+            proc_env = os.environ.copy()
+            proc_env.update(env)
+
+        try:
+            process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1,
+                env=proc_env,
+            )
+            output_lines: List[str] = []
+            for line in process.stdout:  # type: ignore[union-attr]
+                line = line.rstrip()
+                output_lines.append(line)
+                if progress_cb:
+                    progress_cb(line)
+            process.wait()
+            return process.returncode, "\n".join(output_lines)
+        except FileNotFoundError as exc:
+            msg = f"Command not found: {cmd[0]}"
+            logger.error(msg)
+            return 127, msg
+        except Exception as exc:
+            logger.exception("Unexpected error running command")
+            return 1, str(exc)
+
+    @abstractmethod
+    def install(self, packages: List[str], progress_cb=None) -> tuple[int, str]:
+        ...
+
+    @abstractmethod
+    def update_all(self, progress_cb=None) -> tuple[int, str]:
+        ...
+
+    @abstractmethod
+    def update_package(self, packages: List[str], progress_cb=None) -> tuple[int, str]:
+        ...
+
+    @abstractmethod
+    def is_installed(self, package: str) -> bool:
+        ...
+
+
+# ---------------------------------------------------------------------------
+# APT  (Debian / Ubuntu / Mint …)
+# ---------------------------------------------------------------------------
+
+class AptPackageManager(BasePackageManager):
+    name = "apt"
+
+    # ── Lock-contention constants ────────────────────────────────────────────
+    _LOCK_MSG        = "Could not get lock /var/lib/dpkg/lock"
+    _LOCK_RETRY_WAIT = 10   # seconds between retries
+    _LOCK_MAX_WAIT   = 300  # give up after this many total seconds
+
+    def _run_apt(
+        self,
+        args: List[str],
+        sudo: bool = True,
+        env: Optional[dict] = None,
+        progress_cb: Optional[Callable[[str], None]] = None,
+    ) -> tuple[int, str]:
+        """
+        Run an apt/apt-get command, transparently retrying when the dpkg
+        frontend lock is held by another process.
+        """
+        elapsed = 0
+        while True:
+            rc, out = self.run(args, sudo=sudo, env=env, progress_cb=progress_cb)
+            if rc == 0 or self._LOCK_MSG not in out:
+                return rc, out
+            if _CANCEL_EVENT.is_set():
+                msg = "dpkg lock wait cancelled by user."
+                logger.warning(msg)
+                if progress_cb:
+                    progress_cb(msg)
+                return rc, out
+            if elapsed >= self._LOCK_MAX_WAIT:
+                logger.error(
+                    "Gave up waiting for dpkg lock after %ds – last error:\n%s",
+                    elapsed, out,
+                )
+                return rc, out
+            msg = (
+                f"dpkg lock held by another process – "
+                f"retrying in {self._LOCK_RETRY_WAIT}s "
+                f"({elapsed}s elapsed, limit {self._LOCK_MAX_WAIT}s) …"
+            )
+            logger.warning(msg)
+            if progress_cb:
+                progress_cb(msg)
+            # Sleep in small increments so the cancel flag is checked promptly.
+            deadline = time.monotonic() + self._LOCK_RETRY_WAIT
+            while time.monotonic() < deadline:
+                if _CANCEL_EVENT.is_set():
+                    break
+                time.sleep(0.25)
+            elapsed += self._LOCK_RETRY_WAIT
+
+    def _refresh(self, progress_cb=None):
+        return self._run_apt(["apt-get", "update", "-y"], progress_cb=progress_cb)
+
+    def install(self, packages, progress_cb=None):
+        self._refresh(progress_cb)
+        cmd = ["apt-get", "install", "-y", "--no-install-recommends"] + packages
+        return self._run_apt(cmd, env={"DEBIAN_FRONTEND": "noninteractive"}, progress_cb=progress_cb)
+
+    def update_all(self, progress_cb=None):
+        self._refresh(progress_cb)
+        return self._run_apt(
+            ["apt-get", "upgrade", "-y"],
+            progress_cb=progress_cb,
+        )
+
+    def update_package(self, packages, progress_cb=None):
+        return self.install(packages, progress_cb)
+
+    def is_installed(self, package: str) -> bool:
+        _, out = self.run(
+            ["dpkg-query", "-W", "-f=${Status}", package], sudo=False
+        )
+        return "install ok installed" in out
+
+
+# ---------------------------------------------------------------------------
+# DNF  (Fedora / RHEL 8+ / AlmaLinux / Rocky …)
+# ---------------------------------------------------------------------------
+
+class DnfPackageManager(BasePackageManager):
+    name = "dnf"
+
+    def install(self, packages, progress_cb=None):
+        return self.run(
+            ["dnf", "install", "-y"] + packages, progress_cb=progress_cb
+        )
+
+    def update_all(self, progress_cb=None):
+        return self.run(["dnf", "upgrade", "-y"], progress_cb=progress_cb)
+
+    def update_package(self, packages, progress_cb=None):
+        return self.run(
+            ["dnf", "upgrade", "-y"] + packages, progress_cb=progress_cb
+        )
+
+    def is_installed(self, package: str) -> bool:
+        rc, _ = self.run(["rpm", "-q", package], sudo=False)
+        return rc == 0
+
+
+# ---------------------------------------------------------------------------
+# YUM  (CentOS 7 / RHEL 7)
+# ---------------------------------------------------------------------------
+
+class YumPackageManager(DnfPackageManager):
+    name = "yum"
+
+    def install(self, packages, progress_cb=None):
+        return self.run(
+            ["yum", "install", "-y"] + packages, progress_cb=progress_cb
+        )
+
+    def update_all(self, progress_cb=None):
+        return self.run(["yum", "update", "-y"], progress_cb=progress_cb)
+
+    def update_package(self, packages, progress_cb=None):
+        return self.run(
+            ["yum", "update", "-y"] + packages, progress_cb=progress_cb
+        )
+
+
+# ---------------------------------------------------------------------------
+# Pacman  (Arch / Manjaro / EndeavourOS …)
+# ---------------------------------------------------------------------------
+
+class PacmanPackageManager(BasePackageManager):
+    name = "pacman"
+
+    def install(self, packages, progress_cb=None):
+        return self.run(
+            ["pacman", "-S", "--noconfirm", "--needed"] + packages,
+            progress_cb=progress_cb,
+        )
+
+    def update_all(self, progress_cb=None):
+        return self.run(
+            ["pacman", "-Syu", "--noconfirm"], progress_cb=progress_cb
+        )
+
+    def update_package(self, packages, progress_cb=None):
+        return self.run(
+            ["pacman", "-S", "--noconfirm"] + packages, progress_cb=progress_cb
+        )
+
+    def is_installed(self, package: str) -> bool:
+        rc, _ = self.run(["pacman", "-Q", package], sudo=False)
+        return rc == 0
+
+
+# ---------------------------------------------------------------------------
+# AUR Helper  (Arch-based: yay preferred, paru as fallback)
+# ---------------------------------------------------------------------------
+
+class AurHelperPackageManager(BasePackageManager):
+    """
+    Wraps the first available AUR helper on the system — yay is preferred,
+    paru is used as a fallback.  AUR helpers MUST NOT be run as root; this
+    class enforces that by passing ``sudo=False`` for every operation.
+    """
+
+    def __init__(self):
+        from shutil import which
+        if which("yay"):
+            self._helper = "yay"
+        elif which("paru"):
+            self._helper = "paru"
+        else:
+            self._helper = ""
+
+    @property
+    def name(self) -> str:  # type: ignore[override]
+        return self._helper or "aur"
+
+    def _aur_run(
+        self,
+        args: List[str],
+        progress_cb: Optional[Callable[[str], None]] = None,
+    ) -> tuple[int, str]:
+        if not self._helper:
+            return 127, "No AUR helper (yay / paru) found on PATH."
+        return self.run(args, sudo=False, progress_cb=progress_cb)
+
+    def install(self, packages: List[str], progress_cb=None) -> tuple[int, str]:
+        return self._aur_run(
+            [self._helper, "-S", "--noconfirm", "--needed"] + packages,
+            progress_cb=progress_cb,
+        )
+
+    def update_all(self, progress_cb=None) -> tuple[int, str]:
+        return self._aur_run(
+            [self._helper, "-Syu", "--noconfirm"],
+            progress_cb=progress_cb,
+        )
+
+    def update_package(
+        self, packages: List[str], progress_cb=None
+    ) -> tuple[int, str]:
+        return self._aur_run(
+            [self._helper, "-S", "--noconfirm"] + packages,
+            progress_cb=progress_cb,
+        )
+
+    def is_installed(self, package: str) -> bool:
+        if not self._helper:
+            return False
+        rc, _ = self.run([self._helper, "-Q", package], sudo=False)
+        return rc == 0
+
+
+# ---------------------------------------------------------------------------
+# Zypper  (openSUSE)
+# ---------------------------------------------------------------------------
+
+class ZypperPackageManager(BasePackageManager):
+    name = "zypper"
+
+    def install(self, packages, progress_cb=None):
+        return self.run(
+            ["zypper", "--non-interactive", "install"] + packages,
+            progress_cb=progress_cb,
+        )
+
+    def update_all(self, progress_cb=None):
+        return self.run(
+            ["zypper", "--non-interactive", "update"], progress_cb=progress_cb
+        )
+
+    def update_package(self, packages, progress_cb=None):
+        return self.run(
+            ["zypper", "--non-interactive", "update"] + packages,
+            progress_cb=progress_cb,
+        )
+
+    def is_installed(self, package: str) -> bool:
+        rc, _ = self.run(["rpm", "-q", package], sudo=False)
+        return rc == 0
+
+
+# ---------------------------------------------------------------------------
+# Snap
+# ---------------------------------------------------------------------------
+
+class SnapPackageManager(BasePackageManager):
+    name = "snap"
+
+    def install(self, packages, progress_cb=None):
+        results = []
+        for pkg in packages:
+            rc, out = self.run(["snap", "install", pkg], progress_cb=progress_cb)
+            results.append((rc, out))
+        overall_rc = max(r[0] for r in results) if results else 0
+        return overall_rc, "\n".join(r[1] for r in results)
+
+    def install_classic(self, packages, progress_cb=None):
+        results = []
+        for pkg in packages:
+            rc, out = self.run(
+                ["snap", "install", "--classic", pkg], progress_cb=progress_cb
+            )
+            results.append((rc, out))
+        overall_rc = max(r[0] for r in results) if results else 0
+        return overall_rc, "\n".join(r[1] for r in results)
+
+    def update_all(self, progress_cb=None):
+        return self.run(["snap", "refresh"], progress_cb=progress_cb)
+
+    def update_package(self, packages, progress_cb=None):
+        return self.run(["snap", "refresh"] + packages, progress_cb=progress_cb)
+
+    def is_installed(self, package: str) -> bool:
+        rc, _ = self.run(["snap", "list", package], sudo=False)
+        return rc == 0
+
+
+# ---------------------------------------------------------------------------
+# Flatpak
+# ---------------------------------------------------------------------------
+
+class FlatpakPackageManager(BasePackageManager):
+    name = "flatpak"
+
+    # Well-known remote → .flatpakrepo URL
+    _REMOTE_URLS: dict = {
+        "flathub": "https://dl.flathub.org/repo/flathub.flatpakrepo",
+        "flathub-beta": "https://flathub.org/beta-repo/flathub-beta.flatpakrepo",
+        "gnome-nightly": "https://nightly.gnome.org/gnome-nightly.flatpakrepo",
+        "kde-runtime": "https://distribute.kde.org/kdeapps.flatpakrepo",
+    }
+
+    def _ensure_remote(self, remote: str, progress_cb=None) -> None:
+        """
+        Register *remote* as a Flatpak remote if it is not already present.
+        Works for both --user and --system installations; tries --system
+        first (requires sudo), then falls back to --user.
+        """
+        # Check whether the remote is already registered (no sudo needed).
+        rc, out = self.run(
+            ["flatpak", "remote-list", "--columns=name"],
+            sudo=False,
+        )
+        if rc == 0 and remote in out.split():
+            logger.debug("Flatpak remote '%s' already registered.", remote)
+            return
+
+        url = self._REMOTE_URLS.get(remote)
+        if not url:
+            msg = (
+                f"[flatpak] Unknown remote '{remote}' and no URL configured; "
+                "skipping remote-add. Install may fail."
+            )
+            logger.warning(msg)
+            if progress_cb:
+                progress_cb(msg)
+            return
+
+        msg = f"[flatpak] Adding remote '{remote}' ({url}) …"
+        logger.info(msg)
+        if progress_cb:
+            progress_cb(msg)
+
+        # Try system-wide first; fall back to user-level if that fails.
+        rc, out = self.run(
+            ["flatpak", "remote-add", "--if-not-exists", "--system", remote, url],
+            sudo=True,
+            progress_cb=progress_cb,
+        )
+        if rc != 0:
+            logger.warning(
+                "System-wide remote-add failed (rc=%d); retrying as --user …", rc
+            )
+            rc, out = self.run(
+                ["flatpak", "remote-add", "--if-not-exists", "--user", remote, url],
+                sudo=False,
+                progress_cb=progress_cb,
+            )
+            if rc != 0:
+                logger.error(
+                    "Failed to add Flatpak remote '%s': %s", remote, out
+                )
+
+    def install(self, packages, progress_cb=None):
+        """Install Flatpak app IDs (no remote prefix)."""
+        return self.run(
+            ["flatpak", "install", "-y", "--noninteractive"] + packages,
+            sudo=False,
+            progress_cb=progress_cb,
+        )
+
+    def install_from_remote(
+        self,
+        remote: str,
+        packages: List[str],
+        progress_cb=None,
+    ) -> tuple[int, str]:
+        """
+        Ensure *remote* is registered, then install *packages* from it.
+        This avoids the 'No remote refs found' error when Flathub (or any
+        other remote) has not been configured on the system.
+        """
+        self._ensure_remote(remote, progress_cb=progress_cb)
+        return self.run(
+            ["flatpak", "install", "-y", "--noninteractive", remote] + packages,
+            sudo=False,
+            progress_cb=progress_cb,
+        )
+
+    def update_all(self, progress_cb=None):
+        return self.run(
+            ["flatpak", "update", "-y", "--noninteractive"],
+            sudo=False,
+            progress_cb=progress_cb,
+        )
+
+    def update_package(self, packages, progress_cb=None):
+        return self.run(
+            ["flatpak", "update", "-y", "--noninteractive"] + packages,
+            sudo=False,
+            progress_cb=progress_cb,
+        )
+
+    def is_installed(self, package: str) -> bool:
+        rc, _ = self.run(["flatpak", "info", package], sudo=False)
+        return rc == 0
+
+
+# ---------------------------------------------------------------------------
+# Factory
+# ---------------------------------------------------------------------------
+
+_PM_MAP = {
+    "apt": AptPackageManager,
+    "dnf": DnfPackageManager,
+    "yum": YumPackageManager,
+    "pacman": PacmanPackageManager,
+    "zypper": ZypperPackageManager,
+    "snap": SnapPackageManager,
+    "flatpak": FlatpakPackageManager,
+    # AUR helpers — all three keys map to the same class which auto-detects
+    # whichever of yay / paru is actually installed.
+    "aur": AurHelperPackageManager,
+    "yay": AurHelperPackageManager,
+    "paru": AurHelperPackageManager,
+}
+
+
+def get_package_manager(name: str) -> BasePackageManager:
+    """Return an instance of the appropriate package manager."""
+    cls = _PM_MAP.get(name.lower())
+    if cls is None:
+        raise ValueError(f"Unsupported package manager: '{name}'")
+    return cls()

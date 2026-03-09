@@ -1,0 +1,14 @@
+# Linite Python dependencies
+# Tkinter is part of the standard library but may need a system package on some distros:
+#   sudo apt install python3-tk        (Debian/Ubuntu)
+#   sudo dnf install python3-tkinter   (Fedora)
+#   sudo pacman -S tk                  (Arch)
+
+# ── Required ──────────────────────────────────────────────────────────────────
+# (none — all dependencies are Python 3.11+ stdlib)
+# tomllib  is used for reading TOML data files  (stdlib since Python 3.11)
+# json     is used for history persistence       (stdlib)
+
+# ── Optional extras ───────────────────────────────────────────────────────────
+# pillow          # for app icons as images (PNG) instead of emoji
+# requests        # if you want to fetch live catalog updates from a remote source

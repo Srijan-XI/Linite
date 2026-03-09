@@ -1,0 +1,112 @@
+[[apps]]
+id          = "openjdk"
+name        = "OpenJDK"
+description = "Free and open-source implementation of Java SE."
+category    = "Java"
+icon        = "☕"
+website     = "https://openjdk.org"
+
+[apps.install_specs.apt]
+packages = ["default-jdk"]
+
+[apps.install_specs.dnf]
+packages = ["java-latest-openjdk"]
+
+[apps.install_specs.pacman]
+packages = ["jdk-openjdk"]
+
+[apps.install_specs.zypper]
+packages = ["java-21-openjdk"]
+
+[[apps]]
+id          = "eclipse-temurin"
+name        = "Eclipse Temurin (AdoptOpenJDK)"
+description = "High-quality, TCK-certified builds of OpenJDK by the Adoptium project."
+category    = "Java"
+icon        = "☕"
+website     = "https://adoptium.net"
+
+[apps.install_specs.apt]
+packages = ["temurin-21-jdk"]
+pre_commands = [
+  "apt-get install -y wget gnupg",
+  "mkdir -p /etc/apt/keyrings",
+  "wget -O - https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor | tee /etc/apt/keyrings/adoptium.gpg > /dev/null",
+  "echo \"deb [signed-by=/etc/apt/keyrings/adoptium.gpg] https://packages.adoptium.net/artifactory/deb $(. /etc/os-release && echo $VERSION_CODENAME) main\" | tee /etc/apt/sources.list.d/adoptium.list",
+  "apt-get update",
+]
+
+[apps.install_specs.dnf]
+packages = ["temurin-21-jdk"]
+pre_commands = [
+  "curl -fsSL https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor | tee /etc/pki/rpm-gpg/RPM-GPG-KEY-adoptium",
+  "cat > /etc/yum.repos.d/adoptium.repo <<EOF\n[Adoptium]\nname=Adoptium\nbaseurl=https://packages.adoptium.net/artifactory/rpm/$(. /etc/os-release && echo $ID)/$(. /etc/os-release && echo $VERSION_ID)/$(uname -m)\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.adoptium.net/artifactory/api/gpg/key/public\nEOF",
+]
+
+[apps.install_specs.pacman]
+packages = ["jdk21-temurin"]
+
+[[apps]]
+id          = "amazon-corretto"
+name        = "Amazon Corretto"
+description = "No-cost, production-ready distribution of OpenJDK by Amazon."
+category    = "Java"
+icon        = "☕"
+website     = "https://aws.amazon.com/corretto"
+
+[apps.install_specs.apt]
+packages = ["java-21-amazon-corretto-jdk"]
+pre_commands = [
+  "curl -fsSL https://apt.corretto.aws/corretto.key | gpg --dearmor | tee /usr/share/keyrings/corretto-keyring.gpg > /dev/null",
+  "echo \"deb [signed-by=/usr/share/keyrings/corretto-keyring.gpg] https://apt.corretto.aws stable main\" | tee /etc/apt/sources.list.d/corretto.list",
+  "apt-get update",
+]
+
+[apps.install_specs.dnf]
+packages = ["java-21-amazon-corretto-devel"]
+pre_commands = [
+  "curl -fsSL https://yum.corretto.aws/corretto.key | gpg --dearmor | tee /etc/pki/rpm-gpg/RPM-GPG-KEY-corretto",
+  "curl -fsSL -o /etc/yum.repos.d/corretto.repo https://yum.corretto.aws/corretto.repo",
+]
+
+[[apps]]
+id          = "zulu-jdk"
+name        = "Zulu JDK"
+description = "Certified builds of OpenJDK by Azul Systems."
+category    = "Java"
+icon        = "☕"
+website     = "https://www.azul.com/downloads/"
+
+[apps.install_specs.apt]
+packages = ["zulu21-jdk"]
+pre_commands = [
+  "curl -fsSL https://repos.azul.com/azul-repo.key | gpg --dearmor | tee /etc/apt/trusted.gpg.d/azul.gpg > /dev/null",
+  "echo \"deb [signed-by=/etc/apt/trusted.gpg.d/azul.gpg] https://repos.azul.com/zulu/deb stable main\" | tee /etc/apt/sources.list.d/zulu.list",
+  "apt-get update",
+]
+
+[apps.install_specs.dnf]
+packages = ["zulu21-jdk"]
+pre_commands = [
+  "curl -fsSL https://repos.azul.com/azul-repo.key | gpg --dearmor | tee /etc/pki/rpm-gpg/RPM-GPG-KEY-azul",
+  "curl -fsSL -o /etc/yum.repos.d/zulu.repo https://repos.azul.com/zulu/deb/azul-repo.conf",
+]
+
+[apps.install_specs.pacman]
+packages = ["zulu21-bin"]
+
+[[apps]]
+id          = "oracle-jdk"
+name        = "Oracle JDK"
+description = "Oracle's official JDK — free for personal development use."
+category    = "Java"
+icon        = "☕"
+website     = "https://www.oracle.com/java/technologies/downloads/"
+
+[apps.install_specs.script]
+packages = []
+script_url = "https://www.oracle.com/java/technologies/downloads/"
+pre_commands = [
+  "echo 'Oracle JDK requires manual download from https://www.oracle.com/java/technologies/downloads/ due to license terms.'",
+]
+

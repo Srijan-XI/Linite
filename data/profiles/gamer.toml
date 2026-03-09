@@ -1,0 +1,48 @@
+# Linite Profile — Gamer
+# -----------------------
+# Steam, Lutris, Heroic, Bottles, MangoHUD, Discord — the full Linux gaming stack.
+
+id          = "gamer"
+name        = "Gamer"
+icon        = "🎮"
+color       = "#e05c5c"
+tagline     = "Linux gaming stack"
+description = """\
+Steam, native Wine/Proton launchers, Discord, and performance overlays — \
+everything you need to play both native and Windows titles on Linux.\
+"""
+
+packages = [
+  "steam",
+  "lutris",
+  "heroic",
+  "bottles",
+  "discord",
+  "obs",
+  "mangohud",
+  "gamemode",
+  "vlc",
+  "firefox",
+  "flatpak",
+]
+
+[[system_tweaks]]
+id                = "steam_multilib"
+description       = "Enable 32-bit (multilib) support required by Steam"
+command           = "dpkg --add-architecture i386 && apt-get update"
+requires_package  = "steam"
+run_as_root       = true
+
+[[system_tweaks]]
+id                = "flathub_remote"
+description       = "Add the Flathub repository for Flatpak"
+command           = "flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo"
+requires_package  = "flatpak"
+run_as_root       = false
+
+[[system_tweaks]]
+id                = "gamemode_enable"
+description       = "Add current user to the gamemode group"
+command           = "usermod -aG gamemode $SUDO_USER"
+requires_package  = "gamemode"
+run_as_root       = true

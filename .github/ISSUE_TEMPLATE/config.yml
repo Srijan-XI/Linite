@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discussion / Question
+    url: https://github.com/your-username/linite/discussions
+    about: Ask questions and discuss Linite in the community forum.
+  - name: 📖 Documentation
+    url: https://github.com/your-username/linite/wiki
+    about: Read the Linite documentation and wiki.
+  - name: 🔒 Security Vulnerability
+    url: https://github.com/your-username/linite/security/advisories/new
+    about: Report a security vulnerability privately via GitHub Security Advisories.

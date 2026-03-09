@@ -1,0 +1,320 @@
+# Linite Flatpak Package Map
+# ---------------------------
+# Maps catalog app IDs → Flatpak package specs.
+# flatpak_remote is the remote to install from (almost always "flathub").
+# All Flatpak App IDs are fully-qualified reverse-DNS identifiers.
+
+# ── Web Browsers ──────────────────────────────────────────────────────────────
+
+[firefox]
+packages = ["org.mozilla.firefox"]
+flatpak_remote = "flathub"
+
+[chromium]
+packages = ["org.chromium.Chromium"]
+flatpak_remote = "flathub"
+
+[brave]
+packages = ["com.brave.Browser"]
+flatpak_remote = "flathub"
+
+[google-chrome]
+packages = ["com.google.Chrome"]
+flatpak_remote = "flathub"
+
+[opera]
+packages = ["com.opera.Opera"]
+flatpak_remote = "flathub"
+
+[tor-browser]
+packages = ["com.github.micahflee.torbrowser-launcher"]
+flatpak_remote = "flathub"
+
+[vivaldi]
+packages = ["com.vivaldi.Vivaldi"]
+flatpak_remote = "flathub"
+
+# ── Development ───────────────────────────────────────────────────────────────
+
+[vscode]
+packages = ["com.visualstudio.code"]
+flatpak_remote = "flathub"
+
+[gh]
+packages = ["com.github.cli.gh"]
+flatpak_remote = "flathub"
+
+[htop]
+packages = ["org.htop_team.htop"]
+flatpak_remote = "flathub"
+
+# ── Media ─────────────────────────────────────────────────────────────────────
+
+[vlc]
+packages = ["org.videolan.VLC"]
+flatpak_remote = "flathub"
+
+[mpv]
+packages = ["io.mpv.Mpv"]
+flatpak_remote = "flathub"
+
+[obs]
+packages = ["com.obsproject.Studio"]
+flatpak_remote = "flathub"
+
+[audacity]
+packages = ["org.audacityteam.Audacity"]
+flatpak_remote = "flathub"
+
+[handbrake]
+packages = ["fr.handbrake.ghb"]
+flatpak_remote = "flathub"
+
+[spotify]
+packages = ["com.spotify.Client"]
+flatpak_remote = "flathub"
+
+[clementine]
+packages = ["org.clementine_player.Clementine"]
+flatpak_remote = "flathub"
+
+# ── Communication ─────────────────────────────────────────────────────────────
+
+[thunderbird]
+packages = ["org.mozilla.Thunderbird"]
+flatpak_remote = "flathub"
+
+[discord]
+packages = ["com.discordapp.Discord"]
+flatpak_remote = "flathub"
+
+[slack]
+packages = ["com.slack.Slack"]
+flatpak_remote = "flathub"
+
+[zoom]
+packages = ["us.zoom.Zoom"]
+flatpak_remote = "flathub"
+
+[telegram]
+packages = ["org.telegram.desktop"]
+flatpak_remote = "flathub"
+
+[signal]
+packages = ["org.signal.Signal"]
+flatpak_remote = "flathub"
+
+[element]
+packages = ["im.riot.Riot"]
+flatpak_remote = "flathub"
+
+[dropbox]
+packages = ["com.dropbox.Client"]
+flatpak_remote = "flathub"
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+
+[flameshot]
+packages = ["org.flameshot.Flameshot"]
+flatpak_remote = "flathub"
+
+["7zip"]
+packages = ["org.7-zip.Sevenzip"]
+flatpak_remote = "flathub"
+
+[timeshift]
+packages = ["com.github.teejee2008.timeshift"]
+flatpak_remote = "flathub"
+
+[neofetch]
+packages = ["io.github.fastfetch_cli.fastfetch"]
+flatpak_remote = "flathub"
+
+# ── Gaming ────────────────────────────────────────────────────────────────────
+
+[steam]
+packages = ["com.valvesoftware.Steam"]
+flatpak_remote = "flathub"
+
+[lutris]
+packages = ["net.lutris.Lutris"]
+flatpak_remote = "flathub"
+
+[heroic]
+packages = ["com.heroicgameslauncher.hgl"]
+flatpak_remote = "flathub"
+
+[bottles]
+packages = ["com.usebottles.bottles"]
+flatpak_remote = "flathub"
+
+[mangohud]
+packages = ["org.freedesktop.Platform.VulkanLayer.MangoHud"]
+flatpak_remote = "flathub"
+
+# ── Graphics ──────────────────────────────────────────────────────────────────
+
+[gimp]
+packages = ["org.gimp.GIMP"]
+flatpak_remote = "flathub"
+
+[inkscape]
+packages = ["org.inkscape.Inkscape"]
+flatpak_remote = "flathub"
+
+[blender]
+packages = ["org.blender.Blender"]
+flatpak_remote = "flathub"
+
+[darktable]
+packages = ["org.darktable.Darktable"]
+flatpak_remote = "flathub"
+
+[krita]
+packages = ["org.kde.krita"]
+flatpak_remote = "flathub"
+
+# ── Office ────────────────────────────────────────────────────────────────────
+
+[libreoffice]
+packages = ["org.libreoffice.LibreOffice"]
+flatpak_remote = "flathub"
+
+[openoffice]
+packages = ["org.openoffice.Writer"]
+flatpak_remote = "flathub"
+
+[okular]
+packages = ["org.kde.okular"]
+flatpak_remote = "flathub"
+
+[evince]
+packages = ["org.gnome.Evince"]
+flatpak_remote = "flathub"
+
+[foxit-reader]
+packages = ["com.foxitsoftware.FoxitReader"]
+flatpak_remote = "flathub"
+
+# ── Torrents ─────────────────────────────────────────────────────────────────
+
+[qbittorrent]
+packages = ["org.qbittorrent.qBittorrent"]
+flatpak_remote = "flathub"
+
+[transmission]
+packages = ["com.transmissionbt.Transmission"]
+flatpak_remote = "flathub"
+
+[deluge]
+packages = ["org.deluge_torrent.deluge"]
+flatpak_remote = "flathub"
+
+# ── Virtualization ────────────────────────────────────────────────────────────
+
+[gnome-boxes]
+packages = ["org.gnome.Boxes"]
+flatpak_remote = "flathub"
+
+# ── Java ─────────────────────────────────────────────────────────────────────
+
+# Note: JDKs on Flatpak are unusual; SDKs are typically installed as shared runtimes.
+# The entries below install standalone runtime images where available.
+
+[openjdk]
+packages = ["org.freedesktop.Sdk.Extension.openjdk21"]
+flatpak_remote = "flathub"
+
+# ── Security ─────────────────────────────────────────────────────────────────
+
+[angryip]
+packages = ["com.angryip.ipscan"]
+flatpak_remote = "flathub"
+
+[wireshark]
+packages = ["org.wireshark.Wireshark"]
+flatpak_remote = "flathub"
+
+# ── Password Managers ─────────────────────────────────────────────────────────
+
+["1password"]
+packages = ["com.1password.1Password"]
+flatpak_remote = "flathub"
+
+[keepassxc]
+packages = ["org.keepassxc.KeePassXC"]
+flatpak_remote = "flathub"
+
+[bitwarden]
+packages = ["com.bitwarden.desktop"]
+flatpak_remote = "flathub"
+
+# ── Video Editors ─────────────────────────────────────────────────────────────
+
+[kdenlive]
+packages = ["org.kde.kdenlive"]
+flatpak_remote = "flathub"
+
+[openshot]
+packages = ["org.openshot.OpenShot"]
+flatpak_remote = "flathub"
+
+[davinci-resolve]
+packages = ["com.blackmagicdesign.resolve"]
+flatpak_remote = "flathub"
+
+[shotcut]
+packages = ["org.shotcut.Shotcut"]
+flatpak_remote = "flathub"
+
+# ── Terminal Emulators ────────────────────────────────────────────────────────
+
+[alacritty]
+packages = ["org.alacritty.Alacritty"]
+flatpak_remote = "flathub"
+
+[kitty]
+packages = ["net.kovidgoyal.kitty"]
+flatpak_remote = "flathub"
+
+[wezterm]
+packages = ["org.wezfurlong.wezterm"]
+flatpak_remote = "flathub"
+
+[tilix]
+packages = ["com.gexperts.Tilix"]
+flatpak_remote = "flathub"
+
+# ── VPN ───────────────────────────────────────────────────────────────────────
+
+[protonvpn]
+packages = ["com.protonvpn.www"]
+flatpak_remote = "flathub"
+
+[mullvad]
+packages = ["net.mullvad.MullvadVpn"]
+flatpak_remote = "flathub"
+
+# ── Note Taking ───────────────────────────────────────────────────────────────
+
+[obsidian]
+packages = ["md.obsidian.Obsidian"]
+flatpak_remote = "flathub"
+
+[logseq]
+packages = ["com.logseq.Logseq"]
+flatpak_remote = "flathub"
+
+[cherrytree]
+packages = ["net.giuspen.cherrytree"]
+flatpak_remote = "flathub"
+
+[joplin]
+packages = ["net.cozic.joplin_desktop"]
+flatpak_remote = "flathub"
+
+# ── Cloud / Storage ───────────────────────────────────────────────────────────
+
+[nextcloud]
+packages = ["com.nextcloud.desktopclient.nextcloud"]
+flatpak_remote = "flathub"

@@ -1,0 +1,39 @@
+# Linite Profile — Daily User
+# ----------------------------
+# Browser, email, media, office, and file management for everyday desktop use.
+
+id          = "daily_user"
+name        = "Daily User"
+icon        = "🏠"
+color       = "#f0ad4e"
+tagline     = "Everyday desktop essentials"
+description = """\
+Browser, email client, media player, office suite, screenshot tool, and \
+a PDF reader — everything an everyday Linux desktop user needs out of the box.\
+"""
+
+packages = [
+  "firefox",
+  "thunderbird",
+  "vlc",
+  "libreoffice",
+  "flameshot",
+  "okular",
+  "gimp",
+  "flatpak",
+  "neofetch",
+]
+
+[[system_tweaks]]
+id                = "thunderbird_default"
+description       = "Register Thunderbird as default mail client (GNOME/XDG)"
+command           = "xdg-mime default thunderbird.desktop x-scheme-handler/mailto"
+requires_package  = "thunderbird"
+run_as_root       = false
+
+[[system_tweaks]]
+id                = "firefox_default"
+description       = "Register Firefox as default web browser (GNOME/XDG)"
+command           = "xdg-settings set default-web-browser firefox.desktop"
+requires_package  = "firefox"
+run_as_root       = false

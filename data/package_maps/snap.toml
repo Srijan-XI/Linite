@@ -1,0 +1,175 @@
+# Linite Snap Package Map
+# ------------------------
+# Maps catalog app IDs → Snap package specs.
+# snap_classic = true  → installed with --classic flag.
+# channel overrides the default "stable" if needed.
+
+# ── Web Browsers ──────────────────────────────────────────────────────────────
+
+[firefox]
+packages = ["firefox"]
+
+[chromium]
+packages = ["chromium"]
+
+[brave]
+packages = ["brave"]
+
+# ── Development ───────────────────────────────────────────────────────────────
+
+[git]
+packages = ["git-ubuntu"]
+# Usually prefer distro package; snap listed as fallback
+
+[vscode]
+packages = ["code"]
+snap_classic = true
+
+[python3]
+packages = ["python312"]
+snap_classic = true
+
+[nodejs]
+packages = ["node"]
+snap_classic = true
+
+[gh]
+packages = ["gh"]
+snap_classic = true
+
+[curl]
+# Prefer system package; snap not recommended for curl
+packages = []
+
+[wget]
+# Prefer system package
+packages = []
+
+[htop]
+packages = ["htop"]
+
+# ── Media ─────────────────────────────────────────────────────────────────────
+
+[vlc]
+packages = ["vlc"]
+
+[obs]
+packages = ["obs-studio"]
+snap_classic = true
+
+[audacity]
+packages = ["audacity"]
+
+# ── Communication ─────────────────────────────────────────────────────────────
+
+[thunderbird]
+packages = ["thunderbird"]
+
+[discord]
+packages = ["discord"]
+
+[slack]
+packages = ["slack"]
+snap_classic = true
+
+[zoom]
+packages = ["zoom-client"]
+
+[telegram]
+packages = ["telegram-desktop"]
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+
+[flameshot]
+packages = ["flameshot"]
+
+["7zip"]
+packages = ["7zip"]
+
+[neofetch]
+packages = ["neofetch"]
+
+# ── Graphics ──────────────────────────────────────────────────────────────────
+
+[gimp]
+packages = ["gimp"]
+
+[inkscape]
+packages = ["inkscape"]
+
+[blender]
+packages = ["blender"]
+snap_classic = true
+
+# ── Office ────────────────────────────────────────────────────────────────────
+
+[libreoffice]
+packages = ["libreoffice"]
+
+# ── Torrents ─────────────────────────────────────────────────────────────────
+
+[transmission]
+packages = ["transmission"]
+
+# ── Java ─────────────────────────────────────────────────────────────────────
+
+[openjdk]
+packages = ["openjdk"]
+snap_classic = true
+
+[eclipse-temurin]
+packages = ["temurin21"]
+snap_classic = true
+
+[amazon-corretto]
+packages = ["amazon-corretto21"]
+snap_classic = true
+
+# ── Password Managers ─────────────────────────────────────────────────────────
+
+["1password"]
+packages = ["1password"]
+
+[keepassxc]
+packages = ["keepassxc"]
+
+# ── Video Editors ─────────────────────────────────────────────────────────────
+
+[kdenlive]
+packages = ["kdenlive"]
+
+[openshot]
+packages = ["openshot-qt"]
+
+# ── Terminal Emulators ────────────────────────────────────────────────────────
+
+[alacritty]
+packages = ["alacritty"]
+snap_classic = true
+
+[kitty]
+packages = ["kitty"]
+snap_classic = true
+
+# ── VPN ───────────────────────────────────────────────────────────────────────
+
+[wireguard]
+packages = ["wireguard"]
+# Typically a kernel module; prefer distro package
+
+# ── Note Taking ───────────────────────────────────────────────────────────────
+
+[cherrytree]
+packages = ["cherrytree"]
+
+[obsidian]
+packages = ["obsidian"]
+snap_classic = true
+
+# ── Cloud / Storage ───────────────────────────────────────────────────────────
+
+[dropbox]
+packages = ["dropbox"]
+
+[nextcloud]
+packages = ["nextcloud-client"]

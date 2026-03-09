@@ -1,0 +1,84 @@
+[[apps]]
+id          = "protonvpn"
+name        = "ProtonVPN"
+description = "High-speed Swiss VPN that safeguards your privacy."
+category    = "VPN"
+icon        = "🛡️"
+website     = "https://protonvpn.com"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["proton-vpn-gnome-desktop"]
+pre_commands = [
+  "curl -fsSL https://repo.protonvpn.com/debian/public_key.asc | gpg --dearmor | tee /usr/share/keyrings/protonvpn.gpg > /dev/null",
+  "echo \"deb [signed-by=/usr/share/keyrings/protonvpn.gpg] https://repo.protonvpn.com/debian unstable main\" | tee /etc/apt/sources.list.d/protonvpn.list",
+  "apt-get update",
+]
+
+[apps.install_specs.flatpak]
+packages = ["com.protonvpn.www"]
+
+[[apps]]
+id          = "wireguard"
+name        = "WireGuard"
+description = "Fast, modern, secure VPN tunnel."
+category    = "VPN"
+icon        = "🔒"
+website     = "https://www.wireguard.com"
+
+[apps.install_specs.apt]
+packages = ["wireguard"]
+
+[apps.install_specs.dnf]
+packages = ["wireguard-tools"]
+
+[apps.install_specs.pacman]
+packages = ["wireguard-tools"]
+
+[apps.install_specs.zypper]
+packages = ["wireguard-tools"]
+
+[[apps]]
+id          = "mullvad"
+name        = "Mullvad VPN"
+description = "Privacy-first VPN service with no-logs policy."
+category    = "VPN"
+icon        = "🦁"
+website     = "https://mullvad.net"
+preferred_pm = "apt"
+
+[apps.install_specs.apt]
+packages = ["mullvad-vpn"]
+pre_commands = [
+  "curl -fsSL https://repository.mullvad.net/deb/mullvad-keyring.asc | gpg --dearmor | tee /usr/share/keyrings/mullvad-keyring.gpg > /dev/null",
+  "echo \"deb [signed-by=/usr/share/keyrings/mullvad-keyring.gpg] https://repository.mullvad.net/deb/stable $(. /etc/os-release && echo $VERSION_CODENAME) main\" | tee /etc/apt/sources.list.d/mullvad.list",
+  "apt-get update",
+]
+
+[apps.install_specs.dnf]
+packages = ["mullvad-vpn"]
+pre_commands = [
+  "dnf config-manager --add-repo https://repository.mullvad.net/rpm/stable/mullvad.repo",
+  "rpm --import https://repository.mullvad.net/rpm/mullvad-keyring.asc",
+]
+
+[[apps]]
+id          = "openvpn"
+name        = "OpenVPN"
+description = "Full-featured open-source SSL VPN solution."
+category    = "VPN"
+icon        = "🔓"
+website     = "https://openvpn.net"
+
+[apps.install_specs.apt]
+packages = ["openvpn"]
+
+[apps.install_specs.dnf]
+packages = ["openvpn"]
+
+[apps.install_specs.pacman]
+packages = ["openvpn"]
+
+[apps.install_specs.zypper]
+packages = ["openvpn"]
+

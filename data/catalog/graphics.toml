@@ -1,0 +1,69 @@
+[[apps]]
+id          = "gimp"
+name        = "GIMP"
+description = "GNU Image Manipulation Program."
+category    = "Graphics"
+icon        = "🖼️"
+website     = "https://www.gimp.org"
+
+[apps.install_specs.apt]
+packages = ["gimp"]
+
+[apps.install_specs.dnf]
+packages = ["gimp"]
+
+[apps.install_specs.pacman]
+packages = ["gimp"]
+
+[apps.install_specs.zypper]
+packages = ["gimp"]
+
+[apps.install_specs.flatpak]
+packages = ["org.gimp.GIMP"]
+
+[[apps]]
+id          = "inkscape"
+name        = "Inkscape"
+description = "Professional vector graphics editor."
+category    = "Graphics"
+icon        = "✏️"
+website     = "https://inkscape.org"
+
+[apps.install_specs.apt]
+packages = ["inkscape"]
+
+[apps.install_specs.dnf]
+packages = ["inkscape"]
+
+[apps.install_specs.pacman]
+packages = ["inkscape"]
+
+[apps.install_specs.flatpak]
+packages = ["org.inkscape.Inkscape"]
+
+[[apps]]
+id          = "blender"
+name        = "Blender"
+description = "Free and open-source 3D creation suite."
+category    = "Graphics"
+icon        = "🎨"
+website     = "https://www.blender.org"
+
+[apps.install_specs.apt]
+packages = ["blender"]
+
+[apps.install_specs.dnf]
+packages = ["blender"]
+
+[apps.install_specs.pacman]
+packages = ["blender"]
+
+[apps.install_specs.zypper]
+packages = ["blender"]
+
+[apps.install_specs.snap]
+packages = ["blender"]
+
+[apps.install_specs.flatpak]
+packages = ["org.blender.Blender"]
+

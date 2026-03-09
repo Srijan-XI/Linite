@@ -1,0 +1,34 @@
+id: content_creator
+name: Content Creator
+icon: "🎬"
+color: "#f1fa8c"
+tagline: Create, edit & stream anything
+description: |
+  A pro creative suite: OBS for streaming, GIMP and Inkscape for graphics,
+  Blender for 3-D, Audacity for audio editing, HandBrake for video encoding,
+  and Spotify to keep the vibe going while you work.
+
+packages:
+  - obs
+  - gimp
+  - inkscape
+  - blender
+  - audacity
+  - handbrake
+  - vlc
+  - spotify
+  - flameshot
+  - discord
+
+system_tweaks:
+  - id: obs_v4l2
+    description: "Load v4l2loopback kernel module for OBS virtual camera"
+    command: "modprobe v4l2loopback && echo 'v4l2loopback' >> /etc/modules-load.d/linite.conf"
+    requires_package: obs
+    run_as_root: true
+
+  - id: realtime_audio
+    description: "Add user to audio and realtime groups for low-latency audio"
+    command: "usermod -aG audio,realtime $SUDO_USER"
+    requires_package: audacity
+    run_as_root: true

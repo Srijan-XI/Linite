@@ -1,0 +1,29 @@
+id: student
+name: Student
+icon: "🎓"
+color: "#50fa7b"
+tagline: Study, research & light coding
+description: |
+  A balanced setup for students: an office suite for assignments, a PDF
+  viewer, a web browser, basic coding tools, and a media player for
+  lecture recordings. Keeps the system lean and fast.
+
+packages:
+  - firefox
+  - libreoffice
+  - thunderbird
+  - okular
+  - evince
+  - vlc
+  - git
+  - python3
+  - vscode
+  - flameshot
+  - telegram
+
+system_tweaks:
+  - id: git_student_config
+    description: "Configure git with sensible defaults"
+    command: "git config --global init.defaultBranch main"
+    requires_package: git
+    run_as_root: false

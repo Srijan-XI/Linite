@@ -1,0 +1,58 @@
+# Linite Profile — Developer
+# ----------------------------
+# Full-stack & DevOps toolbox: editors, runtimes, containers, CLI essentials.
+
+id          = "developer"
+name        = "Developer"
+icon        = "💻"
+color       = "#7c6af7"
+tagline     = "Full-stack & DevOps toolbox"
+description = """\
+Everything a software developer needs: version control, editors, \
+runtimes, containers, and essential CLI utilities — ready to go \
+in a single pass.\
+"""
+
+packages = [
+  "git",
+  "vscode",
+  "python3",
+  "nodejs",
+  "docker",
+  "gh",
+  "neovim",
+  "alacritty",
+  "curl",
+  "wget",
+  "htop",
+  "firefox",
+  "flatpak",
+]
+
+[[system_tweaks]]
+id                = "enable_docker"
+description       = "Enable Docker daemon on startup"
+command           = "systemctl enable --now docker"
+requires_package  = "docker"
+run_as_root       = true
+
+[[system_tweaks]]
+id                = "docker_group"
+description       = "Add current user to the docker group (no-sudo docker)"
+command           = "usermod -aG docker $SUDO_USER"
+requires_package  = "docker"
+run_as_root       = true
+
+[[system_tweaks]]
+id                = "git_global_config"
+description       = "Initialise sane Git global defaults (main branch, rebase pull)"
+command           = "git config --global init.defaultBranch main && git config --global pull.rebase true"
+requires_package  = "git"
+run_as_root       = false
+
+[[system_tweaks]]
+id                = "flathub_remote"
+description       = "Add the Flathub repository for Flatpak"
+command           = "flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo"
+requires_package  = "flatpak"
+run_as_root       = false

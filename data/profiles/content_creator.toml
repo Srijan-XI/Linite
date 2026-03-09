@@ -1,0 +1,41 @@
+# Linite Profile — Content Creator
+# ----------------------------------
+# OBS, GIMP, Blender, Audacity, Kdenlive, Inkscape — full creative production stack.
+
+id          = "content_creator"
+name        = "Content Creator"
+icon        = "🎨"
+color       = "#d9534f"
+tagline     = "Video, audio & design production suite"
+description = """\
+Everything a YouTuber, streamer, photographer, or graphic designer needs: \
+screen recorder, video editor, audio editor, 2D/3D graphics, vector art, \
+and real-time audio optimisation.\
+"""
+
+packages = [
+  "obs",
+  "gimp",
+  "blender",
+  "audacity",
+  "kdenlive",
+  "inkscape",
+  "handbrake",
+  "vlc",
+  "firefox",
+  "flatpak",
+]
+
+[[system_tweaks]]
+id                = "obs_v4l2"
+description       = "Load v4l2loopback kernel module for virtual camera in OBS"
+command           = "modprobe v4l2loopback && echo 'v4l2loopback' >> /etc/modules-load.d/v4l2loopback.conf"
+requires_package  = "obs"
+run_as_root       = true
+
+[[system_tweaks]]
+id                = "realtime_audio"
+description       = "Configure rtirq / realtime-privileges for low-latency audio"
+command           = "usermod -aG audio,realtime $SUDO_USER"
+requires_package  = "audacity"
+run_as_root       = true

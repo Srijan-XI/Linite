@@ -1,0 +1,65 @@
+[[apps]]
+id          = "virtualbox"
+name        = "VirtualBox"
+description = "Free and open-source x86 virtualisation software."
+category    = "Virtualization"
+icon        = "📦"
+website     = "https://www.virtualbox.org"
+
+[apps.install_specs.apt]
+packages = ["virtualbox"]
+pre_commands = [
+  "curl -fsSL https://www.virtualbox.org/download/oracle_vbox_2016.asc | gpg --dearmor | tee /usr/share/keyrings/virtualbox.gpg > /dev/null",
+  "echo \"deb [arch=amd64 signed-by=/usr/share/keyrings/virtualbox.gpg] https://download.virtualbox.org/virtualbox/debian $(. /etc/os-release && echo $VERSION_CODENAME) contrib\" | tee /etc/apt/sources.list.d/virtualbox.list",
+  "apt-get update",
+]
+
+[apps.install_specs.dnf]
+packages = ["VirtualBox"]
+pre_commands = [
+  "dnf config-manager --add-repo https://download.virtualbox.org/virtualbox/rpm/fedora/virtualbox.repo",
+]
+
+[apps.install_specs.pacman]
+packages = ["virtualbox"]
+
+[apps.install_specs.flatpak]
+packages = ["org.virtualbox.VirtualBox"]
+
+[[apps]]
+id          = "vmware"
+name        = "VMware Workstation Player"
+description = "Free virtualisation platform for running multiple OSes (personal use)."
+category    = "Virtualization"
+icon        = "🖥️"
+website     = "https://www.vmware.com/products/workstation-player.html"
+
+[apps.install_specs.script]
+packages = []
+script_url = "https://www.vmware.com/go/getplayer-linux"
+pre_commands = [
+  "curl -fsSL https://www.vmware.com/go/getplayer-linux -o /tmp/vmware-player.bundle",
+  "chmod +x /tmp/vmware-player.bundle",
+]
+post_commands = ["bash /tmp/vmware-player.bundle --eulas-agreed"]
+
+[[apps]]
+id          = "qemu"
+name        = "QEMU"
+description = "Generic and open-source machine emulator and virtualiser. Often paired with KVM for near-native performance."
+category    = "Virtualization"
+icon        = "🖥️"
+website     = "https://www.qemu.org"
+
+[apps.install_specs.apt]
+packages = ["qemu-system", "qemu-utils", "virt-manager", "libvirt-daemon-system"]
+
+[apps.install_specs.dnf]
+packages = ["qemu-kvm", "virt-manager", "libvirt", "virt-install"]
+
+[apps.install_specs.pacman]
+packages = ["qemu-full", "virt-manager", "libvirt", "dnsmasq"]
+
+[apps.install_specs.zypper]
+packages = ["qemu", "virt-manager", "libvirt"]
+

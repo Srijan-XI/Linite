@@ -1,0 +1,337 @@
+[[apps]]
+id          = "nmap"
+name        = "Nmap"
+description = "Free and open-source network scanner used for security auditing."
+category    = "Security"
+icon        = "🔍"
+website     = "https://nmap.org"
+
+[apps.install_specs.apt]
+packages = ["nmap"]
+
+[apps.install_specs.dnf]
+packages = ["nmap"]
+
+[apps.install_specs.pacman]
+packages = ["nmap"]
+
+[apps.install_specs.zypper]
+packages = ["nmap"]
+
+[apps.install_specs.flatpak]
+packages = ["org.nmap.Zenmap"]
+
+[[apps]]
+id          = "zenmap"
+name        = "Zenmap"
+description = "Official graphical front-end for Nmap."
+category    = "Security"
+icon        = "🗺️"
+website     = "https://nmap.org/zenmap/"
+
+[apps.install_specs.apt]
+packages = ["zenmap"]
+
+[apps.install_specs.dnf]
+packages = ["zenmap"]
+
+[apps.install_specs.pacman]
+packages = ["zenmap"]
+
+[apps.install_specs.flatpak]
+packages = ["org.nmap.Zenmap"]
+
+[[apps]]
+id          = "angryip"
+name        = "Angry IP Scanner"
+description = "Fast and friendly network scanner for IP addresses and ports."
+category    = "Security"
+icon        = "😡"
+website     = "https://angryip.org"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["ipscan"]
+pre_commands = [
+  "curl -fsSL https://github.com/angryip/ipscan/releases/latest/download/ipscan_3.9.1_amd64.deb -o /tmp/ipscan.deb",
+  "apt-get install -y /tmp/ipscan.deb",
+]
+
+[apps.install_specs.flatpak]
+packages = ["com.angryip.ipscan"]
+
+[apps.install_specs.script]
+packages = []
+script_url = "https://github.com/angryip/ipscan/releases/latest"
+
+[[apps]]
+id          = "metasploit"
+name        = "Metasploit Framework"
+description = "World's most widely used penetration testing framework."
+category    = "Security"
+icon        = "💀"
+website     = "https://www.metasploit.com"
+
+[apps.install_specs.apt]
+packages = ["metasploit-framework"]
+pre_commands = [
+  "curl -fsSL https://apt.metasploit.com/metasploit-framework.list -o /etc/apt/sources.list.d/metasploit-framework.list",
+  "curl -fsSL https://apt.metasploit.com/pubkey.gpg | gpg --dearmor | tee /etc/apt/trusted.gpg.d/metasploit.gpg > /dev/null",
+  "apt-get update",
+]
+post_commands = ["msfdb init"]
+
+[apps.install_specs.script]
+packages = []
+script_url = "https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb"
+pre_commands = [
+  "curl -fsSL https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb -o /tmp/msfinstall",
+  "chmod +x /tmp/msfinstall",
+  "bash /tmp/msfinstall",
+]
+
+[[apps]]
+id          = "burpsuite"
+name        = "Burp Suite Community"
+description = "Leading toolkit for web application security testing."
+category    = "Security"
+icon        = "🕷️"
+website     = "https://portswigger.net/burp"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["net.portswigger.BurpSuite"]
+
+[apps.install_specs.script]
+packages = []
+script_url = "https://portswigger.net/burp/releases/community/latest"
+pre_commands = [
+  "curl -fsSL 'https://portswigger.net/burp/releases/community/latest' -o /tmp/burpsuite_installer.sh",
+  "chmod +x /tmp/burpsuite_installer.sh",
+  "bash /tmp/burpsuite_installer.sh",
+]
+
+[[apps]]
+id          = "sqlmap"
+name        = "SQLMap"
+description = "Automatic SQL injection and database takeover tool."
+category    = "Security"
+icon        = "💉"
+website     = "https://sqlmap.org"
+
+[apps.install_specs.apt]
+packages = ["sqlmap"]
+
+[apps.install_specs.dnf]
+packages = ["sqlmap"]
+
+[apps.install_specs.pacman]
+packages = ["sqlmap"]
+
+[apps.install_specs.universal]
+packages = ["sqlmap"]
+pre_commands = [
+  "git clone --depth 1 https://github.com/sqlmapproject/sqlmap.git /opt/sqlmap",
+  "ln -sf /opt/sqlmap/sqlmap.py /usr/local/bin/sqlmap",
+]
+
+[[apps]]
+id          = "hydra"
+name        = "THC Hydra"
+description = "Fast and flexible network login cracker supporting many protocols."
+category    = "Security"
+icon        = "🐉"
+website     = "https://github.com/vanhauser-thc/thc-hydra"
+
+[apps.install_specs.apt]
+packages = ["hydra"]
+
+[apps.install_specs.dnf]
+packages = ["hydra"]
+
+[apps.install_specs.pacman]
+packages = ["hydra"]
+
+[apps.install_specs.zypper]
+packages = ["hydra"]
+
+[[apps]]
+id          = "john"
+name        = "John the Ripper"
+description = "Fast password cracker for many hash types."
+category    = "Security"
+icon        = "🔓"
+website     = "https://www.openwall.com/john/"
+
+[apps.install_specs.apt]
+packages = ["john"]
+
+[apps.install_specs.dnf]
+packages = ["john"]
+
+[apps.install_specs.pacman]
+packages = ["john"]
+
+[apps.install_specs.zypper]
+packages = ["john"]
+
+[[apps]]
+id          = "aircrack-ng"
+name        = "Aircrack-ng"
+description = "Complete suite of tools for assessing Wi-Fi network security."
+category    = "Security"
+icon        = "📡"
+website     = "https://www.aircrack-ng.org"
+
+[apps.install_specs.apt]
+packages = ["aircrack-ng"]
+
+[apps.install_specs.dnf]
+packages = ["aircrack-ng"]
+
+[apps.install_specs.pacman]
+packages = ["aircrack-ng"]
+
+[apps.install_specs.zypper]
+packages = ["aircrack-ng"]
+
+[[apps]]
+id          = "hashcat"
+name        = "Hashcat"
+description = "World's fastest and most advanced password recovery utility."
+category    = "Security"
+icon        = "#️⃣"
+website     = "https://hashcat.net"
+
+[apps.install_specs.apt]
+packages = ["hashcat"]
+
+[apps.install_specs.dnf]
+packages = ["hashcat"]
+
+[apps.install_specs.pacman]
+packages = ["hashcat"]
+
+[apps.install_specs.zypper]
+packages = ["hashcat"]
+
+[[apps]]
+id          = "clamav"
+name        = "ClamAV"
+description = "Open-source antivirus engine and utilities."
+category    = "Security"
+icon        = "🛡️"
+website     = "https://www.clamav.net"
+
+[apps.install_specs.apt]
+packages = ["clamav"]
+
+[apps.install_specs.dnf]
+packages = ["clamav"]
+
+[apps.install_specs.pacman]
+packages = ["clamav"]
+
+[apps.install_specs.zypper]
+packages = ["clamav"]
+
+[[apps]]
+id          = "ufw"
+name        = "UFW"
+description = "Uncomplicated Firewall command-line frontend."
+category    = "Security"
+icon        = "🔥"
+website     = "https://wiki.ubuntu.com/UncomplicatedFirewall"
+
+[apps.install_specs.apt]
+packages = ["ufw"]
+
+[apps.install_specs.dnf]
+packages = ["ufw"]
+
+[apps.install_specs.pacman]
+packages = ["ufw"]
+
+[apps.install_specs.zypper]
+packages = ["ufw"]
+
+[[apps]]
+id          = "gufw"
+name        = "Gufw"
+description = "Graphical firewall manager for UFW."
+category    = "Security"
+icon        = "🧱"
+website     = "https://github.com/costales/gufw"
+
+[apps.install_specs.apt]
+packages = ["gufw"]
+
+[apps.install_specs.dnf]
+packages = ["gufw"]
+
+[apps.install_specs.pacman]
+packages = ["gufw"]
+
+[apps.install_specs.zypper]
+packages = ["gufw"]
+
+[[apps]]
+id          = "fail2ban"
+name        = "Fail2ban"
+description = "Intrusion prevention by banning repeated failed login attempts."
+category    = "Security"
+icon        = "🚫"
+website     = "https://github.com/fail2ban/fail2ban"
+
+[apps.install_specs.apt]
+packages = ["fail2ban"]
+
+[apps.install_specs.dnf]
+packages = ["fail2ban"]
+
+[apps.install_specs.pacman]
+packages = ["fail2ban"]
+
+[apps.install_specs.zypper]
+packages = ["fail2ban"]
+
+[[apps]]
+id          = "nikto"
+name        = "Nikto"
+description = "Web server vulnerability scanner."
+category    = "Security"
+icon        = "🕵️"
+website     = "https://github.com/sullo/nikto"
+
+[apps.install_specs.apt]
+packages = ["nikto"]
+
+[apps.install_specs.dnf]
+packages = ["nikto"]
+
+[apps.install_specs.pacman]
+packages = ["nikto"]
+
+[apps.install_specs.zypper]
+packages = ["nikto"]
+
+[[apps]]
+id          = "gobuster"
+name        = "Gobuster"
+description = "Directory, DNS and virtual host brute-forcing tool."
+category    = "Security"
+icon        = "🧪"
+website     = "https://github.com/OJ/gobuster"
+
+[apps.install_specs.apt]
+packages = ["gobuster"]
+
+[apps.install_specs.dnf]
+packages = ["gobuster"]
+
+[apps.install_specs.pacman]
+packages = ["gobuster"]
+
+[apps.install_specs.zypper]
+packages = ["gobuster"]
+

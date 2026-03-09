@@ -1,0 +1,340 @@
+[[apps]]
+id          = "htop"
+name        = "htop"
+description = "Interactive process viewer for Unix."
+category    = "Utilities"
+icon        = "📊"
+website     = "https://htop.dev"
+
+[apps.install_specs.apt]
+packages = ["htop"]
+
+[apps.install_specs.dnf]
+packages = ["htop"]
+
+[apps.install_specs.pacman]
+packages = ["htop"]
+
+[apps.install_specs.zypper]
+packages = ["htop"]
+
+[[apps]]
+id          = "curl"
+name        = "curl"
+description = "Transfer data from or to a server."
+category    = "Utilities"
+icon        = "🌀"
+website     = "https://curl.se"
+
+[apps.install_specs.apt]
+packages = ["curl"]
+
+[apps.install_specs.dnf]
+packages = ["curl"]
+
+[apps.install_specs.pacman]
+packages = ["curl"]
+
+[apps.install_specs.zypper]
+packages = ["curl"]
+
+[[apps]]
+id          = "wget"
+name        = "wget"
+description = "Non-interactive network downloader."
+category    = "Utilities"
+icon        = "📦"
+
+[apps.install_specs.apt]
+packages = ["wget"]
+
+[apps.install_specs.dnf]
+packages = ["wget"]
+
+[apps.install_specs.pacman]
+packages = ["wget"]
+
+[apps.install_specs.zypper]
+packages = ["wget"]
+
+[[apps]]
+id          = "7zip"
+name        = "7-Zip"
+description = "File archiver with a high compression ratio."
+category    = "Utilities"
+icon        = "📦"
+website     = "https://www.7-zip.org"
+
+[apps.install_specs.apt]
+packages = ["p7zip-full"]
+
+[apps.install_specs.dnf]
+packages = ["p7zip"]
+
+[apps.install_specs.pacman]
+packages = ["p7zip"]
+
+[apps.install_specs.zypper]
+packages = ["p7zip"]
+
+[[apps]]
+id          = "timeshift"
+name        = "Timeshift"
+description = "System restore tool for Linux."
+category    = "Utilities"
+icon        = "🕰️"
+website     = "https://github.com/linuxmint/timeshift"
+
+[apps.install_specs.apt]
+packages = ["timeshift"]
+
+[apps.install_specs.dnf]
+packages = ["timeshift"]
+
+[apps.install_specs.pacman]
+packages = ["timeshift"]
+
+[[apps]]
+id          = "neofetch"
+name        = "Neofetch"
+description = "CLI system information tool."
+category    = "Utilities"
+icon        = "🖥️"
+
+[apps.install_specs.apt]
+packages = ["neofetch"]
+
+[apps.install_specs.dnf]
+packages = ["neofetch"]
+
+[apps.install_specs.pacman]
+packages = ["neofetch"]
+
+[apps.install_specs.zypper]
+packages = ["neofetch"]
+
+[[apps]]
+id          = "flatpak"
+name        = "Flatpak"
+description = "Universal Linux application sandbox."
+category    = "Utilities"
+icon        = "📦"
+website     = "https://flatpak.org"
+
+[apps.install_specs.apt]
+packages = ["flatpak"]
+
+[apps.install_specs.dnf]
+packages = ["flatpak"]
+
+[apps.install_specs.pacman]
+packages = ["flatpak"]
+
+[apps.install_specs.zypper]
+packages = ["flatpak"]
+
+[[apps]]
+id          = "flameshot"
+name        = "Flameshot"
+description = "Powerful yet simple screenshot tool (ShareX equivalent for Linux)."
+category    = "Utilities"
+icon        = "🔥"
+website     = "https://flameshot.org"
+
+[apps.install_specs.apt]
+packages = ["flameshot"]
+
+[apps.install_specs.dnf]
+packages = ["flameshot"]
+
+[apps.install_specs.pacman]
+packages = ["flameshot"]
+
+[apps.install_specs.zypper]
+packages = ["flameshot"]
+
+[apps.install_specs.flatpak]
+packages = ["org.flameshot.Flameshot"]
+
+[[apps]]
+id          = "wireshark"
+name        = "Wireshark"
+description = "World's leading network protocol analyser."
+category    = "Utilities"
+icon        = "🦈"
+website     = "https://www.wireshark.org"
+
+[apps.install_specs.apt]
+packages = ["wireshark"]
+
+[apps.install_specs.dnf]
+packages = ["wireshark"]
+
+[apps.install_specs.pacman]
+packages = ["wireshark-qt"]
+
+[apps.install_specs.zypper]
+packages = ["wireshark"]
+
+[apps.install_specs.flatpak]
+packages = ["org.wireshark.Wireshark"]
+
+[[apps]]
+id          = "notepadplusplus"
+name        = "Notepad++"
+description = "Popular source-code editor (via Wine wrapper on Linux)."
+category    = "Utilities"
+icon        = "📝"
+website     = "https://notepad-plus-plus.org"
+preferred_pm = "flatpak"
+
+[apps.install_specs.snap]
+packages = ["notepad-plus-plus"]
+
+[apps.install_specs.flatpak]
+packages = ["io.github.mmtrt.Notepad_npp"]
+
+[[apps]]
+id          = "btop"
+name        = "btop"
+description = "Modern resource monitor with an interactive terminal UI."
+category    = "Utilities"
+icon        = "📈"
+website     = "https://github.com/aristocratos/btop"
+
+[apps.install_specs.apt]
+packages = ["btop"]
+
+[apps.install_specs.dnf]
+packages = ["btop"]
+
+[apps.install_specs.pacman]
+packages = ["btop"]
+
+[apps.install_specs.zypper]
+packages = ["btop"]
+
+[[apps]]
+id          = "glances"
+name        = "Glances"
+description = "Cross-platform system monitoring tool with optional web UI."
+category    = "Utilities"
+icon        = "🧭"
+website     = "https://nicolargo.github.io/glances/"
+
+[apps.install_specs.apt]
+packages = ["glances"]
+
+[apps.install_specs.dnf]
+packages = ["glances"]
+
+[apps.install_specs.pacman]
+packages = ["glances"]
+
+[apps.install_specs.zypper]
+packages = ["glances"]
+
+[[apps]]
+id          = "stacer"
+name        = "Stacer"
+description = "System optimizer and resource monitor for Linux."
+category    = "Utilities"
+icon        = "🧰"
+website     = "https://github.com/oguzhaninan/Stacer"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["com.github.oguzhaninan.Stacer"]
+
+[[apps]]
+id          = "mission-center"
+name        = "Mission Center"
+description = "Modern GTK task manager and system monitor."
+category    = "Utilities"
+icon        = "🛰️"
+website     = "https://missioncenter.io"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["io.missioncenter.MissionCenter"]
+
+[[apps]]
+id          = "nautilus"
+name        = "Nautilus"
+description = "GNOME Files, the default file manager for GNOME desktops."
+category    = "Utilities"
+icon        = "📁"
+website     = "https://apps.gnome.org/Nautilus/"
+
+[apps.install_specs.apt]
+packages = ["nautilus"]
+
+[apps.install_specs.dnf]
+packages = ["nautilus"]
+
+[apps.install_specs.pacman]
+packages = ["nautilus"]
+
+[apps.install_specs.zypper]
+packages = ["nautilus"]
+
+[[apps]]
+id          = "thunar"
+name        = "Thunar"
+description = "Lightweight and fast file manager from the XFCE project."
+category    = "Utilities"
+icon        = "📂"
+website     = "https://docs.xfce.org/xfce/thunar/start"
+
+[apps.install_specs.apt]
+packages = ["thunar"]
+
+[apps.install_specs.dnf]
+packages = ["thunar"]
+
+[apps.install_specs.pacman]
+packages = ["thunar"]
+
+[apps.install_specs.zypper]
+packages = ["thunar"]
+
+[[apps]]
+id          = "nemo"
+name        = "Nemo"
+description = "Feature-rich file manager from the Cinnamon desktop."
+category    = "Utilities"
+icon        = "🗂️"
+website     = "https://github.com/linuxmint/nemo"
+
+[apps.install_specs.apt]
+packages = ["nemo"]
+
+[apps.install_specs.dnf]
+packages = ["nemo"]
+
+[apps.install_specs.pacman]
+packages = ["nemo"]
+
+[apps.install_specs.zypper]
+packages = ["nemo"]
+
+[[apps]]
+id          = "dolphin"
+name        = "Dolphin"
+description = "KDE's powerful file manager."
+category    = "Utilities"
+icon        = "🐬"
+website     = "https://apps.kde.org/dolphin/"
+
+[apps.install_specs.apt]
+packages = ["dolphin"]
+
+[apps.install_specs.dnf]
+packages = ["dolphin"]
+
+[apps.install_specs.pacman]
+packages = ["dolphin"]
+
+[apps.install_specs.zypper]
+packages = ["dolphin"]
+

@@ -1,0 +1,37 @@
+id: daily_user
+name: Daily User
+icon: "🏠"
+color: "#8be9fd"
+tagline: Everyday essentials, nothing more
+description: |
+  The essentials for comfortable daily use: a browser, email client, office
+  suite, media player, cloud storage, messaging apps, and a screenshot tool.
+  Keeps the system lean and focused on getting things done.
+
+packages:
+  - firefox
+  - chromium
+  - thunderbird
+  - libreoffice
+  - vlc
+  - spotify
+  - discord
+  - telegram
+  - dropbox
+  - flameshot
+  - keepassxc
+  - obsidian
+  - htop
+
+system_tweaks:
+  - id: thunderbird_default
+    description: "Set Thunderbird as the default email client"
+    command: "xdg-mime default thunderbird.desktop x-scheme-handler/mailto"
+    requires_package: thunderbird
+    run_as_root: false
+
+  - id: firefox_default
+    description: "Set Firefox as the default browser"
+    command: "xdg-settings set default-web-browser firefox.desktop"
+    requires_package: firefox
+    run_as_root: false
