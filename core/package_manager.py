@@ -277,6 +277,54 @@ class AppImagePackageManager(BasePackageManager):
 
 
 # ---------------------------------------------------------------------------
+# NIX
+# ---------------------------------------------------------------------------
+
+class NixPackageManager(BasePackageManager):
+    """
+    Nix / NixOS package manager backend.
+    Works both on NixOS and on Nix installed on a foreign distro.
+    Packages are specified as attribute paths, e.g. ``nixpkgs.vlc``.
+    If no channel prefix is present, ``nixpkgs.`` is prepended.
+    """
+
+    name = "nix"
+
+    def _normalise(self, packages: List[str]) -> List[str]:
+        """Ensure every package name has a channel prefix."""
+        return [p if "." in p else f"nixpkgs.{p}" for p in packages]
+
+    def install(self, packages: List[str], **kwargs) -> Tuple[int, str]:
+        return self.run(
+            ["nix-env", "--install", "--attr"] + self._normalise(packages),
+            sudo=False,
+            **kwargs,
+        )
+
+    def update_all(self, **kwargs) -> Tuple[int, str]:
+        rc1, out1 = self.run(
+            ["nix-channel", "--update"], sudo=False, **kwargs
+        )
+        rc2, out2 = self.run(
+            ["nix-env", "--upgrade", "--attr", "nixpkgs"],
+            sudo=False, **kwargs,
+        )
+        return max(rc1, rc2), (out1 + "\n" + out2).strip()
+
+    def update_package(self, packages: List[str], **kwargs) -> Tuple[int, str]:
+        return self.run(
+            ["nix-env", "--upgrade", "--attr"] + self._normalise(packages),
+            sudo=False, **kwargs,
+        )
+
+    def is_installed(self, package: str) -> bool:
+        # Use nix-env -q; strip any channel prefix for comparison
+        attr = package.split(".")[-1]
+        rc, out = self.run(["nix-env", "-q"], sudo=False)
+        return rc == 0 and attr.lower() in out.lower()
+
+
+# ---------------------------------------------------------------------------
 # FACTORY
 # ---------------------------------------------------------------------------
 
@@ -286,6 +334,7 @@ _PM_MAP = {
     "snap": SnapPackageManager,
     "flatpak": FlatpakPackageManager,
     "appimage": AppImagePackageManager,
+    "nix": NixPackageManager,
 }
 
 
@@ -294,3 +343,21 @@ def get_package_manager(name: str) -> BasePackageManager:
     if not cls:
         raise ValueError(f"Unsupported package manager: {name}")
     return cls()
+
+
+def is_pm_available(name: str) -> bool:
+    """Return True if the given package manager binary is present on PATH."""
+    pm_binaries: dict[str, str] = {
+        "apt": "apt-get",
+        "dnf": "dnf",
+        "pacman": "pacman",
+        "zypper": "zypper",
+        "snap": "snap",
+        "flatpak": "flatpak",
+        "appimage": "",  # always considered "available" (URL-based)
+        "nix": "nix-env",
+    }
+    binary = pm_binaries.get(name.lower(), name)
+    if not binary:
+        return True
+    return which(binary) is not None

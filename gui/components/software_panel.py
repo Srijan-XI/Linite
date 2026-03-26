@@ -116,6 +116,7 @@ class SoftwarePanel(tk.Frame):
         self._installed_ids:    Set[str] = set()
         self._on_detail         = on_detail
         self._current_category  = "All"
+        self._active_tag        = "All"
         self._search_text       = ""
         self._search_after_id: Optional[str] = None   # debounce handle
 
@@ -178,6 +179,41 @@ class SoftwarePanel(tk.Frame):
             fg=st.TEXT_SECONDARY, font=st.FONT_SMALL,
         )
         self._count_label.pack(side="left")
+
+        tags_row = tk.Frame(self, bg=st.BG_DARK)
+        tags_row.pack(fill="x", padx=st.PADDING, pady=(0, 6))
+
+        tk.Label(
+            tags_row,
+            text="Tags:",
+            bg=st.BG_DARK,
+            fg=st.TEXT_MUTED,
+            font=st.FONT_SMALL,
+        ).pack(side="left", padx=(0, 6))
+
+        self._tag_buttons: Dict[str, tk.Label] = {}
+        for tag in ["All", "Installed", "Popular", "Flatpak", "Snap", "Script"]:
+            btn = tk.Label(
+                tags_row,
+                text=tag,
+                bg=st.BG_MEDIUM if tag == "All" else st.BG_DARK,
+                fg=st.TEXT_PRIMARY if tag == "All" else st.TEXT_MUTED,
+                font=st.FONT_SMALL,
+                padx=8,
+                pady=3,
+                cursor="hand2",
+            )
+            btn.pack(side="left", padx=(0, 6))
+            btn.bind("<Button-1>", lambda _e, t=tag: self._set_tag(t))
+            btn.bind(
+                "<Enter>",
+                lambda _e, t=tag: self._set_tag_button_style(t, hover=True),
+            )
+            btn.bind(
+                "<Leave>",
+                lambda _e, t=tag: self._set_tag_button_style(t, hover=False),
+            )
+            self._tag_buttons[tag] = btn
 
         da_btn = tk.Label(
             header, text="Deselect All", bg=st.BG_DARK,
@@ -254,6 +290,10 @@ class SoftwarePanel(tk.Frame):
                     inst_lbl.pack_forget()
             if name_lbl is not None:
                 name_lbl.config(fg=st.TEXT_MUTED if installed else st.TEXT_PRIMARY)
+
+        # Keep "Installed" tag results in sync when installed state changes.
+        if self._active_tag == "Installed":
+            self._apply_filters()
 
     def get_selected(self) -> List[SoftwareEntry]:
         return [e for e in self._all_entries if self._checked[e.id].get()]
@@ -386,6 +426,9 @@ class SoftwarePanel(tk.Frame):
         if self._current_category != "All":
             entries = [e for e in entries if e.category == self._current_category]
 
+        if self._active_tag != "All":
+            entries = [e for e in entries if self._entry_matches_tag(e)]
+
         if self._search_text:
             # Score every entry; keep those above the threshold and rank by
             # relevance so the best matches bubble to the top.
@@ -419,12 +462,51 @@ class SoftwarePanel(tk.Frame):
 
         self._update_count_label()
 
+    def _entry_matches_tag(self, entry: SoftwareEntry) -> bool:
+        if self._active_tag == "Installed":
+            return entry.id in self._installed_ids
+        if self._active_tag == "Popular":
+            return _popularity_score(entry) >= 90
+        if self._active_tag == "Flatpak":
+            return "flatpak" in entry.install_specs
+        if self._active_tag == "Snap":
+            return "snap" in entry.install_specs
+        if self._active_tag == "Script":
+            return "script" in entry.install_specs
+        return True
+
+    def _set_tag(self, tag: str):
+        if tag == self._active_tag:
+            return
+        self._active_tag = tag
+        self._refresh_tag_button_styles()
+        self._apply_filters()
+
+    def _refresh_tag_button_styles(self):
+        for tag in self._tag_buttons:
+            self._set_tag_button_style(tag, hover=False)
+
+    def _set_tag_button_style(self, tag: str, hover: bool):
+        btn = self._tag_buttons.get(tag)
+        if btn is None:
+            return
+        active = tag == self._active_tag
+        if active:
+            btn.config(bg=st.BG_MEDIUM, fg=st.TEXT_PRIMARY)
+            return
+        if hover:
+            btn.config(bg=st.BG_LIGHT, fg=st.TEXT_PRIMARY)
+        else:
+            btn.config(bg=st.BG_DARK, fg=st.TEXT_MUTED)
+
     # ── Rendering helpers ─────────────────────────────────────────────────
 
     def _update_count_label(self):
         count    = len(self._visible_entries)
         selected = sum(1 for e in self._all_entries if self._checked[e.id].get())
         parts = [f"{count} app{'s' if count != 1 else ''}"]
+        if self._active_tag != "All":
+            parts.append(f"tag: {self._active_tag}")
         if selected:
             parts.append(f"{selected} selected")
         self._count_label.config(text="  ·  ".join(parts))

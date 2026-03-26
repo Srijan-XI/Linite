@@ -1,0 +1,66 @@
+#compdef linite python3
+# Zsh tab-completion for Linite
+# ------------------------------------------------------
+# Installation (choose one):
+#
+#  1. Per-user (recommended):
+#       mkdir -p ~/.zsh/completions
+#       cp _linite ~/.zsh/completions/_linite
+#       # Ensure the directory is in fpath (add to ~/.zshrc if not):
+#       echo 'fpath=(~/.zsh/completions $fpath)' >> ~/.zshrc
+#       echo 'autoload -Uz compinit && compinit' >> ~/.zshrc
+#       exec zsh
+#
+#  2. System-wide (e.g. Arch):
+#       sudo cp _linite /usr/share/zsh/site-functions/_linite
+#
+# ------------------------------------------------------
+
+_linite() {
+    local context state state_descr line expl
+    typeset -A opt_args
+
+    # ── Arguments spec ────────────────────────────────────────────────────
+    _arguments -C \
+        '(--cli)--cli[Run CLI subcommand]:subcmd:->cli_subcmd' \
+        '(--list)--list[Print software catalog and exit]' \
+        '(--export)--export[Export shell script]:file:_files -g "*.sh"' \
+        '(--export-profile)--export-profile[Save app selection as JSON profile]:file:_files -g "*.json"' \
+        '(--import-profile)--import-profile[Load a JSON profile file]:file:_files -g "*.json"' \
+        '(--cache)--cache[Pre-download packages to local cache]' \
+        '(--cache-info)--cache-info[Show cache info and exit]' \
+        '(--clear-cache)--clear-cache[Delete cached packages and exit]' \
+        '(--light)--light[Launch GUI in light mode]' \
+        '(--rollback)--rollback[Roll back last installation]' \
+        '(--dry)--dry[Dry run (no changes)]' \
+        '(--daemon)--daemon[Run as background update daemon]' \
+        '--daemon-interval-hours[Daemon check interval (hours)]:hours:(1 2 4 6 12 24 48)' \
+        '(--skip-network-check)--skip-network-check[Skip connectivity check]' \
+        '--pm[Override package manager]:pm:(apt dnf pacman zypper snap flatpak nix)' \
+        '(-v --verbose)'{-v,--verbose}'[Enable verbose output]' \
+        '(-h --help)'{-h,--help}'[Show help]' \
+        '*::args:->args'
+
+    case "${state}" in
+        cli_subcmd)
+            local subcmds=(install update uninstall)
+            _describe 'subcommand' subcmds
+            ;;
+        args)
+            # Provide app ID completions when after 'install' or 'uninstall'
+            if [[ ${line[1]} == install || ${line[1]} == uninstall ]]; then
+                local catalog_ids
+                catalog_ids=( ${(f)"$(python3 -c "
+from data.software_catalog import CATALOG_MAP
+for k in sorted(CATALOG_MAP.keys()):
+    print(k)
+" 2>/dev/null)"} )
+                if (( ${#catalog_ids} )); then
+                    _describe 'app id' catalog_ids
+                fi
+            fi
+            ;;
+    esac
+}
+
+_linite "$@"

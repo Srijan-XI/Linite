@@ -38,6 +38,7 @@ class SoftwareEntry:
     category: str
     icon: str = "📦"               # emoji fallback icon
     website: str = ""
+    tags: List[str] = field(default_factory=list)
 
     # Keyed by package-manager name.
     # Special key "universal" falls back when a specific PM has no entry.

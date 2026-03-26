@@ -5,11 +5,18 @@ Entry point: launches the GUI or runs CLI install/update commands.
 
 Usage:
   python main.py                          # Launch GUI
+  python main.py --light                  # Launch GUI in light mode
   python main.py --cli install vlc git    # CLI install
   python main.py --cli update             # CLI update all
+    python main.py --remote user@host --install vlc git   # Remote install over SSH
+    python main.py --remote user@host --update            # Remote update over SSH
   python main.py --list                   # Print software catalog
   python main.py --export mysetup.sh      # Export a shell install script
   python main.py --export mysetup.sh --pm apt --cli install vlc git  # filtered export
+  python main.py --export-profile dev.json --cli install vlc git  # save profile
+  python main.py --import-profile dev.json  # restore profile (prints IDs)
+  python main.py --cache                  # pre-download all packages
+  python main.py --cache --pm apt         # pre-download only apt packages
   python main.py --verbose                # Enable debug logging
 """
 
@@ -82,6 +89,54 @@ def parse_args():
         "--verbose", "-v",
         action="store_true",
         help="Enable verbose/debug output.",
+    )
+    parser.add_argument(
+        "--light",
+        action="store_true",
+        help="Launch the GUI in light mode instead of the default dark mode.",
+    )
+    parser.add_argument(
+        "--export-profile",
+        metavar="FILE",
+        help="Save the app selection (from --cli install <ids>) as a JSON profile file.",
+    )
+    parser.add_argument(
+        "--import-profile",
+        metavar="FILE",
+        help="Load a profile file and print the contained app IDs (stdout).",
+    )
+    parser.add_argument(
+        "--cache",
+        action="store_true",
+        help="Pre-download packages to ~/.cache/linite/ before installing. "
+             "Supports apt, dnf, pacman, zypper. "
+             "Combine with --pm to restrict to one package manager.",
+    )
+    parser.add_argument(
+        "--cache-info",
+        action="store_true",
+        help="Show what is currently cached and its disk usage, then exit.",
+    )
+    parser.add_argument(
+        "--clear-cache",
+        action="store_true",
+        help="Delete all pre-downloaded packages from ~/.cache/linite/ and exit.",
+    )
+    parser.add_argument(
+        "--remote",
+        metavar="TARGET",
+        help="Run command on a remote host over SSH (user@host or user@host:port).",
+    )
+    parser.add_argument(
+        "--install",
+        nargs="+",
+        metavar="APP_ID",
+        help="Install app IDs (primarily used with --remote).",
+    )
+    parser.add_argument(
+        "--update",
+        action="store_true",
+        help="Run system update (primarily used with --remote).",
     )
     return parser.parse_args()
 
@@ -221,7 +276,7 @@ def cmd_cli(args_list: list, verbose: bool, skip_network_check: bool = False):
         sys.exit(1)
 
 
-def cmd_gui():
+def cmd_gui(light_mode: bool = False):
     """Launch the Tkinter GUI."""
     try:
         import tkinter  # noqa: F401
@@ -234,6 +289,11 @@ def cmd_gui():
             file=sys.stderr,
         )
         sys.exit(1)
+
+    if light_mode:
+        from gui import styles
+        styles.set_theme("light")
+        styles._refresh_module_attrs()  # propagate to all colour constants
 
     from gui.app import run
     run()
@@ -300,6 +360,150 @@ def cmd_daemon(interval_hours: int = 24):
         time.sleep(interval_hours * 3600)
 
 
+def cmd_export_profile(output_file: str, ids: list[str]) -> None:
+    """Serialize a set of app IDs to a JSON profile file."""
+    from core.profiles import save_profile
+
+    if not ids:
+        print("Error: specify app IDs to save, e.g.: --cli install vlc git --export-profile mysetup.json")
+        sys.exit(1)
+
+    save_profile(set(ids), output_file, name="")
+    print(f"✓ Profile saved to: {output_file}  ({len(ids)} app(s))")
+
+
+def cmd_import_profile(profile_file: str) -> None:
+    """Load a profile file and print the app IDs it contains."""
+    from core.profiles import load_profile
+    from data.software_catalog import CATALOG_MAP
+
+    ids = load_profile(profile_file)
+    valid = [i for i in ids if i in CATALOG_MAP]
+    unknown = [i for i in ids if i not in CATALOG_MAP]
+
+    print(f"Profile: {profile_file}  ({len(ids)} app(s) stored)")
+    print()
+    for app_id in valid:
+        entry = CATALOG_MAP[app_id]
+        print(f"  ✓  {app_id:<28} {entry.name}")
+    if unknown:
+        print()
+        for app_id in unknown:
+            print(f"  ?  {app_id:<28} (not in catalog)")
+
+    print()
+    print("# CLI usage:")
+    print(f"  linite --cli install {' '.join(valid)}")
+
+
+def cmd_cache(ids: list[str], pm_filter: str | None) -> None:
+    """Pre-download packages to ~/.cache/linite/."""
+    from core.cache import cache_packages
+    from data.software_catalog import CATALOG, CATALOG_MAP
+
+    if ids:
+        entries = []
+        for app_id in ids:
+            entry = CATALOG_MAP.get(app_id)
+            if entry is None:
+                print(f"  [!] Unknown app id: '{app_id}' — skipped")
+            else:
+                entries.append(entry)
+    else:
+        entries = list(CATALOG)
+
+    if not entries:
+        print("No valid apps to cache.")
+        sys.exit(1)
+
+    print(f"Pre-downloading {len(entries)} app(s) …")
+    results = cache_packages(entries, pm_filter=pm_filter, progress_cb=print)
+
+    if results:
+        ok = sum(1 for v in results.values() if v)
+        print(f"\n✓ {ok}/{len(results)} package-manager block(s) cached successfully.")
+    else:
+        print("Nothing was cached (selected apps may use only unsupported PMs).")
+
+
+def cmd_cache_info() -> None:
+    """Print information about the local package cache."""
+    from core.cache import cache_info, CACHE_DIR
+
+    info = cache_info()
+    if not info:
+        print(f"Cache is empty (or does not exist: {CACHE_DIR})")
+        return
+
+    print(f"Cache directory: {CACHE_DIR}")
+    print()
+    total_mb = 0.0
+    for pm, data in sorted(info.items()):
+        print(f"  {pm:<12} {data['file_count']:>5} file(s)   {data['total_mb']:>7.1f} MB")
+        total_mb += data["total_mb"]
+    print()
+    print(f"  {'TOTAL':<12} {'':>5}          {total_mb:>7.1f} MB")
+
+
+def cmd_clear_cache(pm_filter: str | None = None) -> None:
+    """Delete the local package cache."""
+    from core.cache import clear_cache, CACHE_DIR
+
+    clear_cache(pm=pm_filter)
+    scope = pm_filter if pm_filter else "all"
+    print(f"✓ Cache cleared ({scope}). Path: {CACHE_DIR}")
+
+
+def cmd_remote(
+    target_text: str,
+    cli_args: list[str] | None,
+    install_ids: list[str] | None,
+    do_update: bool,
+    skip_network_check: bool,
+) -> int:
+    """Execute a Linite command on a remote host over SSH."""
+    from core.remote.install import build_remote_install_command
+    from core.remote.ssh import parse_remote_target, quote_remote_args, run_remote_command
+
+    if not shutil.which("ssh"):
+        print("Error: ssh command not found in PATH.")
+        return 2
+
+    target = parse_remote_target(target_text)
+
+    requested_modes = int(bool(install_ids)) + int(bool(do_update)) + int(bool(cli_args))
+    if requested_modes == 0:
+        print("Error: remote mode requires one of: --install ..., --update, or --cli ...")
+        return 2
+    if cli_args and (install_ids or do_update):
+        print("Error: when using --remote --cli ..., do not also pass --install/--update.")
+        return 2
+    if install_ids and do_update:
+        print("Error: choose only one remote operation (--install or --update).")
+        return 2
+
+    if cli_args:
+        remote_command = quote_remote_args(["linite", *cli_args])
+    elif install_ids:
+        remote_command = build_remote_install_command(
+            install_ids,
+            skip_network_check=skip_network_check,
+        )
+    else:
+        remote_command = quote_remote_args(["linite", "--cli", "update"])
+
+    print(f"Remote target: {target.user}@{target.host}:{target.port}")
+    print(f"Remote command: {remote_command}")
+    print("\n── Remote Output ──────────────────────────────────────")
+    rc, output = run_remote_command(target, remote_command)
+    if output.strip():
+        print(output.rstrip())
+    print("\n── Remote Status ──────────────────────────────────────")
+    icon = "✓" if rc == 0 else "✗"
+    print(f"{icon} Exit code: {rc}")
+    return rc
+
+
 def main():
     args = parse_args()
     setup_logging(verbose=args.verbose)
@@ -349,12 +553,55 @@ def main():
             print("\nLinite daemon stopped.")
         return
 
+    if args.remote:
+        try:
+            rc = cmd_remote(
+                target_text=args.remote,
+                cli_args=args.cli,
+                install_ids=args.install,
+                do_update=args.update,
+                skip_network_check=args.skip_network_check,
+            )
+        except ValueError as exc:
+            print(f"Error: {exc}")
+            sys.exit(2)
+        sys.exit(rc)
+
+    if args.install or args.update:
+        print("Error: --install/--update shorthand is only valid with --remote.")
+        print("Use local mode as: --cli install <ids...>  or  --cli update")
+        sys.exit(2)
+
+    # ── Profile import / export ──────────────────────────────────────────
+    if args.import_profile:
+        cmd_import_profile(args.import_profile)
+        return
+
+    if args.export_profile:
+        ids = args.cli[1:] if (args.cli and args.cli[0].lower() == "install") else []
+        cmd_export_profile(args.export_profile, ids)
+        return
+
+    # ── Cache management ─────────────────────────────────────────────────
+    if args.cache_info:
+        cmd_cache_info()
+        return
+
+    if args.clear_cache:
+        cmd_clear_cache(pm_filter=getattr(args, "pm", None))
+        return
+
+    if args.cache:
+        ids = args.cli[1:] if (args.cli and args.cli[0].lower() == "install") else []
+        cmd_cache(ids, pm_filter=getattr(args, "pm", None))
+        return
+
     if args.cli:
         cmd_cli(args.cli, verbose=args.verbose, skip_network_check=args.skip_network_check)
         return
 
     # Default: launch GUI
-    cmd_gui()
+    cmd_gui(light_mode=getattr(args, "light", False))
 
 
 if __name__ == "__main__":

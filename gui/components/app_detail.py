@@ -5,9 +5,11 @@ Shows full information about a selected app in a modal window.
 
 import tkinter as tk
 from tkinter import ttk
+import threading
 import webbrowser
 from typing import Optional
 
+from core.catalog.flathub import load_flathub_metadata
 from core.distro import DistroInfo
 from core.installer import _pick_pm
 from data.software_catalog import SoftwareEntry
@@ -27,6 +29,9 @@ class AppDetailWindow(tk.Toplevel):
 
         self._entry = entry
         self._distro = distro
+        self._latest_version_value: Optional[tk.Label] = None
+        self._latest_notes_value: Optional[tk.Label] = None
+        self._latest_link: Optional[tk.Label] = None
 
         self._build(entry, distro)
         self._center(parent)
@@ -82,6 +87,9 @@ class AppDetailWindow(tk.Toplevel):
         pms = list(entry.install_specs.keys())
         self._row(body, "Supported PMs", "  •  ".join(pms) or "—")
 
+        # Flatpak metadata (version/changelog) via Flathub API, cached locally.
+        self._build_flatpak_metadata_section(body, entry)
+
         # Pre/post commands note
         if distro:
             pm = _pick_pm(entry, distro)
@@ -130,6 +138,128 @@ class AppDetailWindow(tk.Toplevel):
             bg=st.BG_DARK, fg=st.TEXT_PRIMARY, font=st.FONT_SMALL,
             anchor="w", **kw,
         ).pack(side="left", fill="x", expand=True)
+
+    def _dynamic_row(self, parent, label: str, initial: str, wrap: bool = False) -> tk.Label:
+        row = tk.Frame(parent, bg=st.BG_DARK)
+        row.pack(fill="x", pady=4)
+
+        tk.Label(
+            row,
+            text=label + ":",
+            bg=st.BG_DARK,
+            fg=st.TEXT_MUTED,
+            font=st.FONT_SMALL,
+            anchor="w",
+            width=18,
+        ).pack(side="left", anchor="n")
+
+        kw = dict(wraplength=340, justify="left") if wrap else {}
+        value = tk.Label(
+            row,
+            text=initial,
+            bg=st.BG_DARK,
+            fg=st.TEXT_PRIMARY,
+            font=st.FONT_SMALL,
+            anchor="w",
+            **kw,
+        )
+        value.pack(side="left", fill="x", expand=True)
+        return value
+
+    def _dynamic_link_row(self, parent, label: str, initial: str = "—") -> tk.Label:
+        row = tk.Frame(parent, bg=st.BG_DARK)
+        row.pack(fill="x", pady=4)
+
+        tk.Label(
+            row,
+            text=label + ":",
+            bg=st.BG_DARK,
+            fg=st.TEXT_MUTED,
+            font=st.FONT_SMALL,
+            anchor="w",
+            width=18,
+        ).pack(side="left")
+
+        link = tk.Label(
+            row,
+            text=initial,
+            bg=st.BG_DARK,
+            fg=st.TEXT_MUTED,
+            font=st.FONT_SMALL,
+            anchor="w",
+            cursor="arrow",
+        )
+        link.pack(side="left")
+        return link
+
+    def _build_flatpak_metadata_section(self, body, entry: SoftwareEntry):
+        flatpak_spec = entry.install_specs.get("flatpak")
+        if not flatpak_spec or not flatpak_spec.packages:
+            return
+
+        app_id = flatpak_spec.packages[0]
+        self._row(body, "Flatpak ID", app_id)
+        self._latest_version_value = self._dynamic_row(body, "Latest version", "Loading…")
+        self._latest_notes_value = self._dynamic_row(
+            body,
+            "Changelog",
+            "Loading release notes…",
+            wrap=True,
+        )
+        self._latest_link = self._dynamic_link_row(body, "Release URL")
+
+        threading.Thread(
+            target=self._load_flatpak_metadata,
+            args=(app_id,),
+            daemon=True,
+        ).start()
+
+    def _load_flatpak_metadata(self, app_id: str):
+        try:
+            info = load_flathub_metadata(app_id)
+            self.after(0, lambda: self._apply_flatpak_metadata(info, None))
+        except Exception as exc:
+            self.after(0, lambda: self._apply_flatpak_metadata(None, str(exc)))
+
+    def _apply_flatpak_metadata(self, info: Optional[dict[str, str]], error: Optional[str]):
+        if not self.winfo_exists():
+            return
+
+        if error:
+            if self._latest_version_value is not None:
+                self._latest_version_value.config(text="Unavailable")
+            if self._latest_notes_value is not None:
+                self._latest_notes_value.config(text="Could not load release metadata.")
+            if self._latest_link is not None:
+                self._latest_link.config(text="—", fg=st.TEXT_MUTED, cursor="arrow")
+            return
+
+        assert info is not None
+        version = info.get("version", "Unknown")
+        notes = info.get("notes", "No release notes available.")
+        source = info.get("source", "")
+        url = info.get("url", "")
+
+        if self._latest_version_value is not None:
+            suffix = ""
+            if source == "cache":
+                suffix = " (cached)"
+            elif source == "cache-stale":
+                suffix = " (cached, stale)"
+            self._latest_version_value.config(text=f"{version}{suffix}")
+
+        if self._latest_notes_value is not None:
+            truncated = notes[:1200] + "…" if len(notes) > 1200 else notes
+            self._latest_notes_value.config(text=truncated)
+
+        if self._latest_link is not None:
+            if url:
+                self._latest_link.config(text=url, fg=st.ACCENT, cursor="hand2")
+                self._latest_link.bind("<Button-1>", lambda _e: webbrowser.open(url))
+                self._latest_link.bind("<Enter>", lambda _e: self._latest_link.config(fg=st.ACCENT_HOVER))
+                self._latest_link.bind("<Leave>", lambda _e: self._latest_link.config(fg=st.ACCENT))
+            else:
+                self._latest_link.config(text="—", fg=st.TEXT_MUTED, cursor="arrow")
 
     def _link_row(self, parent, label: str, url: str):
         row = tk.Frame(parent, bg=st.BG_DARK)

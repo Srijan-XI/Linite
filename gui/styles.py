@@ -1,29 +1,126 @@
 """
 Linite - GUI Style Constants
-Dark-mode color scheme and font definitions for Tkinter.
+Dark-mode and Light-mode color palettes for Tkinter.
+
+Usage:
+    from gui import styles as st
+
+    # Apply a palette before building the UI:
+    st.set_theme("light")   # or "dark" (default)
+
+    # All widgets reference st.<NAME> — they update automatically when
+    # set_theme() is called *before* window construction.
 """
 
-# ── Palette ───────────────────────────────────────────────────────────────
+from __future__ import annotations
 
-BG_DARK        = "#1e1e2e"   # main background
-BG_MEDIUM      = "#2a2a3d"   # sidebar / card background
-BG_LIGHT       = "#313145"   # hover / selected row
-CARD_SELECTED  = "#2e2e50"   # card bg when checked
-ACCENT         = "#7c6af7"   # purple accent (checkboxes, buttons)
-ACCENT_HOVER   = "#9b8df9"
-ACCENT_DIM     = "#4a3fa0"   # muted accent (badges, counts)
-SUCCESS        = "#50fa7b"
-SUCCESS_BG     = "#163a28"   # installed badge background
-ERROR          = "#ff5555"
-ERROR_BG       = "#3a1010"   # error badge background
-WARNING        = "#f1fa8c"
-TEXT_PRIMARY   = "#cdd6f4"
-TEXT_SECONDARY = "#a6adc8"
-TEXT_MUTED     = "#6c7086"
-BORDER         = "#45475a"
-DIVIDER        = "#55576a"   # stronger divider for button groups
-TOOLTIP_BG     = "#3c3c58"
-TOOLTIP_FG     = "#e0e0f8"
+# ---------------------------------------------------------------------------
+# Palette definitions
+# ---------------------------------------------------------------------------
+
+_DARK = {
+    "BG_DARK":        "#1e1e2e",   # main background
+    "BG_MEDIUM":      "#2a2a3d",   # sidebar / card background
+    "BG_LIGHT":       "#313145",   # hover / selected row
+    "CARD_SELECTED":  "#2e2e50",   # card bg when checked
+    "ACCENT":         "#7c6af7",   # purple accent (checkboxes, buttons)
+    "ACCENT_HOVER":   "#9b8df9",
+    "ACCENT_DIM":     "#4a3fa0",   # muted accent (badges, counts)
+    "SUCCESS":        "#50fa7b",
+    "SUCCESS_BG":     "#163a28",   # installed badge background
+    "ERROR":          "#ff5555",
+    "ERROR_BG":       "#3a1010",   # error badge background
+    "WARNING":        "#f1fa8c",
+    "TEXT_PRIMARY":   "#cdd6f4",
+    "TEXT_SECONDARY": "#a6adc8",
+    "TEXT_MUTED":     "#6c7086",
+    "BORDER":         "#45475a",
+    "DIVIDER":        "#55576a",   # stronger divider for button groups
+    "TOOLTIP_BG":     "#3c3c58",
+    "TOOLTIP_FG":     "#e0e0f8",
+}
+
+_LIGHT = {
+    "BG_DARK":        "#f4f4f8",   # main background
+    "BG_MEDIUM":      "#e8e8f0",   # sidebar / card background
+    "BG_LIGHT":       "#d8d8ea",   # hover / selected row
+    "CARD_SELECTED":  "#dcdcf0",   # card bg when checked
+    "ACCENT":         "#5a44d8",   # purple accent
+    "ACCENT_HOVER":   "#7060e8",
+    "ACCENT_DIM":     "#b0a8f0",   # muted accent
+    "SUCCESS":        "#1a8a45",
+    "SUCCESS_BG":     "#d0f0dc",   # installed badge background
+    "ERROR":          "#cc2222",
+    "ERROR_BG":       "#ffe0e0",   # error badge background
+    "WARNING":        "#b07800",
+    "TEXT_PRIMARY":   "#1a1a2e",
+    "TEXT_SECONDARY": "#3a3a5c",
+    "TEXT_MUTED":     "#7070a0",
+    "BORDER":         "#c0c0d8",
+    "DIVIDER":        "#b0b0cc",
+    "TOOLTIP_BG":     "#e0e0f0",
+    "TOOLTIP_FG":     "#1a1a2e",
+}
+
+# ---------------------------------------------------------------------------
+# Active palette (module-level mutable state — set before window is built)
+# ---------------------------------------------------------------------------
+
+_active_palette: dict[str, str] = dict(_DARK)
+_current_theme: str = "dark"
+
+
+def set_theme(theme: str) -> None:
+    """Switch the active palette.  Call before constructing any widgets.
+
+    Args:
+        theme: ``"dark"`` (default) or ``"light"``.
+    """
+    global _active_palette, _current_theme
+    _current_theme = theme.lower()
+    _active_palette = dict(_DARK if _current_theme == "dark" else _LIGHT)
+
+
+def current_theme() -> str:
+    """Return the name of the current theme: ``"dark"`` or ``"light"``."""
+    return _current_theme
+
+
+# ---------------------------------------------------------------------------
+# Colour accessors (delegating to the active palette)
+# ---------------------------------------------------------------------------
+# These are defined as module attributes so existing code that does
+#   `from gui import styles as st` and then uses `st.BG_DARK` keeps working.
+# They are updated by _refresh_module_attrs() after any set_theme() call.
+
+def _refresh_module_attrs() -> None:
+    import sys
+    mod = sys.modules[__name__]
+    for name, value in _active_palette.items():
+        setattr(mod, name, value)
+
+
+# Expose attributes with their dark-mode defaults initially
+BG_DARK:        str = _DARK["BG_DARK"]
+BG_MEDIUM:      str = _DARK["BG_MEDIUM"]
+BG_LIGHT:       str = _DARK["BG_LIGHT"]
+CARD_SELECTED:  str = _DARK["CARD_SELECTED"]
+ACCENT:         str = _DARK["ACCENT"]
+ACCENT_HOVER:   str = _DARK["ACCENT_HOVER"]
+ACCENT_DIM:     str = _DARK["ACCENT_DIM"]
+SUCCESS:        str = _DARK["SUCCESS"]
+SUCCESS_BG:     str = _DARK["SUCCESS_BG"]
+ERROR:          str = _DARK["ERROR"]
+ERROR_BG:       str = _DARK["ERROR_BG"]
+WARNING:        str = _DARK["WARNING"]
+TEXT_PRIMARY:   str = _DARK["TEXT_PRIMARY"]
+TEXT_SECONDARY: str = _DARK["TEXT_SECONDARY"]
+TEXT_MUTED:     str = _DARK["TEXT_MUTED"]
+BORDER:         str = _DARK["BORDER"]
+DIVIDER:        str = _DARK["DIVIDER"]
+TOOLTIP_BG:     str = _DARK["TOOLTIP_BG"]
+TOOLTIP_FG:     str = _DARK["TOOLTIP_FG"]
+
 
 # ── Fonts ─────────────────────────────────────────────────────────────────
 

@@ -53,6 +53,7 @@ def _load_app(d: dict) -> "SoftwareEntry":
         category=d["category"],
         icon=d.get("icon", "📦"),
         website=d.get("website", ""),
+        tags=d.get("tags", []),
         install_specs=install_specs,
         preferred_pm=d.get("preferred_pm"),
     )

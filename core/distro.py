@@ -45,6 +45,10 @@ class DistroInfo:
                "suse" in self.id_like
 
     @property
+    def is_nixos(self) -> bool:
+        return self.id == "nixos" or "nix" in self.id_like
+
+    @property
     def display_name(self) -> str:
         return f"{self.name} {self.version} ({self.arch})"
 
@@ -67,6 +71,8 @@ def _read_os_release() -> dict:
 
 def _detect_package_manager(distro: DistroInfo) -> str:
     """Determine the primary package manager for the distro."""
+    if distro.is_nixos:
+        return "nix"
     if distro.is_debian_based:
         return "apt"
     if distro.is_fedora_based:
@@ -78,7 +84,9 @@ def _detect_package_manager(distro: DistroInfo) -> str:
         return "pacman"
     if distro.is_opensuse:
         return "zypper"
-    # Fallbacks
+    # Fallbacks: prefer nix-env if present on a foreign distro
+    if _cmd_exists("nix-env"):
+        return "nix"
     for pm in ("apt", "dnf", "yum", "pacman", "zypper", "apk", "emerge"):
         if _cmd_exists(pm):
             return pm
