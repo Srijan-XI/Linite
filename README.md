@@ -1,4 +1,4 @@
-# Linite 🐧
+# [Linite](https://srijan-xi.github.io/Linites/) 🐧
 
 > **The Linux equivalent of [Ninite](https://ninite.com/)** — pick your apps, click **Install**, and Linite silently sets up your entire system using the right package manager for your distro.
 
