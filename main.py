@@ -14,7 +14,11 @@ Usage:
 """
 
 import argparse
+import re
+import shutil
+import subprocess
 import sys
+import time
 
 from utils.helpers import warn_if_not_linux, setup_logging, warn_if_not_root
 
@@ -62,6 +66,17 @@ def parse_args():
         "--skip-network-check",
         action="store_true",
         help="Skip network connectivity check before installation (not recommended).",
+    )
+    parser.add_argument(
+        "--daemon",
+        action="store_true",
+        help="Run scheduled daily update checks with desktop notifications.",
+    )
+    parser.add_argument(
+        "--daemon-interval-hours",
+        type=int,
+        default=24,
+        help="Interval in hours for --daemon update cycles (default: 24).",
     )
     parser.add_argument(
         "--verbose", "-v",
@@ -224,6 +239,67 @@ def cmd_gui():
     run()
 
 
+def _notify(title: str, body: str):
+    """Best-effort desktop notification; falls back to stdout."""
+    if sys.platform.startswith("linux") and shutil.which("notify-send"):
+        subprocess.run(["notify-send", title, body], capture_output=True, text=True)
+    else:
+        print(f"[notify] {title}: {body}")
+
+
+def _estimate_updated_packages(output: str) -> int:
+    """Best-effort package-count extraction from PM output."""
+    patterns = [
+        r"(\d+)\s+upgraded",
+        r"Upgraded:\s*(\d+)",
+        r"(\d+)\s+packages?\s+to\s+upgrade",
+        r"Updated:\s*(\d+)",
+    ]
+    for pat in patterns:
+        m = re.search(pat, output, flags=re.IGNORECASE)
+        if m:
+            try:
+                return int(m.group(1))
+            except ValueError:
+                return 0
+    return 0
+
+
+def cmd_daemon(interval_hours: int = 24):
+    """Run periodic update checks/updates and issue desktop notifications."""
+    from core.ops.update import update_system
+    from core.system import distro as distro_mod
+
+    interval_hours = max(1, interval_hours)
+    distro = distro_mod.detect()
+    _notify("Linite Daemon", f"Started (interval: {interval_hours}h, pm: {distro.package_manager})")
+    print(f"Linite daemon running every {interval_hours}h (Ctrl+C to stop)")
+
+    while True:
+        started = time.strftime("%Y-%m-%d %H:%M:%S")
+        print(f"[{started}] Running scheduled update cycle...")
+
+        try:
+            results = update_system(distro)
+            failed = [pm for pm, (rc, _) in results.items() if rc != 0]
+            updated_count = sum(_estimate_updated_packages(out) for _, (_, out) in results.items())
+
+            if failed:
+                _notify(
+                    "Linite Update Warning",
+                    f"Some managers failed: {', '.join(failed)}",
+                )
+            else:
+                _notify(
+                    "Linite Update Complete",
+                    f"Cycle complete. Approx updated packages: {updated_count}",
+                )
+        except Exception as exc:
+            _notify("Linite Daemon Error", str(exc))
+
+        time.sleep(interval_hours * 3600)
+
+
 def main():
     args = parse_args()
     setup_logging(verbose=args.verbose)
@@ -263,6 +339,14 @@ def main():
     if args.rollback:
         warn_if_not_root()
         cmd_rollback(dry_run=args.dry)
+        return
+
+    if args.daemon:
+        warn_if_not_root()
+        try:
+            cmd_daemon(interval_hours=args.daemon_interval_hours)
+        except KeyboardInterrupt:
+            print("\nLinite daemon stopped.")
         return
 
     if args.cli:

@@ -30,6 +30,32 @@ _SEARCH_DEBOUNCE_MS = 200
 # always score 1.0 and are never excluded by this threshold.
 _FUZZY_THRESHOLD = 0.45
 
+# Heuristic popularity weights used for non-search ordering.
+# Higher means the app appears earlier within its category.
+_POPULARITY_WEIGHTS: Dict[str, int] = {
+    "firefox": 100,
+    "chromium": 95,
+    "google-chrome": 95,
+    "vscode": 100,
+    "git": 98,
+    "docker": 96,
+    "python3": 96,
+    "nodejs": 94,
+    "steam": 98,
+    "vlc": 95,
+    "libreoffice": 90,
+    "obsidian": 92,
+    "joplin": 88,
+    "bitwarden": 90,
+    "keepassxc": 84,
+    "discord": 92,
+    "telegram": 90,
+    "slack": 88,
+    "zoom": 86,
+    "wireguard": 82,
+    "openvpn": 80,
+}
+
 
 def _fuzzy_score(query: str, entry: SoftwareEntry) -> float:
     """
@@ -66,6 +92,11 @@ def _fuzzy_score(query: str, entry: SoftwareEntry) -> float:
             best = max(best, word_ratio)
 
     return best
+
+
+def _popularity_score(entry: SoftwareEntry) -> int:
+    """Return heuristic popularity score for deterministic app ordering."""
+    return _POPULARITY_WEIGHTS.get(entry.id, 50)
 
 
 class SoftwarePanel(tk.Frame):
@@ -363,8 +394,15 @@ class SoftwarePanel(tk.Frame):
                 for e in entries
             ]
             scored = [(e, s) for e, s in scored if s >= _FUZZY_THRESHOLD]
-            scored.sort(key=lambda x: x[1], reverse=True)
+            # Primary: fuzzy relevance, Secondary: popularity, Tertiary: name.
+            scored.sort(key=lambda x: (-x[1], -_popularity_score(x[0]), x[0].name.lower()))
             entries = [e for e, _ in scored]
+        else:
+            # For category/all views without search, sort by popularity first.
+            entries = sorted(
+                entries,
+                key=lambda e: (-_popularity_score(e), e.name.lower()),
+            )
 
         self._visible_entries = entries
         visible_ids = {e.id for e in entries}

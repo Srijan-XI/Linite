@@ -79,7 +79,7 @@ Scope:
 - Scheduled update notifications (`--daemon`)
 - Batch-copy selected app IDs and “What’s New” panel
 
-Status: ⚠️ **In progress**
+Status: ✅ **Completed**
 
 ---
 
@@ -356,12 +356,14 @@ Add `"appimage"` as a 4th fallback (after flatpak → snap). Many apps (Obsidian
 
 ---
 
-#### ❌ G. Scheduled Update Notifications
+#### ✅ G. Scheduled Update Notifications
 Add a `--daemon` mode that runs `update_system()` once per day and fires a `notify-send` desktop notification showing the number of pending updates.
 
 ```bash
 linite --daemon &
 ```
+
+> **Implemented** in `main.py` with `--daemon` and `--daemon-interval-hours`. Runs scheduled update cycles and sends desktop notifications via `notify-send` when available (falls back to console logging).
 
 ---
 
@@ -518,7 +520,7 @@ Generate tab-completion for `linite --cli install <TAB>` using `argcomplete` or 
 | `Ctrl+F` keyboard shortcut to focus the search box | Very Low | High | ✅ Done |
 | Batch-copy selected app IDs for CLI reuse | Low | Medium | ✅ Done |
 | "What's New" panel on first launch after an update | Low | Medium | ✅ Done |
-| Sort apps within each category by popularity | Medium | High | ❌ Todo |
+| Sort apps within each category by popularity | Medium | High | ✅ Done |
 | Show estimated total install time before confirming | Medium | Medium | ✅ Done |
 
 > **Batch-copy IDs:** Added **"📋 Copy IDs"** action in `gui/app.py` action bar. Copies selected app IDs as a space-separated string to clipboard and logs success in the progress panel.
@@ -527,9 +529,11 @@ Generate tab-completion for `linite --cli install <TAB>` using `argcomplete` or 
 
 > **Install ETA:** Confirmation dialog now displays a heuristic estimated install duration before users proceed.
 
+> **Popularity sorting:** `SoftwarePanel` now orders apps by heuristic popularity within filtered category views (and uses popularity as a tie-breaker for fuzzy search results).
+
 > **Installed badge:** `set_installed_ids()` in `gui/components/software_panel.py` renders a green `✓ installed` label per card and dims the app name.  
-> **Right-click:** `Button-3` is bound on cards but opens the detail panel — NOT `webbrowser.open`. One-line change needed.  
-> **Ctrl+F:** `_bind_shortcuts()` in `gui/app.py` has `Ctrl+A`, `Ctrl+Q`, `Ctrl+L` but **no** `Ctrl+F` → `search_entry.focus_set()`.
+> **Right-click:** Context menu opens app website via `webbrowser.open` when available.  
+> **Ctrl+F:** `_bind_shortcuts()` includes `Ctrl+F` and focuses the search entry.
 
 ---
 
