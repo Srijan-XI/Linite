@@ -5,6 +5,7 @@ description = "Free and open-source cross-platform multimedia player."
 category    = "Media"
 icon        = "🎬"
 website     = "https://www.videolan.org/vlc/"
+preferred_pm = "flatpak"
 
 [apps.install_specs.apt]
 packages = ["vlc"]
@@ -46,6 +47,7 @@ description = "Free, open-source and cross-platform media player."
 category    = "Media"
 icon        = "▶️"
 website     = "https://mpv.io"
+preferred_pm = "flatpak"
 
 [apps.install_specs.apt]
 packages = ["mpv"]
@@ -69,6 +71,7 @@ description = "Free and open source software for video recording and live stream
 category    = "Media"
 icon        = "🎙️"
 website     = "https://obsproject.com"
+preferred_pm = "flatpak"
 
 [apps.install_specs.apt]
 packages = ["obs-studio"]
@@ -92,6 +95,7 @@ description = "Free, open-source, cross-platform audio editor."
 category    = "Media"
 icon        = "🎤"
 website     = "https://www.audacityteam.org"
+preferred_pm = "flatpak"
 
 [apps.install_specs.apt]
 packages = ["audacity"]
@@ -115,6 +119,7 @@ description = "Open-source video transcoder."
 category    = "Media"
 icon        = "🎞️"
 website     = "https://handbrake.fr"
+preferred_pm = "flatpak"
 
 [apps.install_specs.apt]
 packages = ["handbrake"]

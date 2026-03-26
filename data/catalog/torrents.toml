@@ -5,6 +5,7 @@ description = "Free and open-source BitTorrent client."
 category    = "Torrents"
 icon        = "🌊"
 website     = "https://www.qbittorrent.org"
+preferred_pm = "flatpak"
 
 [apps.install_specs.apt]
 packages = ["qbittorrent"]
@@ -45,6 +46,7 @@ description = "Lightweight, free BitTorrent client."
 category    = "Torrents"
 icon        = "💧"
 website     = "https://deluge-torrent.org"
+preferred_pm = "flatpak"
 
 [apps.install_specs.apt]
 packages = ["deluge"]
@@ -68,6 +70,7 @@ description = "Fast, easy and free BitTorrent client."
 category    = "Torrents"
 icon        = "📡"
 website     = "https://transmissionbt.com"
+preferred_pm = "flatpak"
 
 [apps.install_specs.apt]
 packages = ["transmission"]

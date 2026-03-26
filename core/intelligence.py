@@ -90,8 +90,8 @@ _GUI_ONLY: Set[str] = {
 
 # Apps that benefit from the very latest version (suggest flatpak/snap)
 _BENEFITS_FROM_FLATPAK: Set[str] = {
-    "vscode", "firefox", "chromium", "brave", "discord", "spotify",
-    "telegram", "slack", "zoom", "obs", "libreoffice",
+    "chromium", "brave", "discord", "telegram", "zoom", "obs",
+    "libreoffice", "steam", "lutris", "vlc", "thunderbird",
 }
 
 # Proprietary / license-reminder apps

@@ -5,6 +5,7 @@ description = "GNU Image Manipulation Program."
 category    = "Graphics"
 icon        = "🖼️"
 website     = "https://www.gimp.org"
+preferred_pm = "flatpak"
 
 [apps.install_specs.apt]
 packages = ["gimp"]
@@ -28,6 +29,7 @@ description = "Professional vector graphics editor."
 category    = "Graphics"
 icon        = "✏️"
 website     = "https://inkscape.org"
+preferred_pm = "flatpak"
 
 [apps.install_specs.apt]
 packages = ["inkscape"]
@@ -48,6 +50,7 @@ description = "Free and open-source 3D creation suite."
 category    = "Graphics"
 icon        = "🎨"
 website     = "https://www.blender.org"
+preferred_pm = "flatpak"
 
 [apps.install_specs.apt]
 packages = ["blender"]

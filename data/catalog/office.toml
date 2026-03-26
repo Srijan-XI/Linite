@@ -5,6 +5,7 @@ description = "Free and powerful office suite."
 category    = "Office"
 icon        = "📄"
 website     = "https://www.libreoffice.org"
+preferred_pm = "flatpak"
 
 [apps.install_specs.apt]
 packages = ["libreoffice"]
@@ -27,6 +28,7 @@ name        = "Okular"
 description = "Universal document viewer."
 category    = "Office"
 icon        = "📖"
+preferred_pm = "flatpak"
 
 [apps.install_specs.apt]
 packages = ["okular"]
@@ -47,6 +49,7 @@ description = "Free email client from Mozilla."
 category    = "Office"
 icon        = "📧"
 website     = "https://www.thunderbird.net"
+preferred_pm = "flatpak"
 
 [apps.install_specs.apt]
 packages = ["thunderbird"]
@@ -79,6 +82,7 @@ description = "Simple and clean document viewer (PDF, DJVU, XPS, etc.)."
 category    = "Office"
 icon        = "📖"
 website     = "https://wiki.gnome.org/Apps/Evince"
+preferred_pm = "flatpak"
 
 [apps.install_specs.apt]
 packages = ["evince"]

@@ -140,6 +140,7 @@ description = "Powerful yet simple screenshot tool (ShareX equivalent for Linux)
 category    = "Utilities"
 icon        = "🔥"
 website     = "https://flameshot.org"
+preferred_pm = "flatpak"
 
 [apps.install_specs.apt]
 packages = ["flameshot"]
@@ -163,6 +164,7 @@ description = "World's leading network protocol analyser."
 category    = "Utilities"
 icon        = "🦈"
 website     = "https://www.wireshark.org"
+preferred_pm = "flatpak"
 
 [apps.install_specs.apt]
 packages = ["wireshark"]

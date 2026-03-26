@@ -59,7 +59,13 @@ Scope:
 - Backfill `preferred_pm` consistently across legacy entries
 - Add CI catalog checks (syntax + lint + duplicate IDs + missing fields)
 
-Status: ⚠️ **In progress**
+Status: ✅ **Completed**
+
+Progress update:
+- ✅ Startup catalog lint implemented and wired in `main.py`
+- ✅ Added `check_catalog.py` for structural + duplicate-ID validation (CI-friendly)
+- ✅ Backfilled `preferred_pm` across legacy GUI entries that support Flatpak
+- ✅ Synced `_BENEFITS_FROM_FLATPAK` with current catalog strategy in `core/intelligence.py`
 
 ---
 
@@ -474,14 +480,14 @@ data/catalog/security.toml
 
 ---
 
-### ⚠️ B. Set `preferred_pm` Consistently for All Apps
+### ✅ B. Set `preferred_pm` Consistently for All Apps
 Most entries lack `preferred_pm`. Apply a clear policy:
 
 - Apps in `_BENEFITS_FROM_FLATPAK` (already tracked in `intelligence.py`) → `preferred_pm = "flatpak"`
 - Server/CLI tools → native PM only
 - Sync the `_BENEFITS_FROM_FLATPAK` list with the `preferred_pm` field across the catalog
 
-> **Partial:** All newly added entries (Password Managers, Video Editors, Terminal Emulators, VPN, Note Taking) consistently set `preferred_pm`. Older catalog entries have not been audited / backfilled.
+> **Implemented:** Legacy desktop apps with Flatpak support were backfilled with `preferred_pm = "flatpak"` (Gaming, Graphics, Media, Office, Torrents, Utilities, Web Browsers). Server/CLI-first entries remain native-first (no forced Flatpak preference). `_BENEFITS_FROM_FLATPAK` was updated in `core/intelligence.py` to match the catalog strategy.
 
 ---
 

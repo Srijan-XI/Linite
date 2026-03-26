@@ -83,7 +83,10 @@ def human_size(num_bytes: int) -> str:
     return f"{num_bytes:.1f} TB"
 
 
-def catalog_lint(current_pm: Optional[str] = None) -> list[str]:
+def catalog_lint(
+    current_pm: Optional[str] = None,
+    include_compatibility: bool = True,
+) -> list[str]:
     """
     Validate loaded catalog entries and return human-readable warnings.
 
@@ -131,7 +134,7 @@ def catalog_lint(current_pm: Optional[str] = None) -> list[str]:
                 warnings.append(f"[{app.id}] {pm_key} spec has no packages.")
 
         # Compatibility check for the host package manager.
-        if current_pm and current_pm != "unknown":
+        if include_compatibility and current_pm and current_pm != "unknown":
             compatible_keys = {current_pm, "universal", "flatpak", "snap", "appimage", "script"}
             # Treat yum and dnf as equivalent compatibility for linting.
             if current_pm == "yum":

@@ -25,6 +25,7 @@ description = "Open-source browser project that powers Chrome."
 category    = "Web Browsers"
 icon        = "🔵"
 website     = "https://www.chromium.org"
+preferred_pm = "flatpak"
 
 [apps.install_specs.apt]
 packages = ["chromium-browser"]
@@ -113,6 +114,7 @@ description = "Browse the web anonymously via the Tor network."
 category    = "Web Browsers"
 icon        = "🧅"
 website     = "https://www.torproject.org"
+preferred_pm = "flatpak"
 
 [apps.install_specs.apt]
 packages = ["torbrowser-launcher"]
