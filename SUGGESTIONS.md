@@ -79,7 +79,7 @@ Scope:
 - Scheduled update notifications (`--daemon`)
 - Batch-copy selected app IDs and “What’s New” panel
 
-Status: ❌ Todo
+Status: ⚠️ **In progress**
 
 ---
 
@@ -516,10 +516,12 @@ Generate tab-completion for `linite --cli install <TAB>` using `argcomplete` or 
 | Remember last window size and position across sessions | Very Low | Medium | ✅ Done |
 | Right-click app → **"Open Website"** context menu | Very Low | Medium | ✅ Done |
 | `Ctrl+F` keyboard shortcut to focus the search box | Very Low | High | ✅ Done |
-| Batch-copy selected app IDs for CLI reuse | Low | Medium | ❌ Todo |
+| Batch-copy selected app IDs for CLI reuse | Low | Medium | ✅ Done |
 | "What's New" panel on first launch after an update | Low | Medium | ❌ Todo |
 | Sort apps within each category by popularity | Medium | High | ❌ Todo |
 | Show estimated total install time before confirming | Medium | Medium | ❌ Todo |
+
+> **Batch-copy IDs:** Added **"📋 Copy IDs"** action in `gui/app.py` action bar. Copies selected app IDs as a space-separated string to clipboard and logs success in the progress panel.
 
 > **Installed badge:** `set_installed_ids()` in `gui/components/software_panel.py` renders a green `✓ installed` label per card and dims the app name.  
 > **Right-click:** `Button-3` is bound on cards but opens the detail panel — NOT `webbrowser.open`. One-line change needed.  

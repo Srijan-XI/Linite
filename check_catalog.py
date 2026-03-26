@@ -14,7 +14,7 @@ import sys
 import tomllib
 
 from core import distro as distro_mod
-from utils.helpers import catalog_lint
+from core.catalog.validation import catalog_lint
 
 
 def parse_args() -> argparse.Namespace:

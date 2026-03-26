@@ -97,8 +97,8 @@ def cmd_export(output_file: str, ids: list, pm_hint: str | None):
 
 def cmd_rollback(dry_run: bool = False):
     """Rollback (uninstall) all apps from the most recent session."""
-    from core import distro as distro_mod
-    from core.uninstaller import rollback_last_session
+    from core.ops.uninstall import rollback_last_session
+    from core.system import distro as distro_mod
 
     distro = distro_mod.detect()
     print(f"Detected: {distro.display_name}  |  Package manager: {distro.package_manager}")
@@ -143,9 +143,9 @@ def cmd_list():
 
 def cmd_cli(args_list: list, verbose: bool, skip_network_check: bool = False):
     """Headless install / update."""
-    from core import distro as distro_mod
-    from core.installer import install_apps
-    from core.updater import update_system
+    from core.ops.install import install_apps
+    from core.ops.update import update_system
+    from core.system import distro as distro_mod
     from data.software_catalog import CATALOG_MAP
 
     distro = distro_mod.detect()
@@ -174,7 +174,7 @@ def cmd_cli(args_list: list, verbose: bool, skip_network_check: bool = False):
 
         # Check network connectivity unless skipped
         if not skip_network_check:
-            from core.network import warn_if_offline
+            from core.system.network import warn_if_offline
             warning = warn_if_offline()
             if warning:
                 print(f"\n⚠ {warning}\n")
@@ -231,8 +231,8 @@ def main():
 
     # Non-fatal startup catalog validation.
     try:
-        from core import distro as distro_mod
-        from utils.helpers import catalog_lint
+        from core.catalog.validation import catalog_lint
+        from core.system import distro as distro_mod
 
         detected_pm = distro_mod.detect().package_manager
         lint_warnings = catalog_lint(current_pm=detected_pm)
@@ -261,7 +261,6 @@ def main():
         return
 
     if args.rollback:
-        from core import distro as distro_mod
         warn_if_not_root()
         cmd_rollback(dry_run=args.dry)
         return

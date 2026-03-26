@@ -15,16 +15,17 @@ from pathlib import Path
 from tkinter import filedialog, messagebox
 from typing import List, Optional
 
-from core import distro as distro_mod
 from core.distro import DistroInfo
-from core.history import get_installed_ids
 from core.log_engine import tx_log
-from core.installer import install_apps, Status as InstallStatus
-from core.package_manager import clear_cancel, request_cancel
-from core.profiles import load_profile, save_profile
-from core.script_exporter import export_to_file as export_script_to_file
-from core.uninstaller import uninstall_apps
-from core.updater import update_system
+from core.ops.export import export_to_file as export_script_to_file
+from core.ops.history import get_installed_ids
+from core.ops.install import Status as InstallStatus
+from core.ops.install import install_apps
+from core.ops.profiles import load_profile, save_profile
+from core.ops.uninstall import uninstall_apps
+from core.ops.update import update_system
+from core.system import distro as distro_mod
+from core.system.package_manager import clear_cancel, request_cancel
 from data.software_catalog import CATALOG, CATALOG_MAP, CATEGORIES, SoftwareEntry
 from gui import styles as st
 from gui.components.app_detail import AppDetailWindow
@@ -215,6 +216,22 @@ class LiniteApp(tk.Tk):
         )
         self._export_btn.pack(side="right", padx=(0, 4), pady=10)
 
+        # Selection: Copy IDs for CLI reuse
+        self._copy_ids_btn = tk.Button(
+            action_bar, text="📋  Copy IDs",
+            bg=st.BG_LIGHT, fg="#a8c8ff", font=st.FONT_SMALL,
+            relief="flat", bd=0, padx=12, pady=st.BTN_PADY,
+            cursor="hand2", activebackground=st.BG_MEDIUM,
+            command=self._on_copy_selected_ids,
+        )
+        self._copy_ids_btn.pack(side="right", padx=(0, 4), pady=10)
+        self._copy_ids_btn.bind(
+            "<Enter>", lambda _e: self._copy_ids_btn.config(bg=st.BG_MEDIUM)
+        )
+        self._copy_ids_btn.bind(
+            "<Leave>", lambda _e: self._copy_ids_btn.config(bg=st.BG_LIGHT)
+        )
+
         # Profile: Import
         self._import_btn = tk.Button(
             action_bar, text="📂  Import Profile",
@@ -318,7 +335,7 @@ class LiniteApp(tk.Tk):
         state = "disabled" if busy else "normal"
         for btn in (self._install_btn, self._uninstall_btn,
                     self._update_btn, self._export_btn, self._import_btn,
-                    self._export_script_btn):
+                self._export_script_btn, self._copy_ids_btn):
             btn.config(state=state)
         # Busy dot in title bar: green when active
         if self._busy_dot is not None:
@@ -409,6 +426,20 @@ class LiniteApp(tk.Tk):
     def _on_quick_start(self):
         """Open the Quick-Start preset picker dialog."""
         PresetPickerDialog(self, on_apply=self._apply_preset)
+
+    def _on_copy_selected_ids(self):
+        """Copy selected app IDs to clipboard for easy CLI reuse."""
+        ids = sorted(self._sw_panel.get_selected_ids())
+        if not ids:
+            messagebox.showinfo("Copy IDs", "No apps selected.")
+            return
+
+        payload = " ".join(ids)
+        self.clipboard_clear()
+        self.clipboard_append(payload)
+        self.update_idletasks()
+
+        self._prog_panel.log(f"Copied {len(ids)} app ID(s) to clipboard.", tag="success")
 
     def _apply_preset(self, app_ids: set):
         """
