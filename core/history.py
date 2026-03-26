@@ -14,11 +14,14 @@ Legacy YAML files (history.yaml) are transparently migrated on first read.
 
 import json
 import logging
-from datetime import datetime
+import threading
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Set
 
 logger = logging.getLogger(__name__)
+
+_HISTORY_LOCK = threading.Lock()
 
 _CONFIG_DIR   = Path.home() / ".config" / "linite"
 HISTORY_FILE  = _CONFIG_DIR / "history.json"
@@ -67,17 +70,18 @@ def _save(data: List[dict]) -> None:
 
 def record(app_id: str, app_name: str, pm_used: str, success: bool,
            action: str = "install") -> None:
-    """Append one install/uninstall event to history.yaml."""
-    data = _load()
-    data.append({
-        "app_id":    app_id,
-        "app_name":  app_name,
-        "pm_used":   pm_used,
-        "action":    action,        # "install" | "uninstall"
-        "success":   success,
-        "timestamp": datetime.now().isoformat(),
-    })
-    _save(data)
+    """Append one install/uninstall event to history.json. Thread-safe."""
+    with _HISTORY_LOCK:
+        data = _load()
+        data.append({
+            "app_id":    app_id,
+            "app_name":  app_name,
+            "pm_used":   pm_used,
+            "action":    action,        # "install" | "uninstall"
+            "success":   success,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        })
+        _save(data)
 
 
 def get_installed_ids() -> Set[str]:
@@ -104,3 +108,38 @@ def get_all() -> List[dict]:
 def clear() -> None:
     """Wipe all recorded history."""
     _save([])
+
+
+def get_last_session_apps(session_window_minutes: int = 60) -> List[dict]:
+    """
+    Return all apps successfully installed in the most recent session.
+    A session is defined as a contiguous block of recent installs (default: 60 minutes).
+    
+    Returns list of entries (dicts with app_id, app_name, pm_used, action, success, timestamp)
+    ordered chronologically (oldest first).
+    """
+    from datetime import timedelta
+    
+    data = _load()
+    
+    # Filter to successful installs, sorted chronologically (oldest first)
+    installs = [
+        entry for entry in data
+        if entry.get("action") == "install" and entry.get("success")
+    ]
+    
+    if not installs:
+        return []
+    
+    # Last install is the most recent
+    last_install = installs[-1]
+    last_timestamp = datetime.fromisoformat(last_install["timestamp"])
+    cutoff = last_timestamp - timedelta(minutes=session_window_minutes)
+    
+    # Get all installs within the session window
+    session_apps = [
+        e for e in installs
+        if datetime.fromisoformat(e["timestamp"]) >= cutoff
+    ]
+    
+    return session_apps

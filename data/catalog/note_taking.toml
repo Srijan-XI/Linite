@@ -21,6 +21,10 @@ category    = "Note Taking"
 icon        = "📓"
 website     = "https://joplinapp.org"
 preferred_pm = "flatpak"
+[apps.install_specs.appimage]
+packages = ["Joplin"]
+script_url = "https://github.com/laurent22/joplin/releases/download/latest/Joplin-latest-x64.AppImage"
+sha256 = ""
 
 [apps.install_specs.flatpak]
 packages = ["net.cozic.joplin_desktop"]
@@ -49,6 +53,10 @@ icon        = "🍒"
 website     = "https://www.giuspen.net/cherrytree"
 preferred_pm = "flatpak"
 
+[apps.install_specs.appimage]
+packages = ["Logseq"]
+script_url = "https://github.com/logseq/logseq/releases/download/latest/Logseq-latest-x64.AppImage"
+sha256 = ""
 [apps.install_specs.apt]
 packages = ["cherrytree"]
 

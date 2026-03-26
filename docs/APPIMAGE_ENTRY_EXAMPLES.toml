@@ -1,0 +1,224 @@
+# AppImage Catalog Entry Examples
+# This file shows real examples of how to add AppImage support to the Linite software catalog
+# These are reference examples you can copy/paste into data/catalog/*.toml files
+
+# ============================================================================
+# EXAMPLE 1: Basic AppImage-Only App (Obsidian)
+# ============================================================================
+# Obsidian is a note-taking app available as AppImage on Linux
+# It prefers Flatpak but can fall back to AppImage if Flatpak not available
+
+[[apps]]
+id          = "obsidian"
+name        = "Obsidian"
+description = "Powerful knowledge base that works on top of a local folder of plain-text Markdown files"
+category    = "note_taking"
+icon        = "🔮"
+website     = "https://obsidian.md"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+# Flatpak is the preferred installation method
+flatpak_id = "md.obsidian.Obsidian"
+packages   = []
+
+[apps.install_specs.appimage]
+# AppImage as fallback if Flatpak is unavailable
+packages   = ["Obsidian"]
+script_url = "https://github.com/obsidianmd/obsidian-releases/releases/download/latest/Obsidian-latest-x64.AppImage"
+sha256     = "abc123def456789..."  # Use: python utils/appimage_helper.py generate ... to fill this
+
+
+# ============================================================================
+# EXAMPLE 2: Development Tool (JetBrains Toolbox) - AppImage Only
+# ============================================================================
+# JetBrains Toolbox is primarily distributed as AppImage on Linux
+# No native PM or Flatpak available, so AppImage is the primary/only option
+
+[[apps]]
+id          = "jetbrains-toolbox"
+name        = "JetBrains Toolbox"
+description = "JetBrains Toolbox App helps manage all your JetBrains tools, projects, and licenses"
+category    = "development"
+icon        = "🚀"
+website     = "https://www.jetbrains.com/toolbox-app/"
+preferred_pm = "appimage"  # Primary installation method
+
+[apps.install_specs.appimage]
+packages   = ["jetbrains-toolbox"]
+script_url = "https://download.jetbrains.com/toolbox/jetbrains-toolbox-latest.tar.gz"
+# Note: Some apps distribute as .tar.gz, extract the .AppImage from within
+sha256     = "def456789abc123..."
+
+
+# ============================================================================
+# EXAMPLE 3: Kubernetes Tool (Headlamp) - AppImage with Snap alternative
+# ============================================================================
+# Headlamp is a Kubernetes dashboard available as AppImage
+# Can also use Snap if AppImage causes compatibility issues
+
+[[apps]]
+id          = "headlamp"
+name        = "Headlamp"
+description = "An easy-to-use and extensible web-based Kubernetes UI"
+category    = "development"
+icon        = "⚙️"
+website     = "https://headlamp.dev/"
+preferred_pm = "appimage"
+
+[apps.install_specs.snap]
+# Snap available as alternative
+packages = ["headlamp"]
+
+[apps.install_specs.appimage]
+# AppImage as primary recommendation
+packages   = ["Headlamp"]
+script_url = "https://github.com/kinvolk/headlamp/releases/download/latest/Headlamp-latest-x64.AppImage"
+sha256     = "xyz789abc456..."
+
+
+# ============================================================================
+# EXAMPLE 4: CLI Tool (Insync) - AppImage as Fallback
+# ============================================================================
+# Insync is a cloud sync client with multiple installation options
+# Can use native PM (if available for distro) or AppImage as fallback
+
+[[apps]]
+id          = "insync"
+name        = "Insync"
+description = "Client sync app for Google Drive, Dropbox, OneDrive and SharePoint"
+category    = "utilities"
+icon        = "☁️"
+website     = "https://www.insynchq.com/"
+preferred_pm = "native"  # Some distros have native RPM/DEB packages
+
+[apps.install_specs.native]
+# Ubuntu/Debian as example
+packages = ["insync"]
+repos = [
+  "deb https://d2t3ff60b2234bef8087f4b6b52d34d68d12011a.ddns.net/deb focal non-free"
+]
+
+[apps.install_specs.appimage]
+# AppImage as fallback if native package unavailable
+packages   = ["insync"]
+script_url = "https://www.insynchq.com/downloads/insync-latest-x86_64.AppImage"
+sha256     = "789abc456def123..."
+
+
+# ============================================================================
+# EXAMPLE 5: Graphics Tool (draw.io) - Multiple Install Options
+# ============================================================================
+# draw.io offers web, AppImage, Flatpak, and native package options
+# Shows a comprehensive example with multiple PM support
+
+[[apps]]
+id          = "drawio"
+name        = "draw.io"
+description = "Integrates with Atlassian, Microsoft, Google Cloud, or uses the web, desktop or command-line apps"
+category    = "graphics"
+icon        = "📊"
+website     = "https://www.diagrams.net/"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+flatpak_id = "com.github.jgraph.drawio"
+packages   = []
+
+[apps.install_specs.snap]
+packages = ["draw.io"]
+
+[apps.install_specs.appimage]
+packages   = ["draw.io"]
+script_url = "https://github.com/jgraph/drawio-desktop/releases/download/latest/drawio-latest-x64.AppImage"
+sha256     = "456def789abc123..."
+
+
+# ============================================================================
+# EXAMPLE 6: Note-Taking App (Markdown focused)
+# ============================================================================
+# Template example showing a minimal valid AppImage entry
+
+[[apps]]
+id          = "notesnook"
+name        = "Notesnook"
+description = "Free, private & encrypted note-taking app"
+category    = "note_taking"
+icon        = "📝"
+website     = "https://notesnook.com/"
+preferred_pm = "snap"
+
+[apps.install_specs.snap]
+packages = ["notesnook"]
+
+[apps.install_specs.appimage]
+packages   = ["Notesnook"]
+script_url = "https://github.com/streetwriters/notesnook/releases/download/latest/Notesnook-latest-x64.AppImage"
+sha256     = ""  # TODO: Calculate using: python utils/appimage_helper.py generate ...
+
+
+# ============================================================================
+# KEY PATTERNS AND NOTES
+# ============================================================================
+
+# Pattern 1: Finding AppImage Download URLs
+# Most repos follow similar patterns:
+# - GitHub: https://github.com/{user}/{repo}/releases/download/{tag}/{filename}.AppImage
+# - Official sites: https://example.com/download/example-latest-x64.AppImage
+# - Use GitHub API: https://api.github.com/repos/{user}/{repo}/releases/latest
+
+# Pattern 2: Binary Name Convention
+# - Extract from packages[0] field (remove spaces, lowercase)
+# - "Obsidian" → ~/.local/bin/Obsidian (exact case from packages[0])
+# - "JetBrains Toolbox" → ~/.local/bin/JetBrainToolbox
+
+# Pattern 3: SHA-256 Calculation
+# Run: python utils/appimage_helper.py generate <id> <name> <url> <download_url>
+# This automatically calculates the SHA-256 from the actual release file
+
+# Pattern 4: Icon Emojis
+# ✨ Utilities/Tools
+# 🔮 Note-taking/Wikis
+# 🚀 Development tools
+# 📊 Graphics/Diagramming
+# ☁️ Cloud utilities
+# 🎮 Games
+# 📺 Media players
+# 🔐 Security tools
+
+# Pattern 5: Categories
+# Valid categories (from data/catalog/): 
+# communication, development, gaming, graphics, java, media, 
+# note_taking, office, password_managers, security, 
+# terminal_emulators, torrents, utilities, video_editors, 
+# virtualization, vpn, web_browsers
+
+# Pattern 6: Multiple PM Fallback
+# Recommended order (what Linite uses):
+#   1. native (apt, dnf, pacman, zypper, yay)
+#   2. flatpak
+#   3. snap
+#   4. appimage    ← Fallback before last resort (always available)
+#   5. (future PMs)
+
+# Pattern 7: Unstable URLs
+# URLs with /latest/ or /releases/latest/ are convenient but can break
+# Prefer specific version tags when stability is important:
+# - Good:  https://github.com/.../releases/download/v1.0.5/app-v1.0.5-x64.AppImage
+# - Risky: https://github.com/.../releases/download/latest/app-latest-x64.AppImage
+
+# ============================================================================
+# CONTRIBUTING GUIDELINES
+# ============================================================================
+
+# 1. Find an AppImage-distributed app (GitHub, official website, etc.)
+# 2. Use appimage_helper.py to generate the entry with calculated SHA-256:
+#    python utils/appimage_helper.py generate \
+#      {app-id} "{App Name}" "{website}" "{download_url}" \
+#      --icon "{emoji}"
+# 3. Paste the generated TOML into the appropriate data/catalog/{category}.toml
+# 4. Test the installation: linite --cli install {app-id}
+# 5. Verify: {binary-name} --version
+# 6. Submit PR with description of app and why it's useful
+
+# For questions, see docs/APPIMAGE_SUPPORT.md

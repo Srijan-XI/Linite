@@ -84,3 +84,60 @@ def uninstall_apps(
             icon = "✓" if success else "✗"
             progress_cb(entry.id, f"{icon} {entry.name}: {'removed' if success else 'failed'}")
     return results
+
+
+def rollback_last_session(
+    distro: DistroInfo,
+    progress_cb: Optional[ProgressCallback] = None,
+    dry_run: bool = False,
+) -> dict:
+    """
+    Rollback (uninstall) all apps from the most recent session.
+    
+    If dry_run=True, returns what would be uninstalled without making changes.
+    Returns { app_id: (returncode, output) } or { app_id: (0, "Would remove...") } for dry run.
+    """
+    import core.history as history
+    from data.software_catalog import CATALOG_MAP
+
+    session_apps = history.get_last_session_apps()
+    
+    if not session_apps:
+        if progress_cb:
+            progress_cb("", "No apps found in last session to rollback.")
+        return {}
+
+    if progress_cb:
+        progress_cb("", f"Found {len(session_apps)} app(s) from last session to rollback.")
+
+    if dry_run:
+        # Show what would be removed
+        results = {}
+        for app_data in session_apps:
+            app_id = app_data.get("app_id")
+            app_name = app_data.get("app_name", app_id)
+            pm_used = app_data.get("pm_used", "unknown")
+            results[app_id] = (0, f"Would remove {app_name} (via {pm_used})")
+            if progress_cb:
+                progress_cb(app_id, f"  → {app_name} (via {pm_used})")
+        return results
+
+    # Actually uninstall
+    results = {}
+    for app_data in reversed(session_apps):  # reverse: uninstall in reverse order
+        app_id = app_data.get("app_id")
+        entry = CATALOG_MAP.get(app_id)
+        
+        if entry is None:
+            if progress_cb:
+                progress_cb(app_id, f"✗ App '{app_id}' no longer in catalog, skipping")
+            results[app_id] = (1, f"App no longer in catalog")
+            continue
+
+        rc, out = uninstall_app(entry, distro, progress_cb)
+        results[app_id] = (rc, out)
+        success = rc == 0
+        pm_name = app_data.get("pm_used", "unknown")
+        history.record(app_id, entry.name, pm_name, success, action="uninstall")
+
+    return results

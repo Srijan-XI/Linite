@@ -113,6 +113,7 @@ class ExecutionResult:
     app_name:  str
     status:    ExecStatus
     pm_used:   str = ""
+    output:    str = ""
     error:     str = ""
     attempts:  int = 1
     duration:  float = 0.0     # seconds
@@ -339,8 +340,10 @@ class ExecutionEngine:
         """
         entry  = plan.entry_map[app_id]
         pm     = plan.pm_map[app_id]
+        spec   = plan.spec_map[app_id]
         t0     = time.monotonic()
         last_error = ""
+        last_output = ""
 
         # ── Retry loop ────────────────────────────────────────────────────
         for attempt in range(1, self._max_retries + 1):
@@ -355,8 +358,15 @@ class ExecutionEngine:
                 suffix = f" (attempt {attempt}/{self._max_retries})" if attempt > 1 else ""
                 progress_cb(app_id, f"Installing {entry.name} via {pm}{suffix} …")
 
-            result = install_app(entry, self._distro, progress_cb=progress_cb)
+            result = install_app(
+                entry,
+                self._distro,
+                progress_cb=progress_cb,
+                forced_pm=pm,
+                forced_spec=spec,
+            )
             duration = time.monotonic() - t0
+            last_output = result.output
 
             if result.status == _InstallStatus.SUCCESS:
                 status = ExecStatus.RETRIED if attempt > 1 else ExecStatus.SUCCESS
@@ -365,6 +375,7 @@ class ExecutionEngine:
                 return ExecutionResult(
                     app_id=app_id, app_name=entry.name,
                     status=status, pm_used=pm,
+                    output=result.output,
                     attempts=attempt, duration=duration,
                 )
 
@@ -389,21 +400,20 @@ class ExecutionEngine:
             if progress_cb:
                 progress_cb(app_id, f"  Trying fallback: {fb_pm} …")
 
-            # Temporarily swap the PM assignment in the plan so install_app
-            # uses the correct spec (install_app calls _pick_pm internally,
-            # so we override via preferred_pm patching on a copy)
-            import copy
-            entry_copy = copy.copy(entry)
-            object.__setattr__(entry_copy, "preferred_pm", fb_pm) \
-                if hasattr(entry_copy, "__dataclass_fields__") else None
-
-            fb_result = install_app(entry_copy, self._distro, progress_cb=progress_cb)
+            fb_result = install_app(
+                entry,
+                self._distro,
+                progress_cb=progress_cb,
+                forced_pm=fb_pm,
+                forced_spec=fb_spec,
+            )
             if fb_result.status == _InstallStatus.SUCCESS:
                 if progress_cb:
                     progress_cb(app_id, f"✓ {entry.name} installed via fallback ({fb_pm})")
                 return ExecutionResult(
                     app_id=app_id, app_name=entry.name,
                     status=ExecStatus.FALLBACK, pm_used=fb_pm,
+                    output=fb_result.output,
                     attempts=self._max_retries + 1,
                     duration=time.monotonic() - t0,
                 )
@@ -412,6 +422,7 @@ class ExecutionEngine:
         return ExecutionResult(
             app_id=app_id, app_name=entry.name,
             status=ExecStatus.FAILED, pm_used=pm,
+            output=last_output,
             error=last_error,
             attempts=self._max_retries,
             duration=time.monotonic() - t0,

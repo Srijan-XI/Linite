@@ -19,6 +19,7 @@ import difflib
 import tkinter as tk
 from tkinter import ttk
 from typing import Callable, Dict, List, Optional, Set
+import webbrowser
 
 from data.software_catalog import SoftwareEntry
 from gui import styles as st
@@ -463,6 +464,22 @@ class SoftwarePanel(tk.Frame):
 # ── Helper: bind left-click + double-click on a widget ───────────────────────
 
 def _bind_click(widget, var, toggle_fn, entry, detail_fn):
+    """Bind left-click (toggle), double-click (detail), right-click (context menu)."""
     widget.bind("<Button-1>",        lambda e, v=var: toggle_fn(v))
     widget.bind("<Double-Button-1>", lambda e, en=entry: detail_fn(en))
-    widget.bind("<Button-3>",        lambda e, en=entry: detail_fn(en))
+    widget.bind("<Button-3>",        lambda e, en=entry: _show_context_menu(e, en))
+
+
+def _show_context_menu(event, entry: SoftwareEntry):
+    """Show right-click context menu for app card."""
+    if not entry.website:
+        return
+    menu = tk.Menu(event.widget, tearoff=False, bg="#2b2b2b", fg="#e0e0e0")
+    menu.add_command(
+        label="🌐  Open Website",
+        command=lambda: webbrowser.open(entry.website)
+    )
+    try:
+        menu.tk_popup(event.x_root, event.y_root)
+    finally:
+        menu.after_cancel(menu.after_id) if hasattr(menu, 'after_id') else None

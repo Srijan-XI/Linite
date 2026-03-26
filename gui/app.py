@@ -6,9 +6,12 @@ Features: parallel installs, search, installed-state, detail popup,
           transaction log.
 """
 
+import json
 import logging
+import os
 import threading
 import tkinter as tk
+from pathlib import Path
 from tkinter import filedialog, messagebox
 from typing import List, Optional
 
@@ -46,7 +49,10 @@ class LiniteApp(tk.Tk):
         super().__init__()
         self.title("Linite — Linux Software Installer")
         self.configure(bg=st.BG_DARK)
-        self.geometry(f"{st.WINDOW_W}x{st.WINDOW_H}")
+        
+        # Load saved geometry or use defaults
+        geometry = self._load_geometry()
+        self.geometry(geometry)
         self.minsize(880, 600)
 
         # Detect distro
@@ -62,6 +68,8 @@ class LiniteApp(tk.Tk):
         self._bind_shortcuts()
         # Offer to install yay on Arch-based systems that lack an AUR helper
         self.after(500, self._check_aur_helper)
+        # Save geometry on close
+        self.protocol("WM_DELETE_WINDOW", self._on_closing)
 
     # ── UI construction ───────────────────────────────────────────────────
 
@@ -187,6 +195,16 @@ class LiniteApp(tk.Tk):
         )
         self._update_btn.pack(side="right", padx=(0, 8), pady=10)
 
+        # Rollback last session
+        self._rollback_btn = tk.Button(
+            action_bar, text="↶  Rollback",
+            bg="#4a3535", fg="#e8c8c8", font=st.FONT_MEDIUM,
+            relief="flat", bd=0, padx=st.BTN_PADX, pady=st.BTN_PADY,
+            cursor="hand2", activebackground="#5a4545",
+            command=self._on_rollback,
+        )
+        self._rollback_btn.pack(side="right", padx=(0, 8), pady=10)
+
         # Profile: Export
         self._export_btn = tk.Button(
             action_bar, text="💾  Export Profile",
@@ -261,6 +279,39 @@ class LiniteApp(tk.Tk):
         self.bind("<Control-q>", lambda _e: self._on_quick_start())
         self.bind("<Control-l>", lambda _e: self._on_view_log())
         self.bind("<Control-f>", lambda _e: self._sw_panel.focus_search())
+
+    def _get_geometry_path(self) -> Path:
+        """Get path to geometry config file."""
+        config_dir = Path.home() / ".config" / "linite"
+        config_dir.mkdir(parents=True, exist_ok=True)
+        return config_dir / "window_geometry.json"
+
+    def _load_geometry(self) -> str:
+        """Load saved window geometry or return defaults."""
+        try:
+            path = self._get_geometry_path()
+            if path.exists():
+                with open(path, "r") as f:
+                    data = json.load(f)
+                    return data.get("geometry", f"{st.WINDOW_W}x{st.WINDOW_H}")
+        except Exception:
+            pass
+        return f"{st.WINDOW_W}x{st.WINDOW_H}"
+
+    def _save_geometry(self) -> None:
+        """Save current window geometry."""
+        try:
+            path = self._get_geometry_path()
+            data = {"geometry": self.geometry()}
+            with open(path, "w") as f:
+                json.dump(data, f, indent=2)
+        except Exception:
+            pass
+
+    def _on_closing(self) -> None:
+        """Handle window close event: save geometry and exit."""
+        self._save_geometry()
+        self.destroy()
 
     def _set_busy(self, busy: bool):
         self._busy = busy
@@ -385,6 +436,14 @@ class LiniteApp(tk.Tk):
             messagebox.showinfo("No selection", "Please select at least one app to install.")
             return
 
+        # Check network connectivity
+        from core.network import warn_if_offline
+        warning = warn_if_offline()
+        if warning:
+            msg = f"{warning}\n\nDo you want to continue anyway?"
+            if not messagebox.askyesno("Network check", msg):
+                return
+
         names = "\n".join(f"  • {e.name}" for e in selected)
         if not messagebox.askyesno(
             "Confirm installation",
@@ -484,6 +543,68 @@ class LiniteApp(tk.Tk):
                 self.after(0, self._refresh_installed_state)
 
             self.after(0, lambda m=msg: messagebox.showinfo("Uninstall complete", m))
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def _on_rollback(self):
+        if self._busy:
+            return
+        
+        from core.history import get_last_session_apps
+        
+        session_apps = get_last_session_apps()
+        if not session_apps:
+            messagebox.showinfo("Rollback", "No apps from the last session found to rollback.")
+            return
+        
+        app_names = [f"  • {a.get('app_name', a.get('app_id'))}" for a in session_apps]
+        if not messagebox.askyesno(
+            "Confirm rollback",
+            f"Undo {len(session_apps)} app(s) from the last session?\n\n"
+            + "\n".join(app_names) +
+            f"\n\nThis requires sudo / root access.",
+        ):
+            return
+
+        self._prog_panel.reset(total_apps=len(session_apps))
+        self._set_busy(True)
+        clear_cancel()
+
+        def worker():
+            from core.uninstaller import rollback_last_session
+            
+            def progress(app_id: str, line: str):
+                if line.strip():
+                    self.after(0, lambda l=line: self._prog_panel.log(l, tag="muted"))
+
+            try:
+                results = rollback_last_session(self._distro, progress_cb=progress, dry_run=False)
+                for app_id, (rc, out) in results.items():
+                    entry = CATALOG_MAP.get(app_id)
+                    name  = entry.name if entry else app_id
+                    success = (rc == 0)
+                    self.after(0, lambda n=name, s=success:
+                               self._prog_panel.app_done(n, s))
+                    # ── Transaction log ───────────────────────────────────
+                    tx_log.log(
+                        action   = "rollback",
+                        status   = "success" if success else "failed",
+                        app_id   = app_id,
+                        app_name = name,
+                        output   = out,
+                        error    = "" if success else out,
+                    )
+                all_ok = all(rc == 0 for rc, _ in results.values())
+                msg = "Session rolled back successfully!" if all_ok \
+                      else "Some apps failed to rollback. Check the log."
+            except Exception as exc:
+                logger.exception("Unexpected error during rollback")
+                msg = f"Rollback failed unexpectedly:\n{exc}"
+            finally:
+                self.after(0, lambda: self._set_busy(False))
+                self.after(0, self._refresh_installed_state)
+
+            self.after(0, lambda m=msg: messagebox.showinfo("Rollback complete", m))
 
         threading.Thread(target=worker, daemon=True).start()
 

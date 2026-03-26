@@ -43,6 +43,7 @@ Public API
 from __future__ import annotations
 
 import logging as _logging
+import threading as _threading
 import uuid
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
@@ -52,6 +53,7 @@ from typing import Dict, List, Optional, Tuple
 import json
 
 _log = _logging.getLogger(__name__)
+_FILE_LOCK = _threading.Lock()  # serialises all read-modify-write on log files
 
 _LOG_DIR   = Path.home() / ".config" / "linite" / "logs"
 _MAX_OUTPUT = 4096   # characters stored per record
@@ -186,66 +188,68 @@ class TransactionLogEngine:
         return self._dir / f"{d.date().isoformat()}.json"
 
     def _append(self, rec: TransactionRecord) -> None:
-        """Append one record dict to the current day's YAML file."""
+        """Append one record dict to the current day's log file. Thread-safe."""
         self._dir.mkdir(parents=True, exist_ok=True)
         path = self._daily_path()
-        try:
-            existing = _safe_load_list(path)
-            existing.append(rec.to_dict())
-            _safe_dump_list(path, existing)
-        except Exception as exc:
-            _log.error("Failed to write transaction log: %s", exc)
+        with _FILE_LOCK:
+            try:
+                existing = _safe_load_list(path)
+                existing.append(rec.to_dict())
+                _safe_dump_list(path, existing)
+            except Exception as exc:
+                _log.error("Failed to write transaction log: %s", exc)
 
     def _update_summary(self, rec: TransactionRecord) -> None:
-        """Increment running counters in summary.json."""
+        """Increment running counters in summary.json. Thread-safe."""
         path    = self._dir / "summary.json"
         _legacy = self._dir / "summary.yaml"
-        try:
-            if path.exists():
-                raw = json.loads(path.read_text(encoding="utf-8"))
-            elif _legacy.exists():
-                try:
-                    import yaml as _yaml  # local — only during migration
-                    raw = _yaml.safe_load(_legacy.read_text(encoding="utf-8")) or {}
-                    _legacy.rename(_legacy.with_suffix(".yaml.bak"))
-                except ImportError:
+        with _FILE_LOCK:
+            try:
+                if path.exists():
+                    raw = json.loads(path.read_text(encoding="utf-8"))
+                elif _legacy.exists():
+                    try:
+                        import yaml as _yaml  # local — only during migration
+                        raw = _yaml.safe_load(_legacy.read_text(encoding="utf-8")) or {}
+                        _legacy.rename(_legacy.with_suffix(".yaml.bak"))
+                    except ImportError:
+                        raw = {}
+                else:
                     raw = {}
-            else:
-                raw = {}
-            if not isinstance(raw, dict):
-                raw = {}
+                if not isinstance(raw, dict):
+                    raw = {}
 
-            raw["total"] = raw.get("total", 0) + 1
+                raw["total"] = raw.get("total", 0) + 1
 
-            # Use stable local refs so chained .get() always works
-            by_action = raw.setdefault("by_action", {})
-            by_action[rec.action] = by_action.get(rec.action, 0) + 1
+                # Use stable local refs so chained .get() always works
+                by_action = raw.setdefault("by_action", {})
+                by_action[rec.action] = by_action.get(rec.action, 0) + 1
 
-            by_status = raw.setdefault("by_status", {})
-            by_status[rec.status] = by_status.get(rec.status, 0) + 1
+                by_status = raw.setdefault("by_status", {})
+                by_status[rec.status] = by_status.get(rec.status, 0) + 1
 
-            if rec.pm_used:
-                by_pm = raw.setdefault("by_pm", {})
-                by_pm[rec.pm_used] = by_pm.get(rec.pm_used, 0) + 1
+                if rec.pm_used:
+                    by_pm = raw.setdefault("by_pm", {})
+                    by_pm[rec.pm_used] = by_pm.get(rec.pm_used, 0) + 1
 
-            raw["total_duration"] = \
-                round(raw.get("total_duration", 0.0) + rec.duration, 3)
+                raw["total_duration"] = \
+                    round(raw.get("total_duration", 0.0) + rec.duration, 3)
 
-            # Track install counts per app_id
-            if rec.action == "install" and rec.is_success and rec.app_id:
-                ic = raw.setdefault("install_counts", {})
-                ic[rec.app_id] = ic.get(rec.app_id, 0) + 1
-            if rec.action == "uninstall" and rec.is_success and rec.app_id:
-                ic = raw.get("install_counts", {})
-                ic[rec.app_id] = max(ic.get(rec.app_id, 1) - 1, 0)
-                raw["install_counts"] = ic
+                # Track install counts per app_id
+                if rec.action == "install" and rec.is_success and rec.app_id:
+                    ic = raw.setdefault("install_counts", {})
+                    ic[rec.app_id] = ic.get(rec.app_id, 0) + 1
+                if rec.action == "uninstall" and rec.is_success and rec.app_id:
+                    ic = raw.get("install_counts", {})
+                    ic[rec.app_id] = max(ic.get(rec.app_id, 1) - 1, 0)
+                    raw["install_counts"] = ic
 
-            path.write_text(
-                json.dumps(raw, indent=2, ensure_ascii=False),
-                encoding="utf-8",
-            )
-        except Exception as exc:
-            _log.warning("Failed to update summary.json: %s", exc)
+                path.write_text(
+                    json.dumps(raw, indent=2, ensure_ascii=False),
+                    encoding="utf-8",
+                )
+            except Exception as exc:
+                _log.warning("Failed to update summary.json: %s", exc)
 
     # ── Reading / Querying ────────────────────────────────────────────────
 

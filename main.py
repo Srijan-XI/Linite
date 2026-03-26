@@ -49,6 +49,21 @@ def parse_args():
         help="Preferred package manager to use when exporting a script (optional).",
     )
     parser.add_argument(
+        "--rollback",
+        action="store_true",
+        help="Undo (uninstall) all apps from the most recent installation session.",
+    )
+    parser.add_argument(
+        "--dry",
+        action="store_true",
+        help="With --rollback: preview what would be removed without making changes.",
+    )
+    parser.add_argument(
+        "--skip-network-check",
+        action="store_true",
+        help="Skip network connectivity check before installation (not recommended).",
+    )
+    parser.add_argument(
         "--verbose", "-v",
         action="store_true",
         help="Enable verbose/debug output.",
@@ -78,7 +93,39 @@ def cmd_export(output_file: str, ids: list, pm_hint: str | None):
 
     path = export_to_file(entries, output_file, pm_hint=pm_hint)
     print(f"✓ Script exported to: {path}  ({len(entries)} app(s))")
-    print(f"  Run with:  bash {path.name}")
+
+
+def cmd_rollback(dry_run: bool = False):
+    """Rollback (uninstall) all apps from the most recent session."""
+    from core import distro as distro_mod
+    from core.uninstaller import rollback_last_session
+
+    distro = distro_mod.detect()
+    print(f"Detected: {distro.display_name}  |  Package manager: {distro.package_manager}")
+
+    def progress(app_id, line):
+        if line.strip():
+            print(f"  [{app_id}] {line}" if app_id else f"  {line}")
+
+    mode = "preview" if dry_run else "removing"
+    print(f"\n── Rollback {mode} ──────────────────────────────────────")
+    
+    results = rollback_last_session(distro, progress_cb=progress, dry_run=dry_run)
+
+    if not results:
+        print("  (no apps to rollback)")
+        return
+
+    print(f"\n── Results ──────────────────────────────────────")
+    success_count = sum(1 for rc, _ in results.values() if rc == 0)
+    total_count = len(results)
+    
+    for app_id, (rc, output) in results.items():
+        icon = "✓" if rc == 0 else "✗"
+        status = "ok" if rc == 0 else "failed"
+        print(f"  {icon} {app_id}: {status}")
+
+    print(f"\n  {success_count}/{total_count} app(s) {'removed' if not dry_run else 'would be removed'}")
 
 
 def cmd_list():
@@ -94,7 +141,7 @@ def cmd_list():
     print(f"\n{len(CATALOG)} apps in {len(CATEGORIES)} categories.\n")
 
 
-def cmd_cli(args_list: list, verbose: bool):
+def cmd_cli(args_list: list, verbose: bool, skip_network_check: bool = False):
     """Headless install / update."""
     from core import distro as distro_mod
     from core.installer import install_apps
@@ -124,6 +171,13 @@ def cmd_cli(args_list: list, verbose: bool):
         if not entries:
             print("No valid apps found.")
             sys.exit(1)
+
+        # Check network connectivity unless skipped
+        if not skip_network_check:
+            from core.network import warn_if_offline
+            warning = warn_if_offline()
+            if warning:
+                print(f"\n⚠ {warning}\n")
 
         def progress(app_id, line):
             if line.strip():
@@ -185,8 +239,14 @@ def main():
         cmd_export(args.export, ids, pm_hint=getattr(args, "pm", None))
         return
 
+    if args.rollback:
+        from core import distro as distro_mod
+        warn_if_not_root()
+        cmd_rollback(dry_run=args.dry)
+        return
+
     if args.cli:
-        cmd_cli(args.cli, verbose=args.verbose)
+        cmd_cli(args.cli, verbose=args.verbose, skip_network_check=args.skip_network_check)
         return
 
     # Default: launch GUI

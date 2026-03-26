@@ -233,8 +233,15 @@ linite --rollback --dry  # show what would be removed
 
 ---
 
-#### ❌ E. AppImage Support
-Add `"appimage"` as a 4th fallback (after flatpak → snap). Many apps (Obsidian, Joplin, Headlamp) only distribute AppImages. Implement a standard installer that places the binary in `~/.local/bin` and creates a `.desktop` file.
+#### ✅ E. AppImage Support
+Add `"appimage"` as a 4th fallback (after flatpak → snap). Many apps (Obsidian, Joplin, Headlamp) only distribute AppImages. Implemented a standard installer that places the binary in `~/.local/bin` and creates a `.desktop` file. 
+
+✨ **Documentation & Resources:**
+- [Full Feature Guide](./docs/APPIMAGE_SUPPORT.md) — comprehensive overview, TOML format, workflow, troubleshooting
+- [Quick Reference](./docs/APPIMAGE_QUICK_REFERENCE.md) — copy-paste commands for users & contributors
+- [Entry Examples](./docs/APPIMAGE_ENTRY_EXAMPLES.toml) — real TOML examples for 6 app types (basic, dev tools, CLI, graphics, etc.)
+- [Helper Utility](./utils/appimage_helper.py) — CLI tool to auto-calculate SHA-256 and generate catalog entries
+ 
 
 ---
 
@@ -400,9 +407,9 @@ Generate tab-completion for `linite --cli install <TAB>` using `argcomplete` or 
 | Fix | Effort | Impact | Status |
 |---|---|---|---|
 | Show `✓` badge for apps already installed on the system | Low | High | ✅ Done |
-| Remember last window size and position across sessions | Very Low | Medium | ❌ Todo |
-| Right-click app → **"Open Website"** context menu | Very Low | Medium | ❌ Todo |
-| `Ctrl+F` keyboard shortcut to focus the search box | Very Low | High | ❌ Todo |
+| Remember last window size and position across sessions | Very Low | Medium | ✅ Done |
+| Right-click app → **"Open Website"** context menu | Very Low | Medium | ✅ Done |
+| `Ctrl+F` keyboard shortcut to focus the search box | Very Low | High | ✅ Done |
 | Batch-copy selected app IDs for CLI reuse | Low | Medium | ❌ Todo |
 | "What's New" panel on first launch after an update | Low | Medium | ❌ Todo |
 | Sort apps within each category by popularity | Medium | High | ❌ Todo |
@@ -430,7 +437,7 @@ Generate tab-completion for `linite --cli install <TAB>` using `argcomplete` or 
 | 🟠 10 | Add Gaming Extras — Heroic, Bottles, MangoHud | ✅ Done |
 | � 11 | **Architecture:** Split catalog into per-category TOML files | ✅ Done |
 | 🟡 12 | **Feature:** Fuzzy search in GUI | ✅ Done |
-| 🟡 13 | **Feature:** AppImage support as install fallback | ❌ Todo |
+| 🟡 13 | **Feature:** AppImage support as install fallback | ✅ Done |
 | 🟡 14 | **Feature:** Remote / SSH install mode | ❌ Todo |
 | 🟡 15 | **Feature:** Plugin / drop-in catalog from `~/.config/linite/catalog/` | ✅ Done |
 
