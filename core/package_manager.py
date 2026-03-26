@@ -14,6 +14,25 @@ from shutil import which
 logger = logging.getLogger(__name__)
 
 
+# Shared cancellation state used by GUI actions.
+_CANCEL_EVENT = threading.Event()
+
+
+def request_cancel() -> None:
+    """Signal running package-manager commands to stop as soon as possible."""
+    _CANCEL_EVENT.set()
+
+
+def clear_cancel() -> None:
+    """Reset cancellation state before starting a new operation."""
+    _CANCEL_EVENT.clear()
+
+
+def get_cancel_event() -> threading.Event:
+    """Expose the shared cancellation event for callers that need direct access."""
+    return _CANCEL_EVENT
+
+
 # ---------------------------------------------------------------------------
 # Base class
 # ---------------------------------------------------------------------------
@@ -44,6 +63,9 @@ class BasePackageManager(ABC):
         """
         cmd = self._build_command(args, sudo)
         logger.debug("Running: %s", " ".join(cmd))
+
+        if cancel_event is None:
+            cancel_event = _CANCEL_EVENT
 
         proc_env = os.environ.copy()
         if env:
