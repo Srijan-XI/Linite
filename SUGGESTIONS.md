@@ -517,11 +517,15 @@ Generate tab-completion for `linite --cli install <TAB>` using `argcomplete` or 
 | Right-click app → **"Open Website"** context menu | Very Low | Medium | ✅ Done |
 | `Ctrl+F` keyboard shortcut to focus the search box | Very Low | High | ✅ Done |
 | Batch-copy selected app IDs for CLI reuse | Low | Medium | ✅ Done |
-| "What's New" panel on first launch after an update | Low | Medium | ❌ Todo |
+| "What's New" panel on first launch after an update | Low | Medium | ✅ Done |
 | Sort apps within each category by popularity | Medium | High | ❌ Todo |
-| Show estimated total install time before confirming | Medium | Medium | ❌ Todo |
+| Show estimated total install time before confirming | Medium | Medium | ✅ Done |
 
 > **Batch-copy IDs:** Added **"📋 Copy IDs"** action in `gui/app.py` action bar. Copies selected app IDs as a space-separated string to clipboard and logs success in the progress panel.
+
+> **What's New panel:** Added one-time release dialog on app launch using latest version notes from `CHANGELOG.md`, persisted in `~/.config/linite/ui_state.json`.
+
+> **Install ETA:** Confirmation dialog now displays a heuristic estimated install duration before users proceed.
 
 > **Installed badge:** `set_installed_ids()` in `gui/components/software_panel.py` renders a green `✓ installed` label per card and dims the app name.  
 > **Right-click:** `Button-3` is bound on cards but opens the detail panel — NOT `webbrowser.open`. One-line change needed.  

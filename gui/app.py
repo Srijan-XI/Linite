@@ -9,6 +9,7 @@ Features: parallel installs, search, installed-state, detail popup,
 import json
 import logging
 import os
+import re
 import threading
 import tkinter as tk
 from pathlib import Path
@@ -64,6 +65,7 @@ class LiniteApp(tk.Tk):
 
         self._build_ui()
         self._update_distro_label()
+        self._show_whats_new_if_needed()
         # Load installed state from history in background
         self._refresh_installed_state()
         self._bind_shortcuts()
@@ -303,6 +305,103 @@ class LiniteApp(tk.Tk):
         config_dir.mkdir(parents=True, exist_ok=True)
         return config_dir / "window_geometry.json"
 
+    def _get_ui_state_path(self) -> Path:
+        """Get path to persistent UI state file."""
+        config_dir = Path.home() / ".config" / "linite"
+        config_dir.mkdir(parents=True, exist_ok=True)
+        return config_dir / "ui_state.json"
+
+    def _load_ui_state(self) -> dict:
+        """Load persistent UI state; returns empty dict on failure."""
+        try:
+            p = self._get_ui_state_path()
+            if p.exists():
+                return json.loads(p.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+        return {}
+
+    def _save_ui_state(self, state: dict) -> None:
+        """Persist UI state best-effort (non-fatal on failure)."""
+        try:
+            p = self._get_ui_state_path()
+            p.write_text(json.dumps(state, indent=2), encoding="utf-8")
+        except Exception:
+            pass
+
+    def _get_latest_changelog_release(self) -> tuple[str, str]:
+        """Return (version, notes) from the latest release section in CHANGELOG.md."""
+        default_notes = "Recent improvements are available."
+        try:
+            changelog = Path(__file__).resolve().parents[1] / "CHANGELOG.md"
+            text = changelog.read_text(encoding="utf-8")
+
+            match = re.search(r"^## \[(\d+\.\d+\.\d+)\].*$", text, flags=re.MULTILINE)
+            if not match:
+                return ("unknown", default_notes)
+
+            version = match.group(1)
+            start = match.end()
+            next_header = re.search(r"^## \[", text[start:], flags=re.MULTILINE)
+            end = start + next_header.start() if next_header else len(text)
+            block = text[start:end]
+
+            bullets = []
+            for line in block.splitlines():
+                line = line.strip()
+                if line.startswith("- "):
+                    bullets.append(line[2:])
+                if len(bullets) >= 5:
+                    break
+
+            notes = "\n".join(f"• {b}" for b in bullets) if bullets else default_notes
+            return (version, notes)
+        except Exception:
+            return ("unknown", default_notes)
+
+    def _show_whats_new_if_needed(self) -> None:
+        """Show a one-time What's New message when a newer release is detected."""
+        version, notes = self._get_latest_changelog_release()
+        if version == "unknown":
+            return
+
+        state = self._load_ui_state()
+        seen = state.get("last_seen_release", "")
+        if seen == version:
+            return
+
+        messagebox.showinfo(
+            f"What's New in v{version}",
+            f"Linite has been updated to v{version}.\n\n{notes}",
+        )
+        state["last_seen_release"] = version
+        self._save_ui_state(state)
+
+    def _estimate_install_seconds(self, selected: List[SoftwareEntry]) -> int:
+        """Heuristic install-time estimate used only for user confirmation UX."""
+        heavy_ids = {
+            "docker", "android-studio", "blender", "obs", "virtualbox",
+            "steam", "lutris", "davinci-resolve", "kdenlive", "openjdk",
+        }
+        heavy_categories = {"Video Editors", "Virtualization"}
+
+        total = 0
+        for entry in selected:
+            if entry.id in heavy_ids or entry.category in heavy_categories:
+                total += 120
+            elif entry.preferred_pm == "flatpak":
+                total += 55
+            else:
+                total += 35
+        return total
+
+    @staticmethod
+    def _format_duration(seconds: int) -> str:
+        mins, secs = divmod(max(0, int(seconds)), 60)
+        if mins <= 0:
+            return f"~{secs}s"
+        return f"~{mins}m {secs}s"
+
     def _load_geometry(self) -> str:
         """Load saved window geometry or return defaults."""
         try:
@@ -468,7 +567,7 @@ class LiniteApp(tk.Tk):
             return
 
         # Check network connectivity
-        from core.network import warn_if_offline
+        from core.system.network import warn_if_offline
         warning = warn_if_offline()
         if warning:
             msg = f"{warning}\n\nDo you want to continue anyway?"
@@ -476,9 +575,13 @@ class LiniteApp(tk.Tk):
                 return
 
         names = "\n".join(f"  • {e.name}" for e in selected)
+        eta = self._format_duration(self._estimate_install_seconds(selected))
         if not messagebox.askyesno(
             "Confirm installation",
-            f"Install {len(selected)} app(s)?\n\n{names}\n\nThis requires sudo / root access.",
+            f"Install {len(selected)} app(s)?\n"
+            f"Estimated time: {eta}\n\n"
+            f"{names}\n\n"
+            "This requires sudo / root access.",
         ):
             return
 
@@ -581,7 +684,7 @@ class LiniteApp(tk.Tk):
         if self._busy:
             return
         
-        from core.history import get_last_session_apps
+        from core.ops.history import get_last_session_apps
         
         session_apps = get_last_session_apps()
         if not session_apps:
@@ -602,7 +705,7 @@ class LiniteApp(tk.Tk):
         clear_cancel()
 
         def worker():
-            from core.uninstaller import rollback_last_session
+            from core.ops.uninstall import rollback_last_session
             
             def progress(app_id: str, line: str):
                 if line.strip():
