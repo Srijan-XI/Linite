@@ -8,11 +8,13 @@
 
 ### Core
 - 🖥️ **Full system detection** — distro, version, desktop environment, display server (X11/Wayland), CPU arch, RAM, GPU vendor & driver, VM/container awareness
-- 📦 **Smart package selection** — native PMs (`apt`, `dnf`, `pacman`, `zypper`) with automatic fallback to `flatpak` → `snap`
+- 📦 **Smart package selection** — native PMs (`apt`, `dnf`, `pacman`, `zypper`) with automatic fallback to `flatpak` → `snap` → `appimage`
 - 🗺️ **TOML-driven package maps** — per-PM TOML files are the source of truth; the Python catalog is the fallback
 - 🔄 **One-click system update** — upgrades all packages including Flatpak and Snap
-- 📜 **TOML profiles & YAML history** — profiles stored as TOML; install history stored as human-readable YAML
-- 🧩 **Plugin catalog system** — drop custom app definitions into `~/.config/linite/catalog/` to extend or override the built-in catalog ([docs](docs/PLUGIN_CATALOG.md))
+- 📜 **TOML profiles & JSON history** — profiles stored as TOML; install history stored as JSON
+- 🧩 **Plugin catalog system** — drop custom app definitions into `~/.config/linite/catalog/` to extend or override the built-in catalog ([docs](docs/plugin/PLUGIN_CATALOG.md))
+- 📦 **AppImage support** — download, checksum verification, install to `~/.local/bin`, and auto-create desktop entries
+- 🌐 **Remote over SSH** — run installs/updates on remote systems using `--remote user@host[:port]`
 
 ### Quick-Start Profiles
 - ⚡ **6 pre-built presets** — Developer, Student, Gamer, Content Creator, Daily User, Security/Pentester
@@ -24,6 +26,8 @@
 - ⚡ **Parallel installs** — configurable thread pool installs independent apps simultaneously
 - 🔁 **Retry with back-off** — up to 3 attempts with exponential delay (2 s → 4 s → 8 s)
 - 🛡️ **Failure recovery** — if the native PM fails, automatically falls back to Flatpak then Snap
+- 💾 **Package cache mode** — pre-download package artifacts to `~/.cache/linite/` with `--cache`
+- ⏰ **Daemon mode** — periodic update cycles with desktop notifications via `--daemon`
 
 ### Intelligence
 - 💡 **10 contextual checks** run before installation:
@@ -106,33 +110,33 @@
 │  6. ProfileEngine.apply_tweaks(profile, installed_ids)                 │
 │     └─ run post-install system commands (enable services, add groups…) │
 │                                                                         │
-│  7. history.record(…) → ~/.config/linite/history.yaml                 │
+│  7. history.record(…) → ~/.config/linite/history.json                 │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 📦 Software Catalog  (92 apps · 17 categories)
+## 📦 Software Catalog  (156 apps · 17 categories)
 
 | Category | Count | Notable Apps |
 |----------|------:|--------------|
-| Web Browsers | 7 | Firefox, Chromium, Brave, Chrome, Opera, Tor Browser, Vivaldi |
-| Development | 8 | VS Code, Git, Python 3, Node.js, Docker, Vim, Neovim, GitHub CLI |
-| Media | 6 | VLC, Spotify, mpv, OBS Studio, Audacity, HandBrake |
-| Communication | 5 | Discord, Telegram, Slack, Zoom, Dropbox |
-| Utilities | 10 | htop, curl, wget, 7-Zip, Timeshift, Flatpak, Neofetch, Flameshot, Wireshark, Notepad++ |
-| Office | 6 | LibreOffice, Thunderbird, Okular, Evince, Foxit Reader, OpenOffice |
+| Web Browsers | 10 | Firefox, Chromium, Brave, Chrome, Tor Browser, LibreWolf, Floorp, Edge |
+| Development | 20 | VS Code, Git, Python 3, Node.js, Docker, Neovim, GitHub CLI, Postman, Helm, kubectl |
+| Media | 14 | VLC, Spotify, mpv, OBS Studio, Audacity, HandBrake, Kooha, Ardour, Mixxx |
+| Communication | 14 | Discord, Telegram, Slack, Zoom, Signal, Element, RustDesk, Nextcloud Desktop |
+| Utilities | 25 | htop, curl, wget, 7-Zip, Timeshift, Flatpak, Neofetch, Flameshot, Wireshark, jq |
+| Office | 9 | LibreOffice, Thunderbird, Okular, Evince, Foxit Reader, OpenOffice, OnlyOffice |
 | Gaming | 7 | Steam, Lutris, Heroic Games Launcher, Bottles, GameMode, MangoHud, ProtonUp-Qt |
-| Graphics | 3 | GIMP, Inkscape, Blender |
+| Graphics | 6 | GIMP, Inkscape, Blender, Krita, Darktable, RawTherapee |
 | Torrents | 4 | qBittorrent, qBittorrent-nox, Deluge, Transmission |
 | Virtualization | 3 | VirtualBox, VMware Workstation Player, QEMU |
 | Java | 5 | OpenJDK, Eclipse Temurin, Amazon Corretto, Zulu JDK, Oracle JDK |
-| Security | 10 | Nmap, Zenmap, Angry IP Scanner, Metasploit, Burp Suite, SQLMap, Hydra, John, Aircrack-ng, Hashcat |
+| Security | 19 | Nmap, Zenmap, Angry IP Scanner, Metasploit, Burp Suite, SQLMap, Hydra, John, Aircrack-ng, Hashcat |
 | Note Taking | 4 | Obsidian, Joplin, Logseq, CherryTree |
 | Password Managers | 3 | Bitwarden, KeePassXC, 1Password |
 | Terminal Emulators | 4 | Alacritty, kitty, WezTerm, Tilix |
-| VPN | 4 | ProtonVPN, WireGuard, Mullvad VPN, OpenVPN |
-| Video Editors | 3 | Kdenlive, Shotcut, OpenShot |
+| VPN | 5 | ProtonVPN, WireGuard, Mullvad VPN, OpenVPN, Tailscale |
+| Video Editors | 4 | Kdenlive, Shotcut, OpenShot, DaVinci Resolve |
 
 ---
 
@@ -140,11 +144,11 @@
 
 | Profile | Icon | Apps | System Tweaks |
 |---------|------|-----:|--------------|
-| Developer | 💻 | 12 | Enable Docker daemon, add docker group, git rebase default, Flathub remote |
-| Student | 🎓 | 11 | Set git default branch to `main` |
-| Gamer | 🎮 | 9 | Enable Steam multilib (Arch), Flathub remote, gamemode hint |
+| Developer | 💻 | 13 | Enable Docker daemon, add docker group, git rebase default, Flathub remote |
+| Student | 🎓 | 10 | Set git default branch to `main` |
+| Gamer | 🎮 | 11 | Enable Steam multilib (Arch), Flathub remote, gamemode hint |
 | Content Creator | 🎬 | 10 | Load v4l2loopback for OBS virtual camera, realtime audio group |
-| Daily User | 🏠 | 11 | Set Firefox as default browser, Thunderbird as default email client |
+| Daily User | 🏠 | 9 | Set Firefox as default browser, Thunderbird as default email client |
 | Security / Pentester | 🔐 | 12 | Add user to wireshark group, msfdb init, monitor-mode advisory |
 
 > Custom profiles are saved to `~/.config/linite/profiles/*.toml` and persist across sessions. Legacy `.yaml` profiles are auto-migrated to TOML on first load.
@@ -196,6 +200,28 @@ python main.py --export mysetup.sh --pm apt --cli install vlc git discord  # fil
 bash mysetup.sh                                                            # run on target machine
 ```
 
+### Remote install over SSH
+
+```bash
+python main.py --remote user@host --install vlc git docker
+python main.py --remote user@host:2222 --update
+```
+
+### Scheduled update daemon
+
+```bash
+python main.py --daemon --daemon-interval-hours 24
+```
+
+### Pre-download package cache
+
+```bash
+python main.py --cache
+python main.py --cache --pm apt
+python main.py --cache-info
+python main.py --clear-cache
+```
+
 ### Verbose / debug output
 
 ```bash
@@ -208,13 +234,14 @@ python main.py --verbose
 
 | File / Location | Format | Purpose |
 |-----------------|--------|---------|
-| `data/catalog/<category>.toml` | TOML | App definitions (92 apps across 17 categories) |
+| `data/catalog/<category>.toml` | TOML | App definitions (156 apps across 17 categories) |
 | `data/package_maps/<pm>.toml` | TOML | Authoritative per-PM package names & install commands |
 | `data/profiles/<id>.toml` | TOML | Built-in Quick-Start profiles with system tweaks |
-| `~/.config/linite/history.yaml` | YAML | Install / uninstall event log |
+| `~/.config/linite/history.json` | JSON | Install / uninstall event log |
 | `~/.config/linite/profiles/*.toml` | TOML | User-saved custom profiles |
+| `~/.config/linite/catalog/*.toml` | TOML | User-defined plugin catalogs that extend/override built-ins |
 
-> Legacy `.yaml` profile files are auto-migrated to TOML on first load. Legacy `history.json` files from older versions are auto-migrated to YAML.
+> Legacy `.yaml` profile files are auto-migrated to TOML on first load. Legacy `history.yaml` files are auto-migrated to JSON.
 
 ---
 
@@ -238,9 +265,9 @@ python main.py --verbose
 | Language | Python 3.11+ |
 | GUI toolkit | Tkinter (stdlib) |
 | Catalog & config | TOML (`tomllib`, stdlib) — catalog, package maps, profiles |
-| History | PyYAML — install/uninstall event log |
+| History | JSON (`json`, stdlib) with optional one-time YAML migration |
 | Threading | `threading` + `concurrent.futures.ThreadPoolExecutor` |
-| Package managers | apt · dnf · yum · pacman · zypper · flatpak · snap |
+| Package managers | apt · dnf · yum · pacman · zypper · flatpak · snap · appimage |
 | Algorithms | Kahn's topological sort for dependency ordering |
 
 ---
@@ -249,7 +276,7 @@ python main.py --verbose
 
 - **Python 3.11+** — uses `tomllib` from the standard library
 - **tkinter** — see distro-specific install above (GUI mode only)
-- **PyYAML** (optional) — `pip install pyyaml` — only needed for legacy YAML history files
+- **PyYAML** (optional) — `pip install pyyaml` — only needed for one-time migration of legacy `history.yaml`
 
 No required third-party packages.
 

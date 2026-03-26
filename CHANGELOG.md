@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- AppImage installation path with checksum verification, executable placement in `~/.local/bin`, and automatic desktop entry generation
+- Remote installation/update support over SSH via `--remote user@host[:port]`
+- Daemon mode for scheduled update cycles with desktop notifications (`--daemon`, `--daemon-interval-hours`)
+- Package cache workflow (`--cache`, `--cache-info`, `--clear-cache`) for pre-downloading artifacts
+- Startup catalog linting hooks for install-spec validation and compatibility checks
+- Major catalog expansion to **156 apps** across 17 categories
+
+### Changed
+- Install history format is JSON (`~/.config/linite/history.json`) with automatic migration from legacy YAML
+- README and docs updated to reflect current feature set, counts, and plugin/AppImage workflows
+
 ---
 
 ## [0.4.0] — 2026-03-04
