@@ -331,3 +331,79 @@ packages = ["helm"]
 [apps.install_specs.zypper]
 packages = ["helm"]
 
+[[apps]]
+id          = "minikube"
+name        = "Minikube"
+description = "Local Kubernetes cluster for development and testing."
+category    = "Development"
+icon        = "🧪"
+website     = "https://minikube.sigs.k8s.io"
+preferred_pm = "snap"
+
+[apps.install_specs.snap]
+packages = ["minikube"]
+snap_classic = true
+
+[apps.install_specs.script]
+packages = []
+script_url = "https://minikube.sigs.k8s.io/docs/start/"
+
+[[apps]]
+id          = "kind"
+name        = "kind"
+description = "Run local Kubernetes clusters using Docker containers."
+category    = "Development"
+icon        = "📦"
+website     = "https://kind.sigs.k8s.io"
+
+[apps.install_specs.pacman]
+packages = ["kind"]
+
+[apps.install_specs.script]
+packages = []
+script_url = "https://kind.sigs.k8s.io/docs/user/quick-start/"
+
+[[apps]]
+id          = "k9s"
+name        = "k9s"
+description = "Terminal UI to interact with Kubernetes clusters."
+category    = "Development"
+icon        = "📊"
+website     = "https://k9scli.io"
+
+[apps.install_specs.apt]
+packages = ["k9s"]
+
+[apps.install_specs.dnf]
+packages = ["k9s"]
+
+[apps.install_specs.pacman]
+packages = ["k9s"]
+
+[apps.install_specs.zypper]
+packages = ["k9s"]
+
+[apps.install_specs.script]
+packages = []
+script_url = "https://github.com/derailed/k9s/releases"
+
+[[apps]]
+id          = "lazygit"
+name        = "lazygit"
+description = "Simple terminal UI for Git commands and workflows."
+category    = "Development"
+icon        = "🌀"
+website     = "https://github.com/jesseduffield/lazygit"
+
+[apps.install_specs.apt]
+packages = ["lazygit"]
+
+[apps.install_specs.dnf]
+packages = ["lazygit"]
+
+[apps.install_specs.pacman]
+packages = ["lazygit"]
+
+[apps.install_specs.zypper]
+packages = ["lazygit"]
+

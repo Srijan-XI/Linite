@@ -11,7 +11,7 @@
 
 | Metric | Value |
 |---|---|
-| Total apps in catalog | 130 across 17 categories |
+| Total apps in catalog | 156 across 17 categories |
 | 3rd-party dependencies | 0 |
 | Supported package managers | 6 (apt, dnf, pacman, zypper, flatpak, snap) |
 | Profiles / presets | 6 (developer, student, gamer, content\_creator, daily\_user, security) |
@@ -19,7 +19,105 @@
 
 ---
 
+## 0. Execution Plan (Phased Rollout)
+
+> Plan refreshed on **2026-03-26** to turn the backlog into a concrete delivery sequence.
+
+### Phase 1 — Catalog Expansion Wave 1 *(Completed)*
+
+Goal: Add high-utility apps with low implementation risk (native package-manager coverage and well-known Flatpak IDs).
+
+Scope:
+- Utilities: `tmux`, `ripgrep`, `fd`, `bat`, `fzf`, `jq`, `yq`
+- Communication: `signal-desktop`, `element`, `mattermost-desktop`
+- Security: `lynis`
+
+Status: ✅ **Completed**
+
+---
+
+### Phase 2 — Catalog Expansion Wave 2
+
+Goal: Complete missing high-demand tooling for modern developer and platform workflows.
+
+Scope candidates:
+- Development / platform: `minikube`, `kind`, `k9s`, `lazygit`
+- Office/productivity: `onlyoffice`, `zathura`, `xournalpp`
+- Media/creative: `krita`, `darktable`, `rawtherapee`, `mixxx`, `easyeffects`
+- VPN/security additions: `tailscale`, `opensnitch`, `dnscrypt-proxy`
+
+Status: ✅ **Completed (catalog additions implemented)**
+
+---
+
+### Phase 3 — Reliability & Validation
+
+Goal: Reduce catalog drift and improve confidence before release.
+
+Scope:
+- Startup catalog lint (`catalog_lint`) to validate install specs against detected distro/package manager
+- Backfill `preferred_pm` consistently across legacy entries
+- Add CI catalog checks (syntax + lint + duplicate IDs + missing fields)
+
+Status: ⚠️ **In progress**
+
+---
+
+### Phase 4 — UX & Operations Features
+
+Goal: Ship the highest-impact remaining product capabilities.
+
+Scope:
+- Network connectivity check before install
+- Rollback last session (`--rollback`, `--rollback --dry`)
+- Scheduled update notifications (`--daemon`)
+- Batch-copy selected app IDs and “What’s New” panel
+
+Status: ❌ Todo
+
+---
+
 ## 1. New Applications to Add
+
+### 2026-03-26 Batch (Phase 1)
+
+| App | Category | Status |
+|---|---|---|
+| **tmux** | Utilities | ✅ Done |
+| **ripgrep** | Utilities | ✅ Done |
+| **fd** | Utilities | ✅ Done |
+| **bat** | Utilities | ✅ Done |
+| **fzf** | Utilities | ✅ Done |
+| **jq** | Utilities | ✅ Done |
+| **yq** | Utilities | ✅ Done |
+| **Signal Desktop** | Communication | ✅ Done |
+| **Element** | Communication | ✅ Done |
+| **Mattermost Desktop** | Communication | ✅ Done |
+| **Lynis** | Security | ✅ Done |
+
+---
+
+### 2026-03-26 Batch (Phase 2)
+
+| App | Category | Status |
+|---|---|---|
+| **Minikube** | Development | ✅ Done |
+| **kind** | Development | ✅ Done |
+| **k9s** | Development | ✅ Done |
+| **lazygit** | Development | ✅ Done |
+| **ONLYOFFICE Desktop Editors** | Office | ✅ Done |
+| **Zathura** | Office | ✅ Done |
+| **Xournal++** | Office | ✅ Done |
+| **Krita** | Graphics | ✅ Done |
+| **Darktable** | Graphics | ✅ Done |
+| **RawTherapee** | Graphics | ✅ Done |
+| **Mixxx** | Media | ✅ Done |
+| **EasyEffects** | Media | ✅ Done |
+| **Tailscale** | VPN | ✅ Done |
+| **OpenSnitch** | Security | ✅ Done |
+| **dnscrypt-proxy** | Security | ✅ Done |
+
+---
 
 ### Password Managers *(category entirely missing)*
 
@@ -387,8 +485,10 @@ Most entries lack `preferred_pm`. Apply a clear policy:
 
 ---
 
-### ❌ C. Catalog Validation at Startup
+### ✅ C. Catalog Validation at Startup
 Add a `catalog_lint()` function in `utils/helpers.py` that checks every `SoftwareEntry` has at least one `install_spec` compatible with the currently detected distro's package manager. Emit a clear warning (not a crash) for missing entries.
+
+> **Implemented** in `utils/helpers.py` as `catalog_lint(current_pm=...)`, with startup invocation in `main.py`. Linite now prints a non-fatal warning summary when catalog issues are found (including compatibility gaps for the detected package manager).
 
 ---
 

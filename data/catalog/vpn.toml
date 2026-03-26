@@ -82,3 +82,31 @@ packages = ["openvpn"]
 [apps.install_specs.zypper]
 packages = ["openvpn"]
 
+[[apps]]
+id          = "tailscale"
+name        = "Tailscale"
+description = "Zero-config mesh VPN built on WireGuard."
+category    = "VPN"
+icon        = "🌐"
+website     = "https://tailscale.com"
+
+[apps.install_specs.apt]
+packages = ["tailscale"]
+pre_commands = [
+  "curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/$(. /etc/os-release && echo $VERSION_CODENAME).noarmor.gpg | tee /usr/share/keyrings/tailscale-archive-keyring.gpg > /dev/null",
+  "curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/$(. /etc/os-release && echo $VERSION_CODENAME).tailscale-keyring.list | tee /etc/apt/sources.list.d/tailscale.list",
+  "apt-get update",
+]
+
+[apps.install_specs.dnf]
+packages = ["tailscale"]
+pre_commands = [
+  "dnf config-manager --add-repo https://pkgs.tailscale.com/stable/fedora/tailscale.repo",
+]
+
+[apps.install_specs.pacman]
+packages = ["tailscale"]
+
+[apps.install_specs.zypper]
+packages = ["tailscale"]
+

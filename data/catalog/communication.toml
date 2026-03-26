@@ -182,3 +182,39 @@ preferred_pm = "flatpak"
 [apps.install_specs.flatpak]
 packages = ["com.insynchq.insync"]
 
+[[apps]]
+id          = "signal-desktop"
+name        = "Signal Desktop"
+description = "Private messenger with end-to-end encryption."
+category    = "Communication"
+icon        = "🔐"
+website     = "https://signal.org"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["org.signal.Signal"]
+
+[[apps]]
+id          = "element"
+name        = "Element"
+description = "Matrix-based secure team chat and collaboration app."
+category    = "Communication"
+icon        = "🟩"
+website     = "https://element.io"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["im.riot.Riot"]
+
+[[apps]]
+id          = "mattermost-desktop"
+name        = "Mattermost Desktop"
+description = "Open-source team messaging client for self-hosted collaboration."
+category    = "Communication"
+icon        = "🗨️"
+website     = "https://mattermost.com"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["com.mattermost.Desktop"]
+

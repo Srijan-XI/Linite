@@ -335,3 +335,55 @@ packages = ["gobuster"]
 [apps.install_specs.zypper]
 packages = ["gobuster"]
 
+[[apps]]
+id          = "lynis"
+name        = "Lynis"
+description = "Security auditing and hardening tool for Unix-like systems."
+category    = "Security"
+icon        = "🧯"
+website     = "https://cisofy.com/lynis/"
+
+[apps.install_specs.apt]
+packages = ["lynis"]
+
+[apps.install_specs.dnf]
+packages = ["lynis"]
+
+[apps.install_specs.pacman]
+packages = ["lynis"]
+
+[apps.install_specs.zypper]
+packages = ["lynis"]
+
+[[apps]]
+id          = "opensnitch"
+name        = "OpenSnitch"
+description = "Application firewall and outbound connection monitor."
+category    = "Security"
+icon        = "🕸️"
+website     = "https://github.com/evilsocket/opensnitch"
+
+[apps.install_specs.script]
+packages = []
+script_url = "https://github.com/evilsocket/opensnitch/releases"
+
+[[apps]]
+id          = "dnscrypt-proxy"
+name        = "dnscrypt-proxy"
+description = "Encrypted DNS proxy supporting DNSCrypt, DoH and anonymized DNS."
+category    = "Security"
+icon        = "🔏"
+website     = "https://github.com/DNSCrypt/dnscrypt-proxy"
+
+[apps.install_specs.apt]
+packages = ["dnscrypt-proxy"]
+
+[apps.install_specs.dnf]
+packages = ["dnscrypt-proxy"]
+
+[apps.install_specs.pacman]
+packages = ["dnscrypt-proxy"]
+
+[apps.install_specs.zypper]
+packages = ["dnscrypt-proxy"]
+

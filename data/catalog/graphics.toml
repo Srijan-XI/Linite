@@ -67,3 +67,75 @@ packages = ["blender"]
 [apps.install_specs.flatpak]
 packages = ["org.blender.Blender"]
 
+[[apps]]
+id          = "krita"
+name        = "Krita"
+description = "Professional free painting program for artists."
+category    = "Graphics"
+icon        = "🖌️"
+website     = "https://krita.org"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["krita"]
+
+[apps.install_specs.dnf]
+packages = ["krita"]
+
+[apps.install_specs.pacman]
+packages = ["krita"]
+
+[apps.install_specs.zypper]
+packages = ["krita"]
+
+[apps.install_specs.flatpak]
+packages = ["org.kde.krita"]
+
+[[apps]]
+id          = "darktable"
+name        = "Darktable"
+description = "Photography workflow application and raw developer."
+category    = "Graphics"
+icon        = "📷"
+website     = "https://www.darktable.org"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["darktable"]
+
+[apps.install_specs.dnf]
+packages = ["darktable"]
+
+[apps.install_specs.pacman]
+packages = ["darktable"]
+
+[apps.install_specs.zypper]
+packages = ["darktable"]
+
+[apps.install_specs.flatpak]
+packages = ["org.darktable.Darktable"]
+
+[[apps]]
+id          = "rawtherapee"
+name        = "RawTherapee"
+description = "Powerful raw photo processing and image editing tool."
+category    = "Graphics"
+icon        = "🧰"
+website     = "https://rawtherapee.com"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["rawtherapee"]
+
+[apps.install_specs.dnf]
+packages = ["rawtherapee"]
+
+[apps.install_specs.pacman]
+packages = ["rawtherapee"]
+
+[apps.install_specs.zypper]
+packages = ["rawtherapee"]
+
+[apps.install_specs.flatpak]
+packages = ["com.rawtherapee.RawTherapee"]
+

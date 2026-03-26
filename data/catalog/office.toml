@@ -111,3 +111,59 @@ packages = ["com.foxit.Reader"]
 packages = []
 script_url = "https://www.foxit.com/downloads/latest.html#Foxit-Reader"
 
+[[apps]]
+id          = "onlyoffice"
+name        = "ONLYOFFICE Desktop Editors"
+description = "Modern office suite with strong Microsoft Office compatibility."
+category    = "Office"
+icon        = "🧾"
+website     = "https://www.onlyoffice.com/desktop.aspx"
+preferred_pm = "flatpak"
+
+[apps.install_specs.flatpak]
+packages = ["org.onlyoffice.desktopeditors"]
+
+[[apps]]
+id          = "zathura"
+name        = "Zathura"
+description = "Keyboard-driven, lightweight document viewer."
+category    = "Office"
+icon        = "📚"
+website     = "https://pwmt.org/projects/zathura/"
+
+[apps.install_specs.apt]
+packages = ["zathura"]
+
+[apps.install_specs.dnf]
+packages = ["zathura"]
+
+[apps.install_specs.pacman]
+packages = ["zathura"]
+
+[apps.install_specs.zypper]
+packages = ["zathura"]
+
+[[apps]]
+id          = "xournalpp"
+name        = "Xournal++"
+description = "Handwritten note-taking, PDF annotation and sketching app."
+category    = "Office"
+icon        = "✍️"
+website     = "https://xournalpp.github.io"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["xournalpp"]
+
+[apps.install_specs.dnf]
+packages = ["xournalpp"]
+
+[apps.install_specs.pacman]
+packages = ["xournalpp"]
+
+[apps.install_specs.zypper]
+packages = ["xournalpp"]
+
+[apps.install_specs.flatpak]
+packages = ["com.github.xournalpp.xournalpp"]
+

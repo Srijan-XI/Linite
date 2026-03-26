@@ -256,3 +256,51 @@ packages = ["strawberry"]
 [apps.install_specs.flatpak]
 packages = ["org.strawberrymusicplayer.strawberry"]
 
+[[apps]]
+id          = "mixxx"
+name        = "Mixxx"
+description = "Free DJ software for live mixing and performance."
+category    = "Media"
+icon        = "🎚️"
+website     = "https://mixxx.org"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["mixxx"]
+
+[apps.install_specs.dnf]
+packages = ["mixxx"]
+
+[apps.install_specs.pacman]
+packages = ["mixxx"]
+
+[apps.install_specs.zypper]
+packages = ["mixxx"]
+
+[apps.install_specs.flatpak]
+packages = ["org.mixxx.Mixxx"]
+
+[[apps]]
+id          = "easyeffects"
+name        = "EasyEffects"
+description = "Audio effects processor for PipeWire applications."
+category    = "Media"
+icon        = "🎛️"
+website     = "https://github.com/wwmm/easyeffects"
+preferred_pm = "flatpak"
+
+[apps.install_specs.apt]
+packages = ["easyeffects"]
+
+[apps.install_specs.dnf]
+packages = ["easyeffects"]
+
+[apps.install_specs.pacman]
+packages = ["easyeffects"]
+
+[apps.install_specs.zypper]
+packages = ["easyeffects"]
+
+[apps.install_specs.flatpak]
+packages = ["com.github.wwmm.easyeffects"]
+

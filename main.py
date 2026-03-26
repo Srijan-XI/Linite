@@ -229,6 +229,27 @@ def main():
     setup_logging(verbose=args.verbose)
     warn_if_not_linux()
 
+    # Non-fatal startup catalog validation.
+    try:
+        from core import distro as distro_mod
+        from utils.helpers import catalog_lint
+
+        detected_pm = distro_mod.detect().package_manager
+        lint_warnings = catalog_lint(current_pm=detected_pm)
+        if lint_warnings:
+            print(
+                f"[WARNING] Catalog lint found {len(lint_warnings)} issue(s) for host pm '{detected_pm}'.",
+                file=sys.stderr,
+            )
+            max_preview = 12
+            for msg in lint_warnings[:max_preview]:
+                print(f"  - {msg}", file=sys.stderr)
+            if len(lint_warnings) > max_preview:
+                hidden = len(lint_warnings) - max_preview
+                print(f"  ... and {hidden} more", file=sys.stderr)
+    except Exception as exc:
+        print(f"[WARNING] Catalog lint failed: {exc}", file=sys.stderr)
+
     if args.list:
         cmd_list()
         return
