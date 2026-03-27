@@ -10,6 +10,6 @@
 # json     is used for history persistence       (stdlib)
 
 # ── Optional extras ───────────────────────────────────────────────────────────
-# pillow          # render SVG icons as images in the GUI
-# cairosvg        # rasterise SVG → PNG (requires pillow); sudo apt install python3-cairosvg
-# requests        # if you want to fetch live catalog updates from a remote source
+pillow          # render SVG icons as images in the GUI
+cairosvg        # rasterise SVG → PNG (requires pillow); sudo apt install python3-cairosvg
+requests        # if you want to fetch live catalog updates from a remote source
