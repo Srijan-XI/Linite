@@ -14,6 +14,12 @@ from core.distro import DistroInfo
 from core.installer import _pick_pm
 from data.software_catalog import SoftwareEntry
 from gui import styles as st
+from gui.icon_loader import (
+    load_svg_icon,
+    get_svg_path_for_app,
+    ICON_SIZE_DETAIL,
+    is_svg_rendering_available,
+)
 
 
 class AppDetailWindow(tk.Toplevel):
@@ -43,9 +49,21 @@ class AppDetailWindow(tk.Toplevel):
         header = tk.Frame(self, bg=st.BG_MEDIUM, padx=pad * 2, pady=pad)
         header.pack(fill="x")
 
-        tk.Label(
-            header, text=entry.icon, bg=st.BG_MEDIUM, font=(st.FONT_FAMILY, 32)
-        ).pack(side="left", padx=(0, 12))
+        # ── Header icon: SVG preferred, emoji fallback ────────────────────
+        _icon_photo = None
+        if is_svg_rendering_available():
+            _svg_rel = get_svg_path_for_app(entry.id)
+            if _svg_rel:
+                _icon_photo = load_svg_icon(_svg_rel, size=ICON_SIZE_DETAIL)
+
+        if _icon_photo is not None:
+            _icon_lbl = tk.Label(header, image=_icon_photo, bg=st.BG_MEDIUM)
+            self._icon_photo_ref = _icon_photo   # GC guard
+        else:
+            _icon_lbl = tk.Label(
+                header, text=entry.icon, bg=st.BG_MEDIUM, font=(st.FONT_FAMILY, 32)
+            )
+        _icon_lbl.pack(side="left", padx=(0, 12))
 
         title_col = tk.Frame(header, bg=st.BG_MEDIUM)
         title_col.pack(side="left", fill="x", expand=True)

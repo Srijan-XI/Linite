@@ -23,6 +23,12 @@ import webbrowser
 
 from data.software_catalog import SoftwareEntry
 from gui import styles as st
+from gui.icon_loader import (
+    load_svg_icon,
+    get_svg_path_for_app,
+    ICON_SIZE_CARD,
+    is_svg_rendering_available,
+)
 
 _SEARCH_DEBOUNCE_MS = 200
 
@@ -125,6 +131,9 @@ class SoftwarePanel(tk.Frame):
         self._card_hover_widgets: Dict[str, List[tk.Widget]] = {}
         self._card_name_labels:   Dict[str, tk.Label]        = {}
         self._card_inst_labels:   Dict[str, tk.Label]        = {}
+        # Keep PhotoImage references alive (Tkinter GC guard)
+        self._card_icon_refs:     Dict[str, object]          = {}
+        self._svg_available = is_svg_rendering_available()
 
         # ── Search bar ───────────────────────────────────────────────────
         search_outer = tk.Frame(self, bg=st.BG_DARK)
@@ -341,7 +350,20 @@ class SoftwarePanel(tk.Frame):
         left.pack(side="left", fill="both", expand=True)
         _bind_click(left, var, self._toggle, entry, self._open_detail)
 
-        icon_label = tk.Label(left, text=entry.icon, bg=card_bg, font=(st.FONT_FAMILY, 18))
+        # ── Icon: SVG image preferred; emoji fallback ────────────────────
+        _photo = None
+        if self._svg_available:
+            _svg_rel = get_svg_path_for_app(entry.id)
+            if _svg_rel:
+                _photo = load_svg_icon(_svg_rel, size=ICON_SIZE_CARD)
+
+        if _photo is not None:
+            icon_label = tk.Label(left, image=_photo, bg=card_bg)
+            self._card_icon_refs[entry.id] = _photo   # GC guard
+        else:
+            icon_label = tk.Label(
+                left, text=entry.icon, bg=card_bg, font=(st.FONT_FAMILY, 18)
+            )
         icon_label.pack(side="left")
         _bind_click(icon_label, var, self._toggle, entry, self._open_detail)
 
