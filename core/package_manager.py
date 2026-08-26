@@ -249,6 +249,8 @@ class FlatpakPackageManager(BasePackageManager):
         remote_name = (remote or "flathub").strip()
         if not remote_name:
             remote_name = "flathub"
+        install_scope = "--user"
+        install_sudo = False
 
         # Prefer user-level remotes to avoid requiring root when possible.
         rc_remote, out_remote = self.run(
@@ -260,16 +262,18 @@ class FlatpakPackageManager(BasePackageManager):
         # On systems without per-user Flatpak remotes enabled, retry system-level.
         if rc_remote != 0:
             rc_remote, out_remote = self.run(
-                ["flatpak", "remote-add", "--if-not-exists", remote_name, "https://flathub.org/repo/flathub.flatpakrepo"],
+                ["flatpak", "remote-add", "--if-not-exists", "--system", remote_name, "https://flathub.org/repo/flathub.flatpakrepo"],
                 sudo=True,
                 **kwargs,
             )
             if rc_remote != 0:
                 return rc_remote, out_remote
+            install_scope = "--system"
+            install_sudo = True
 
         rc_install, out_install = self.run(
-            ["flatpak", "install", "-y", remote_name] + packages,
-            sudo=False,
+            ["flatpak", "install", "-y", install_scope, remote_name] + packages,
+            sudo=install_sudo,
             **kwargs,
         )
 
