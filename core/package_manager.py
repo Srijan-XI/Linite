@@ -244,6 +244,38 @@ class FlatpakPackageManager(BasePackageManager):
             **kwargs,
         )
 
+    def install_from_remote(self, remote: str, packages: List[str], **kwargs) -> Tuple[int, str]:
+        """Install packages from a specific Flatpak remote, adding it when missing."""
+        remote_name = (remote or "flathub").strip()
+        if not remote_name:
+            remote_name = "flathub"
+
+        # Prefer user-level remotes to avoid requiring root when possible.
+        rc_remote, out_remote = self.run(
+            ["flatpak", "remote-add", "--if-not-exists", "--user", remote_name, "https://flathub.org/repo/flathub.flatpakrepo"],
+            sudo=False,
+            **kwargs,
+        )
+
+        # On systems without per-user Flatpak remotes enabled, retry system-level.
+        if rc_remote != 0:
+            rc_remote, out_remote = self.run(
+                ["flatpak", "remote-add", "--if-not-exists", remote_name, "https://flathub.org/repo/flathub.flatpakrepo"],
+                sudo=True,
+                **kwargs,
+            )
+            if rc_remote != 0:
+                return rc_remote, out_remote
+
+        rc_install, out_install = self.run(
+            ["flatpak", "install", "-y", remote_name] + packages,
+            sudo=False,
+            **kwargs,
+        )
+
+        combined = "\n".join(part for part in [out_remote, out_install] if part).strip()
+        return rc_install, combined
+
     def update_all(self, **kwargs):
         return self.run(["flatpak", "update", "-y"], sudo=False, **kwargs)
 
