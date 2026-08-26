@@ -18,6 +18,7 @@ class RemoteTarget:
 
 def parse_remote_target(target: str) -> RemoteTarget:
     """Parse a target in the form user@host or user@host:port."""
+    # Normalize early so whitespace around CLI input does not affect parsing.
     raw = target.strip()
     if "@" not in raw:
         raise ValueError("Remote target must be in the form user@host or user@host:port")
@@ -31,6 +32,8 @@ def parse_remote_target(target: str) -> RemoteTarget:
     if not host_port:
         raise ValueError("Remote target host is empty")
 
+    # Use rsplit so IPv6-like host text with separators is less likely to break
+    # and only the final segment is interpreted as a port.
     if ":" in host_port:
         host, port_text = host_port.rsplit(":", 1)
         host = host.strip()
@@ -55,6 +58,7 @@ def run_remote_command(
     timeout_sec: int = 1800,
 ) -> tuple[int, str]:
     """Execute a shell command on the remote host over SSH."""
+    # Keep stderr merged into stdout so callers can show one ordered log stream.
     ssh_cmd = [
         "ssh",
         "-p",
@@ -75,4 +79,5 @@ def run_remote_command(
 
 def quote_remote_args(args: list[str]) -> str:
     """Build a safely quoted shell argument list for remote execution."""
+    # Quote each argument independently to preserve token boundaries remotely.
     return " ".join(shlex.quote(a) for a in args)

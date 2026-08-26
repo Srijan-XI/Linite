@@ -190,7 +190,8 @@ class ExecutionEngine:
                 continue
             pm = self._loader.best_pm(
                 aid, avail,
-                preferred_pm=getattr(entry, "preferred_pm", None),
+                # Native repo is intentionally prioritized via avail ordering.
+                preferred_pm=None,
             )
             if pm is None:
                 unknown.append(aid)

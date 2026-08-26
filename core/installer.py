@@ -56,11 +56,11 @@ def _pick_pm(entry: SoftwareEntry, distro: DistroInfo) -> Optional[str]:
     """
     Choose the best package manager to install *entry* given the current distro.
     Priority:
-      1. entry.preferred_pm  (if spec exists and is a real supported PM)
-      2. distro native pm    (if spec exists)
-      3. flatpak             (if available and spec exists)
-      4. snap                (if available and spec exists)
-@@      5. appimage            (if spec exists)
+    1. distro native pm    (if spec exists)
+    2. entry.preferred_pm  (if spec exists and is a real supported PM)
+    3. flatpak             (if available and spec exists)
+    4. snap                (if available and spec exists)
+    5. appimage            (if spec exists)
 
     NOTE: 'script' is intentionally excluded; it is not a real package manager
     and get_package_manager('script') would raise ValueError.
@@ -70,11 +70,12 @@ def _pick_pm(entry: SoftwareEntry, distro: DistroInfo) -> Optional[str]:
     snap_ok    = check_snap_available()
 
     candidates: List[str] = []
-    # Only add preferred_pm if it's a real, supported package manager
-    if entry.preferred_pm and entry.preferred_pm in _SUPPORTED_PMS:
-        candidates.append(entry.preferred_pm)
+    # Always try the distro-native repository first.
     if native_pm in _SUPPORTED_PMS:
         candidates.append(native_pm)
+    # Then try any app-level PM preference.
+    if entry.preferred_pm and entry.preferred_pm in _SUPPORTED_PMS and entry.preferred_pm not in candidates:
+        candidates.append(entry.preferred_pm)
     if flatpak_ok:
         candidates.append("flatpak")
     if snap_ok:
